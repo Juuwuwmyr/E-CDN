@@ -6,22 +6,7 @@ const Footer = () => {
 
   return (
     <>
-      {/* ── Submit CTA Band ── */}
-      <div className="footer-cta-band" id="submit">
-        <div className="container footer-cta-inner scroll-animate">
-          <div className="footer-cta-text">
-            <h2>Have a Project to Showcase?</h2>
-            <p>
-              CDN college students can submit their deployed systems for review
-              and publication on this portal.
-            </p>
-          </div>
-          <div className="footer-cta-actions">
-            <button className="btn-cta-white">Submit a Project</button>
-            <button className="btn-cta-outline">View Guidelines</button>
-          </div>
-        </div>
-      </div>
+
 
       {/* ── Main Footer ── */}
       <footer className="footer" id="contact">

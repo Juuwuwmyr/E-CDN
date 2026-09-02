@@ -5,18 +5,24 @@ const About = () => {
     {
       num: '01',
       color: 'blue',
+      icon: '📚',
+      label: 'Foundation',
       title: 'Academic Rigor',
       desc: 'Projects meet actual course requirements — real systems, real clients, real data. Not prototypes.',
     },
     {
       num: '02',
       color: 'red',
+      icon: '🚀',
+      label: 'Impact',
       title: 'Practical Deployment',
       desc: 'Every featured system is deployed and in active use, not just submitted as a school requirement.',
     },
     {
       num: '03',
       color: 'gold',
+      icon: '💡',
+      label: 'Innovation',
       title: 'Cross-Discipline Innovation',
       desc: 'BSIS, BTVTED, and WFT students solve unique problems specific to their fields — food tech, hospitality, fabrication, and IT.',
     },
@@ -65,11 +71,24 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right — pillars */}
+          {/* Right — pillar cards */}
           <div className="about-right">
             {pillars.map((p, i) => (
-              <div key={i} className={`pillar-card pillar-${p.color} scroll-animate from-right stagger-${i + 1}`}>
-                <div className="pillar-num">{p.num}</div>
+              <div
+                key={i}
+                className={`pillar-card pillar-${p.color} scroll-animate from-right stagger-${i + 1}`}
+              >
+                {/* Corner tag — like a classroom label tied on */}
+                <div className={`pillar-tag pillar-tag-${p.color}`}>
+                  <span className="pillar-tag-icon">{p.icon}</span>
+                  <span className="pillar-tag-label">{p.label}</span>
+                </div>
+
+                {/* Number badge */}
+                <div className={`pillar-num-badge pillar-badge-${p.color}`}>
+                  {p.num}
+                </div>
+
                 <div className="pillar-body">
                   <h3 className="pillar-title">{p.title}</h3>
                   <p className="pillar-desc">{p.desc}</p>

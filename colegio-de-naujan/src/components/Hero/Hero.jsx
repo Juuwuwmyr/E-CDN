@@ -15,7 +15,7 @@ const Hero = ({ onLoginClick }) => {
       <div className="container hero-inner">
 
         {/* ── LEFT ── */}
-        <div className="hero-left fade-in">
+        <div className="hero-left scroll-animate from-left">
           <div className="hero-eyebrow">
             <span className="eyebrow-dot" />
             CDN College — BSIS Project Portal
@@ -51,7 +51,7 @@ const Hero = ({ onLoginClick }) => {
         </div>
 
         {/* ── RIGHT ── */}
-        <div className="hero-right fade-in delay-200">
+        <div className="hero-right scroll-animate from-right">
           <div className="hero-card-stack">
             <div className="hero-img-frame">
               <img
