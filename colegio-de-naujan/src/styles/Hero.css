@@ -37,6 +37,18 @@
   z-index: 0;
 }
 
+.hero-bg-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.055;
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(30%);
+}
+
 .hero-orb {
   position: absolute;
   border-radius: 50%;

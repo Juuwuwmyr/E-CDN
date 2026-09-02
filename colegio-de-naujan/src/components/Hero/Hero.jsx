@@ -1,5 +1,6 @@
 import '../../styles/Hero.css';
 import ParticleCanvas from './ParticleCanvas';
+import bgImg from '../../assets/images/background.jpg';
 
 const Hero = ({ onLoginClick }) => {
   const stats = [
@@ -12,6 +13,11 @@ const Hero = ({ onLoginClick }) => {
   return (
     <section className="hero" id="home">
       <div className="hero-bg-grid" aria-hidden="true" />
+      <div
+        className="hero-bg-photo"
+        style={{ backgroundImage: `url(${bgImg})` }}
+        aria-hidden="true"
+      />
       <ParticleCanvas />
 
       <div className="container hero-inner">
