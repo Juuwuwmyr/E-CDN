@@ -161,3 +161,11 @@
   .courses { padding: 3.5rem 0; }
   .course-card { padding: 1.4rem; }
 }
+
+@media (max-width: 480px) {
+  .courses { padding: 2.5rem 0; }
+  .course-card { padding: 1.1rem; }
+  .course-card-title { font-size: 1rem; }
+  .course-card-desc { font-size: 0.82rem; }
+  .courses-header h2 { font-size: 1.5rem; }
+}

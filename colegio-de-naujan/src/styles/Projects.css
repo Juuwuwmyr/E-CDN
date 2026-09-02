@@ -382,3 +382,13 @@
 
   .btn-red { width: 100%; text-align: center; }
 }
+
+@media (max-width: 480px) {
+  .projects { padding: 2.5rem 0; }
+  .project-card { border-radius: 10px; }
+  .project-card-body { padding: 1rem; }
+  .project-title { font-size: 0.92rem; }
+  .project-desc { font-size: 0.8rem; }
+  .projects-lock-title { font-size: 1.25rem; }
+  .projects-lock-sub { font-size: 0.85rem; }
+}

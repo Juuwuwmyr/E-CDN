@@ -43,10 +43,10 @@
 .topbar-badge {
   font-size: 0.68rem;
   font-weight: 800;
-  color: var(--primary-gold);
+  color: #fff;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border: 1px solid rgba(255,215,0,0.35);
+  border: 1px solid rgba(255,255,255,0.35);
   padding: 0.18rem 0.65rem;
   border-radius: 999px;
 }
@@ -188,7 +188,7 @@
   margin-left: 0.5rem;
   padding: 0.5rem 1.1rem;
   background: var(--primary-blue);
-  color: #fff;
+  color: var(--primary-gold);
   font-size: 0.82rem;
   font-weight: 700;
   border-radius: var(--radius-md);
@@ -199,7 +199,7 @@
 
 .nav-submit:hover {
   background: var(--primary-red);
-  color: #fff;
+  color: var(--primary-gold);
   transform: translateY(-1px);
 }
 
@@ -210,7 +210,7 @@
   margin-left: 0.5rem;
   padding: 0.5rem 1.1rem;
   background: var(--primary-blue);
-  color: #fff;
+  color: var(--primary-gold);
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 800;

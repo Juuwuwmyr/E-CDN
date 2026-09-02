@@ -247,3 +247,15 @@
   .footer-bottom-inner { flex-direction: column; text-align: center; }
   .footer-bottom-links  { gap: 1rem; }
 }
+
+@media (max-width: 480px) {
+  .footer-main { padding: 2.5rem 0 1.5rem; }
+  .footer-social { flex-wrap: wrap; gap: 0.4rem; }
+  .social-btn { font-size: 0.72rem; padding: 0.3rem 0.75rem; }
+  .footer-school-name { font-size: 0.85rem; }
+  .footer-about { font-size: 0.8rem; }
+  .footer-col-title { font-size: 0.6rem; }
+  .footer-col-links li a { font-size: 0.82rem; }
+  .footer-copy { font-size: 0.72rem; }
+  .footer-bottom-links a { font-size: 0.72rem; }
+}

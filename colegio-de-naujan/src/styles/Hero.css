@@ -113,9 +113,8 @@
   width: fit-content;
   background: #fff;
   border: 1px solid var(--gray-200);
-  border-left: 3px solid var(--primary-red);
-  padding: 0.35rem 0.875rem 0.35rem 0.75rem;
-  border-radius: 0 4px 4px 0;
+  padding: 0.35rem 0.875rem;
+  border-radius: 4px;
 }
 
 .eyebrow-dot {
@@ -169,7 +168,7 @@
 .btn-primary {
   padding: 0.8rem 1.875rem;
   background: var(--primary-blue);
-  color: #fff;
+  color: var(--primary-gold);
   font-weight: 800;
   font-size: 0.88rem;
   border-radius: var(--radius-md);
@@ -184,7 +183,7 @@
 
 .btn-primary:hover {
   background: var(--blue-dark);
-  color: #fff;
+  color: var(--primary-gold);
   transform: translateY(-2px);
   box-shadow: 0 8px 26px rgba(0,34,128,0.35);
 }
@@ -408,4 +407,15 @@
 
   .hero-float-top,
   .hero-float-bottom { display: none; }
+}
+
+@media (max-width: 480px) {
+  .hero { min-height: auto; padding: 1.5rem 0 2.5rem; }
+  .hero-inner { padding: 2rem 0; gap: 1.5rem; }
+  .hero-heading { font-size: 1.75rem; letter-spacing: -0.5px; }
+  .hero-right { display: none; }
+  .hero-eyebrow { font-size: 0.65rem; }
+  .hero-body { font-size: 0.9rem; }
+  .hero-stat-val { font-size: 1.4rem; }
+  .hero-stat-lbl { font-size: 0.6rem; }
 }
