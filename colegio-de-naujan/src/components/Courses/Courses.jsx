@@ -40,7 +40,7 @@ const Courses = () => {
     <section className="courses" id="courses">
       <div className="container">
 
-        {/* Header */}
+        
         <div className="courses-header scroll-animate">
           <div>
             <span className="tag-label">Offered Programs</span>
@@ -55,7 +55,7 @@ const Courses = () => {
           <span className="courses-header-count">4 Programs</span>
         </div>
 
-        {/* Course cards */}
+        
         <div className="courses-grid">
           {courses.map((c, i) => (
             <div

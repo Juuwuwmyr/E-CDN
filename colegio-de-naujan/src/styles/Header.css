@@ -1,6 +1,4 @@
-/* ══════════════════════════════════════════
-   TOP BAR
-══════════════════════════════════════════ */
+
 .topbar {
   background: var(--primary-blue);
   padding: 0.45rem 0;
@@ -53,7 +51,6 @@
   border-radius: 999px;
 }
 
-/* Logout button in top bar */
 .topbar-logout {
   display: flex;
   align-items: center;
@@ -82,9 +79,6 @@
   border-color: transparent;
 }
 
-/* ══════════════════════════════════════════
-   MAIN HEADER
-══════════════════════════════════════════ */
 .header {
   position: sticky;
   top: 0;
@@ -107,7 +101,6 @@
   gap: 2rem;
 }
 
-/* ── Logo ── */
 .logo {
   display: flex;
   align-items: center;
@@ -151,7 +144,6 @@
   letter-spacing: 1px;
 }
 
-/* ── Nav links ── */
 .nav {
   display: flex;
   align-items: center;
@@ -211,7 +203,6 @@
   transform: translateY(-1px);
 }
 
-/* Login button (unauthenticated) */
 .nav-login {
   display: inline-flex;
   align-items: center;
@@ -238,7 +229,6 @@
   transform: translateY(-1px);
 }
 
-/* Logout button (authenticated) */
 .nav-logout {
   display: inline-flex;
   align-items: center;
@@ -265,7 +255,6 @@
   color: #fff;
 }
 
-/* ── Hamburger ── */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -290,9 +279,6 @@
 .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* ══════════════════════════════════════════
-   MOBILE
-══════════════════════════════════════════ */
 @media (max-width: 900px) {
   .topbar-left .topbar-item:last-child { display: none; }
   .hamburger { display: flex; }

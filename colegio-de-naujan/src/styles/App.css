@@ -11,7 +11,6 @@ main {
 
 html { scroll-behavior: smooth; }
 
-/* ── Shared section labels ── */
 .tag-label {
   display: inline-block;
   font-size: 0.72rem;
@@ -59,14 +58,12 @@ html { scroll-behavior: smooth; }
   border-bottom-color: var(--primary-red);
 }
 
-/* ── Focus ring ── */
 :focus-visible {
   outline: 3px solid var(--primary-blue);
   outline-offset: 3px;
   border-radius: 4px;
 }
 
-/* ── Selection ── */
 ::selection {
   background: var(--primary-gold);
   color: var(--blue-dark);

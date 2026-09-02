@@ -1,6 +1,4 @@
-/* ══════════════════════════════════════════
-   PROJECTS  —  BSIS Only
-══════════════════════════════════════════ */
+
 .projects {
   padding: 5rem 0;
   background: var(--gray-50);
@@ -15,7 +13,6 @@
   background: var(--gray-200);
 }
 
-/* ── Header ── */
 .projects-header {
   display: flex;
   align-items: flex-start;
@@ -27,7 +24,6 @@
 
 .projects-header-left { flex: 1; min-width: 240px; }
 
-/* BSIS identity badge */
 .projects-bsis-badge {
   display: flex;
   align-items: center;
@@ -60,7 +56,6 @@
   line-height: 1.4;
 }
 
-/* ── Lock Gate (unauthenticated view) ── */
 .projects-lock-gate {
   position: relative;
   border-radius: var(--radius-lg);
@@ -68,7 +63,6 @@
   min-height: 420px;
 }
 
-/* blurred preview cards behind the overlay */
 .projects-lock-preview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -80,7 +74,6 @@
   transform: scale(0.98);
 }
 
-/* overlay */
 .projects-lock-overlay {
   position: absolute;
   inset: 0;
@@ -176,19 +169,16 @@
   margin: 0;
 }
 
-/* blurred card style */
 .project-card--blurred {
   pointer-events: none;
 }
 
-/* ── Projects Grid ── */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-/* ── Project Card ── */
 .project-card {
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-lg);
@@ -205,7 +195,6 @@
   transform: translateY(-4px);
 }
 
-/* image */
 .project-img-wrap {
   position: relative;
   overflow: hidden;
@@ -225,7 +214,6 @@
   transform: scale(1.05);
 }
 
-/* status pill */
 .project-status-pill {
   position: absolute;
   top: 0.75rem;
@@ -241,7 +229,6 @@
   backdrop-filter: blur(4px);
 }
 
-/* body */
 .project-body {
   padding: 1.25rem;
   display: flex;
@@ -294,7 +281,6 @@
   flex: 1;
 }
 
-/* tech tags */
 .project-tech {
   display: flex;
   flex-wrap: wrap;
@@ -314,7 +300,6 @@
   letter-spacing: 0.3px;
 }
 
-/* view btn */
 .project-view-btn {
   background: none;
   border: none;
@@ -338,7 +323,6 @@
   letter-spacing: 0.5px;
 }
 
-/* ── Footer row ── */
 .projects-footer {
   margin-top: 2.5rem;
   padding-top: 1.75rem;
@@ -381,9 +365,6 @@
   transform: translateY(-2px);
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
 @media (max-width: 1060px) {
   .projects-grid { grid-template-columns: repeat(2, 1fr); }
 }

@@ -5,7 +5,6 @@ const About = () => {
     {
       num: '01',
       color: 'blue',
-      icon: '📚',
       label: 'Foundation',
       title: 'Academic Rigor',
       desc: 'Projects meet actual course requirements — real systems, real clients, real data. Not prototypes.',
@@ -13,7 +12,6 @@ const About = () => {
     {
       num: '02',
       color: 'red',
-      icon: '🚀',
       label: 'Impact',
       title: 'Practical Deployment',
       desc: 'Every featured system is deployed and in active use, not just submitted as a school requirement.',
@@ -21,7 +19,6 @@ const About = () => {
     {
       num: '03',
       color: 'gold',
-      icon: '💡',
       label: 'Innovation',
       title: 'Cross-Discipline Innovation',
       desc: 'BSIS, BTVTED, and WFT students solve unique problems specific to their fields — food tech, hospitality, fabrication, and IT.',
@@ -32,10 +29,10 @@ const About = () => {
     <section className="about" id="about">
       <div className="container">
 
-        {/* Two-column layout */}
+        
         <div className="about-grid">
 
-          {/* Left — text */}
+          
           <div className="about-left scroll-animate from-left">
             <span className="tag-label">About This Portal</span>
             <h2 className="section-heading">
@@ -71,20 +68,19 @@ const About = () => {
             </div>
           </div>
 
-          {/* Right — pillar cards */}
+          
           <div className="about-right">
             {pillars.map((p, i) => (
               <div
                 key={i}
                 className={`pillar-card pillar-${p.color} scroll-animate from-right stagger-${i + 1}`}
               >
-                {/* Corner tag — like a classroom label tied on */}
+                
                 <div className={`pillar-tag pillar-tag-${p.color}`}>
-                  <span className="pillar-tag-icon">{p.icon}</span>
                   <span className="pillar-tag-label">{p.label}</span>
                 </div>
 
-                {/* Number badge */}
+                
                 <div className={`pillar-num-badge pillar-badge-${p.color}`}>
                   {p.num}
                 </div>
@@ -98,7 +94,7 @@ const About = () => {
           </div>
         </div>
 
-        {/* Blue banner */}
+        
         <div className="about-banner scroll-animate">
           <div className="about-banner-text">
             <span className="about-banner-tag">Our Mission</span>

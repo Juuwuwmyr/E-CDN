@@ -34,7 +34,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-root">
-      {/* ── Left panel — brand ── */}
+      
       <div className="login-brand-panel">
         <div className="login-brand-noise" aria-hidden="true" />
         <div className="login-brand-stripe" aria-hidden="true" />
@@ -67,15 +67,15 @@ const Login = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* decorative corner block */}
+        
         <div className="login-corner-block" aria-hidden="true">
           <div className="login-corner-inner" />
         </div>
       </div>
 
-      {/* ── Right panel — form ── */}
+      
       <div className="login-form-panel">
-        {/* top logo (mobile + desktop right side) */}
+        
         <div className="login-form-logo">
           <img src={cdnLogo} alt="CDN Logo" className="login-logo-img" />
           <div className="login-logo-text">
@@ -94,7 +94,7 @@ const Login = ({ onLogin }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form" noValidate>
-            {/* Username */}
+            
             <div className="login-field">
               <label htmlFor="login-username" className="login-label">
                 Username
@@ -117,7 +117,7 @@ const Login = ({ onLogin }) => {
               </div>
             </div>
 
-            {/* Password */}
+            
             <div className="login-field">
               <label htmlFor="login-password" className="login-label">
                 Password
@@ -159,7 +159,7 @@ const Login = ({ onLogin }) => {
               </div>
             </div>
 
-            {/* Error */}
+            
             {error && (
               <div className="login-error" role="alert">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -171,7 +171,7 @@ const Login = ({ onLogin }) => {
               </div>
             )}
 
-            {/* Submit */}
+            
             <button
               type="submit"
               className={`login-submit${loading ? ' loading' : ''}`}

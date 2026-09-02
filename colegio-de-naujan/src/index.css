@@ -2,7 +2,6 @@
 @import './styles/variables.css';
 @import './styles/animations.css';
 
-/* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -32,7 +31,6 @@ body {
   flex-direction: column;
 }
 
-/* ── Typography ── */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
   line-height: 1.2;
@@ -55,7 +53,6 @@ button {
   font-family: inherit;
 }
 
-/* ── Container ── */
 .container {
   width: 100%;
   max-width: 1160px;
@@ -63,7 +60,6 @@ button {
   padding: 0 1.5rem;
 }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar       { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--gray-100); }
 ::-webkit-scrollbar-thumb {
@@ -71,7 +67,6 @@ button {
   border-radius: 3px;
 }
 
-/* ── Shared section labels ── */
 .tag-label {
   display: inline-block;
   font-size: 0.68rem;

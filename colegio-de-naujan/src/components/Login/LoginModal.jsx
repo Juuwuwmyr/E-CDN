@@ -14,14 +14,14 @@ const LoginModal = ({ onLogin, onClose }) => {
   const [loading,  setLoading]  = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  /* close on Escape key */
+  
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  /* lock body scroll while open */
+  
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
@@ -49,7 +49,7 @@ const LoginModal = ({ onLogin, onClose }) => {
     <div className="lm-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="lm-panel" role="dialog" aria-modal="true" aria-label="Sign in to portal">
 
-        {/* Close button */}
+        
         <button className="lm-close" onClick={onClose} aria-label="Close login">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -57,7 +57,7 @@ const LoginModal = ({ onLogin, onClose }) => {
           </svg>
         </button>
 
-        {/* Header */}
+        
         <div className="lm-header">
           <div className="lm-logo-row">
             <img src={cdnLogo} alt="CDN Logo" className="lm-logo" />
@@ -76,9 +76,9 @@ const LoginModal = ({ onLogin, onClose }) => {
           </div>
         </div>
 
-        {/* Form */}
+        
         <form onSubmit={handleSubmit} className="lm-form" noValidate>
-          {/* Username */}
+          
           <div className="lm-field">
             <label htmlFor="lm-username" className="lm-label">Username</label>
             <div className="lm-input-wrap">
@@ -100,7 +100,7 @@ const LoginModal = ({ onLogin, onClose }) => {
             </div>
           </div>
 
-          {/* Password */}
+          
           <div className="lm-field">
             <label htmlFor="lm-password" className="lm-label">Password</label>
             <div className="lm-input-wrap">
@@ -140,7 +140,7 @@ const LoginModal = ({ onLogin, onClose }) => {
             </div>
           </div>
 
-          {/* Error */}
+          
           {error && (
             <div className="lm-error" role="alert">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -152,7 +152,7 @@ const LoginModal = ({ onLogin, onClose }) => {
             </div>
           )}
 
-          {/* Submit */}
+          
           <button
             type="submit"
             className={`lm-submit${loading ? ' loading' : ''}`}

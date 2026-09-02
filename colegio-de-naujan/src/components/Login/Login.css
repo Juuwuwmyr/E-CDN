@@ -1,6 +1,4 @@
-/* ══════════════════════════════════════════
-   LOGIN  —  Split-panel layout
-══════════════════════════════════════════ */
+
 
 .login-root {
   display: flex;
@@ -9,9 +7,6 @@
   font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
-/* ─────────────────────────────────────────
-   LEFT BRAND PANEL
-───────────────────────────────────────── */
 .login-brand-panel {
   position: relative;
   width: 46%;
@@ -23,7 +18,6 @@
   flex-shrink: 0;
 }
 
-/* Noise texture overlay */
 .login-brand-noise {
   position: absolute;
   inset: 0;
@@ -32,7 +26,6 @@
   pointer-events: none;
 }
 
-/* Tilted stripe accent */
 .login-brand-stripe {
   position: absolute;
   top: -60px;
@@ -55,7 +48,6 @@
   gap: 1.5rem;
 }
 
-/* CDN E-Portal badge */
 .login-brand-badge {
   display: inline-flex;
   align-items: center;
@@ -85,7 +77,6 @@
   50%       { opacity: 0.5; transform: scale(0.75); }
 }
 
-/* Main heading */
 .login-brand-title {
   font-size: clamp(2.6rem, 4vw, 3.5rem);
   font-weight: 900;
@@ -100,7 +91,6 @@
   display: block;
 }
 
-/* Sub text */
 .login-brand-sub {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.55);
@@ -109,7 +99,6 @@
   margin: 0;
 }
 
-/* Course pills row */
 .login-brand-course-tag {
   display: flex;
   flex-wrap: wrap;
@@ -132,7 +121,6 @@
   opacity: 0.35;
 }
 
-/* Quote */
 .login-brand-quote {
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.4);
@@ -143,7 +131,6 @@
   margin-top: 0.5rem;
 }
 
-/* Decorative corner block */
 .login-corner-block {
   position: absolute;
   bottom: 0;
@@ -165,9 +152,6 @@
   clip-path: polygon(0 0, 0 100%, 100% 100%);
 }
 
-/* ─────────────────────────────────────────
-   RIGHT FORM PANEL
-───────────────────────────────────────── */
 .login-form-panel {
   flex: 1;
   background: #F8F9FC;
@@ -179,7 +163,6 @@
   position: relative;
 }
 
-/* Logo (shown in right panel for mobile fallback) */
 .login-form-logo {
   display: none;
   align-items: center;
@@ -213,7 +196,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Form box */
 .login-form-box {
   width: 100%;
   max-width: 380px;
@@ -249,7 +231,6 @@
   margin: 0;
 }
 
-/* Form layout */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -327,7 +308,6 @@
 
 .login-pass-toggle:hover { color: #002280; }
 
-/* Error message */
 .login-error {
   display: flex;
   align-items: center;
@@ -347,7 +327,6 @@
   flex-shrink: 0;
 }
 
-/* Submit button */
 .login-submit {
   display: flex;
   align-items: center;
@@ -390,7 +369,6 @@
   opacity: 0.7;
 }
 
-/* Spinner */
 .login-spinner {
   display: inline-block;
   width: 18px;
@@ -422,9 +400,6 @@
   text-align: center;
 }
 
-/* ─────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────── */
 @media (max-width: 768px) {
   .login-root {
     flex-direction: column;

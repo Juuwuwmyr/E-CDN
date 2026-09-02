@@ -7,13 +7,12 @@ const Footer = () => {
   return (
     <>
 
-
-      {/* ── Main Footer ── */}
+      
       <footer className="footer" id="contact">
         <div className="footer-main">
           <div className="container footer-grid">
 
-            {/* Brand */}
+            
             <div className="footer-brand">
               <div className="footer-logo">
                 <img
@@ -38,7 +37,7 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Portal */}
+            
             <div>
               <p className="footer-col-title">Portal</p>
               <ul className="footer-col-links">
@@ -50,7 +49,7 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Courses */}
+            
             <div>
               <p className="footer-col-title">Courses</p>
               <ul className="footer-col-links">
@@ -61,7 +60,7 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Contact */}
+            
             <div>
               <p className="footer-col-title">Contact</p>
               <ul className="footer-contact-list">
@@ -87,7 +86,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom bar */}
+        
         <div className="footer-bottom">
           <div className="container footer-bottom-inner">
             <p className="footer-copy">

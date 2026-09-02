@@ -62,7 +62,7 @@ const Projects = ({ isAuthenticated, onLoginClick }) => {
     <section className="projects" id="projects">
       <div className="container">
 
-        {/* Header */}
+        
         <div className="projects-header scroll-animate">
           <div className="projects-header-left">
             <span className="tag-label">BSIS Capstone &amp; Course Work</span>
@@ -80,7 +80,7 @@ const Projects = ({ isAuthenticated, onLoginClick }) => {
           </div>
         </div>
 
-        {/* ── LOCK GATE — shown when not authenticated ── */}
+        
         {!isAuthenticated ? (
           <div className="projects-lock-gate scroll-animate">
             <div className="projects-lock-preview" aria-hidden="true">
@@ -131,7 +131,7 @@ const Projects = ({ isAuthenticated, onLoginClick }) => {
           </div>
         ) : (
           <>
-            {/* Cards grid — authenticated view */}
+            
             <div className="projects-grid">
               {bsisProjects.map((p, i) => (
                 <article

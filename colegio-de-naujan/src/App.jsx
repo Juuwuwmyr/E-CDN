@@ -13,7 +13,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin,       setShowLogin]       = useState(false);
 
-  // Global scroll-reveal — watches .scroll-animate elements site-wide
+  
   useScrollAnimation();
 
   const handleLogin = () => {
@@ -27,7 +27,7 @@ function App() {
 
   return (
     <div className="App">
-      {/* Login modal overlay — only shown when user clicks Login */}
+      
       {showLogin && (
         <LoginModal
           onLogin={handleLogin}

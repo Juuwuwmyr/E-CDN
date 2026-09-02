@@ -1,6 +1,24 @@
-/* ══════════════════════════════════════════
-   HERO  —  Redesigned
-══════════════════════════════════════════ */
+
+@keyframes floatOrb1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -40px) scale(1.08); }
+  66%  { transform: translate(-20px, 20px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes floatOrb2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(-35px, 30px) scale(1.12); }
+  80%  { transform: translate(25px, -20px) scale(0.92); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes floatOrb3 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(20px, 40px) scale(1.06) rotate(15deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+}
+
 .hero {
   position: relative;
   background: var(--gray-50);
@@ -10,39 +28,48 @@
   align-items: center;
 }
 
-/* angular top-right stripe accent — NOT a generic centered blob */
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -120px;
-  right: -180px;
-  width: 520px;
-  height: 520px;
-  background: linear-gradient(135deg, rgba(0,34,128,0.07) 0%, transparent 65%);
-  transform: rotate(-12deg);
-  border-radius: 40% 60% 55% 45% / 45% 55% 60% 40%;
-  pointer-events: none;
-}
-
-/* subtle bottom-left accent */
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: -60px;
-  left: -80px;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(200,16,46,0.07) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-/* dot grid (subtle) */
 .hero-bg-grid {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(0,34,128,0.055) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(0,34,128,0.045) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
+  z-index: 0;
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(55px);
+  z-index: 1;
+}
+
+.hero-orb-1 {
+  width: 500px;
+  height: 500px;
+  top: -100px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(0,34,128,0.22) 0%, rgba(0,34,128,0.08) 50%, transparent 70%);
+  animation: floatOrb1 14s ease-in-out infinite;
+}
+
+.hero-orb-2 {
+  width: 400px;
+  height: 400px;
+  bottom: -60px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(200,16,46,0.18) 0%, rgba(200,16,46,0.06) 50%, transparent 70%);
+  animation: floatOrb2 18s ease-in-out infinite;
+}
+
+.hero-orb-3 {
+  width: 300px;
+  height: 300px;
+  top: 35%;
+  left: 35%;
+  background: radial-gradient(circle, rgba(180,130,0,0.15) 0%, rgba(180,130,0,0.05) 50%, transparent 70%);
+  animation: floatOrb3 22s ease-in-out infinite;
 }
 
 .hero-inner {
@@ -56,7 +83,6 @@
   width: 100%;
 }
 
-/* ── LEFT COLUMN ── */
 .hero-left {
   display: flex;
   flex-direction: column;
@@ -107,7 +133,6 @@
 .hero-heading-blue { color: var(--primary-blue); }
 .hero-heading-red  { color: var(--primary-red);  }
 
-/* dash underline on red span */
 .hero-heading .hero-heading-red {
   text-decoration: underline;
   text-decoration-color: rgba(200,16,46,0.3);
@@ -123,7 +148,6 @@
   margin: 0;
 }
 
-/* ── Action buttons ── */
 .hero-actions {
   display: flex;
   gap: 0.875rem;
@@ -173,7 +197,6 @@
   transform: translateY(-2px);
 }
 
-/* ── Stats row ── */
 .hero-stats {
   display: flex;
   gap: 0;
@@ -213,7 +236,6 @@
   letter-spacing: 0.75px;
 }
 
-/* ── RIGHT COLUMN ── */
 .hero-right {
   position: relative;
   display: flex;
@@ -226,7 +248,6 @@
   max-width: 490px;
 }
 
-/* main image frame — slightly rotated for a human feel */
 .hero-img-frame {
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -248,7 +269,6 @@
   display: block;
 }
 
-/* browser-bar overlay on image */
 .hero-img-bar {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -278,7 +298,6 @@
   letter-spacing: 0.3px;
 }
 
-/* floating cards */
 .hero-float-card {
   position: absolute;
   background: #fff;
@@ -340,9 +359,6 @@
   line-height: 1.5;
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
 @media (max-width: 960px) {
   .hero-inner {
     grid-template-columns: 1fr;

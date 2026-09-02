@@ -28,7 +28,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
 
   return (
     <>
-      {/* ── Top bar ── */}
+      
       <div className="topbar">
         <div className="container topbar-inner">
           <div className="topbar-left">
@@ -62,11 +62,11 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
         </div>
       </div>
 
-      {/* ── Main Nav ── */}
+      
       <header className={`header${scrolled ? ' scrolled' : ''}`}>
         <div className="container header-inner">
 
-          {/* Logo */}
+          
           <a href="#home" className="logo" onClick={() => handleNav('#home')}>
             <img src={cdnLogo} alt="Colegio De Naujan Logo" className="logo-img" />
             <div className="logo-text">
@@ -75,7 +75,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
             </div>
           </a>
 
-          {/* Desktop Nav */}
+          
           <nav className={`nav${menuOpen ? ' open' : ''}`} role="navigation" aria-label="Main navigation">
             {navLinks.map((l) => (
               <a
@@ -88,7 +88,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
               </a>
             ))}
 
-            {/* Auth action button */}
+            
             {isAuthenticated ? (
               <button className="nav-logout" onClick={onLogout}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -110,7 +110,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
             )}
           </nav>
 
-          {/* Hamburger */}
+          
           <button
             className={`hamburger${menuOpen ? ' open' : ''}`}
             onClick={() => setMenuOpen(!menuOpen)}

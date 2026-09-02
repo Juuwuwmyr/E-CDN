@@ -1,13 +1,10 @@
-/* ══════════════════════════════════════════
-   COURSES  —  Redesigned
-══════════════════════════════════════════ */
+
 .courses {
   padding: 5rem 0;
   background: #fff;
   position: relative;
 }
 
-/* subtle top border with inset accent */
 .courses::before {
   content: '';
   position: absolute;
@@ -35,14 +32,12 @@
   padding-bottom: 0.25rem;
 }
 
-/* ── Grid ── */
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
 }
 
-/* ── Card ── */
 .course-card {
   background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
@@ -60,7 +55,6 @@
   transform: translateY(-3px);
 }
 
-/* top row */
 .course-card-top {
   display: flex;
   flex-direction: column;
@@ -122,7 +116,6 @@
   flex: 1;
 }
 
-/* tags */
 .course-tags {
   display: flex;
   flex-wrap: wrap;
@@ -140,7 +133,6 @@
   letter-spacing: 0.2px;
 }
 
-/* link */
 .course-link {
   font-size: 0.82rem;
   font-weight: 800;
@@ -160,9 +152,6 @@
   gap: 0.6rem;
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
 @media (max-width: 860px) {
   .courses-grid { grid-template-columns: 1fr; }
   .courses-header { flex-direction: column; align-items: flex-start; }

@@ -1,4 +1,5 @@
 import '../../styles/Hero.css';
+import ParticleCanvas from './ParticleCanvas';
 
 const Hero = ({ onLoginClick }) => {
   const stats = [
@@ -11,10 +12,11 @@ const Hero = ({ onLoginClick }) => {
   return (
     <section className="hero" id="home">
       <div className="hero-bg-grid" aria-hidden="true" />
+      <ParticleCanvas />
 
       <div className="container hero-inner">
 
-        {/* ── LEFT ── */}
+        
         <div className="hero-left scroll-animate from-left">
           <div className="hero-eyebrow">
             <span className="eyebrow-dot" />
@@ -50,7 +52,7 @@ const Hero = ({ onLoginClick }) => {
           </div>
         </div>
 
-        {/* ── RIGHT ── */}
+        
         <div className="hero-right scroll-animate from-right">
           <div className="hero-card-stack">
             <div className="hero-img-frame">
