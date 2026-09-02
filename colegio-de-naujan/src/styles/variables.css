@@ -1,0 +1,43 @@
+:root {
+  /* ── Core Brand Colors ── */
+  --primary-blue:  #002280;
+  --primary-red:   #C8102E;
+  --primary-gold:  #FFD700;
+  --primary-white: #FFFFFF;
+
+  /* ── Shades ── */
+  --blue-dark:  #001560;
+  --blue-mid:   #003399;
+  --blue-light: #2952CC;
+  --red-dark:   #a00c24;
+  --red-light:  #e84060;
+  --gold-dark:  #C8960C;
+  --gold-light: #FFF8DC;
+
+  /* ── Neutral Scale ── */
+  --gray-50:  #F8F9FC;
+  --gray-100: #F1F3F8;
+  --gray-200: #E2E6EF;
+  --gray-300: #C9CFDE;
+  --gray-400: #9AA2B8;
+  --gray-600: #4E5873;
+  --gray-800: #1E2540;
+  --gray-900: #0F1422;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 56px rgba(0,0,0,0.13);
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 24px;
+
+  /* ── Transitions ── */
+  --transition-fast:   0.15s ease;
+  --transition-medium: 0.28s ease;
+  --transition-slow:   0.48s ease;
+}

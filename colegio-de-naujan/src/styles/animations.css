@@ -1,0 +1,95 @@
+/* ── Existing Keyframes ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+/* ── Legacy utility classes (Hero uses these on load) ── */
+.fade-in       { animation: fadeIn 0.6s ease-out both; }
+.slide-in-left { animation: slideInLeft 0.6s ease-out both; }
+.scale-in      { animation: scaleIn 0.5s ease-out both; }
+
+/* ── Delay helpers ── */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+
+/* ═══════════════════════════════════════════════
+   SCROLL-REVEAL SYSTEM
+   Elements start hidden; .is-visible triggers animation
+═══════════════════════════════════════════════ */
+
+/* Base hidden state — applied to all scroll-animate elements */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+/* Triggered by IntersectionObserver */
+.scroll-animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Variant: slide from left ── */
+.scroll-animate.from-left {
+  transform: translateX(-40px) translateY(16px);
+}
+.scroll-animate.from-left.is-visible {
+  transform: translateX(0) translateY(0);
+}
+
+/* ── Variant: slide from right ── */
+.scroll-animate.from-right {
+  transform: translateX(40px) translateY(16px);
+}
+.scroll-animate.from-right.is-visible {
+  transform: translateX(0) translateY(0);
+}
+
+/* ── Variant: scale up ── */
+.scroll-animate.scale-up {
+  transform: scale(0.93) translateY(20px);
+}
+.scroll-animate.scale-up.is-visible {
+  transform: scale(1) translateY(0);
+}
+
+/* ── Stagger delays for groups of cards ── */
+.scroll-animate.stagger-1 { transition-delay: 0.05s; }
+.scroll-animate.stagger-2 { transition-delay: 0.12s; }
+.scroll-animate.stagger-3 { transition-delay: 0.19s; }
+.scroll-animate.stagger-4 { transition-delay: 0.26s; }
+.scroll-animate.stagger-5 { transition-delay: 0.33s; }
+.scroll-animate.stagger-6 { transition-delay: 0.40s; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-animate {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

@@ -1,0 +1,73 @@
+.App {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+html { scroll-behavior: smooth; }
+
+/* ── Shared section labels ── */
+.tag-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--primary-red);
+  margin-bottom: 0.6rem;
+}
+
+.section-heading {
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: var(--gray-900);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 0 0 0.6rem;
+}
+
+.section-heading .blue { color: var(--primary-blue); }
+.section-heading .red  { color: var(--primary-red);  }
+.section-heading .gold { color: var(--gold-dark);    }
+
+.section-sub {
+  font-size: 0.975rem;
+  color: var(--gray-600);
+  line-height: 1.7;
+  max-width: 580px;
+}
+
+.text-center { text-align: center; }
+
+.view-all-link {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+  transition: color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+
+.view-all-link:hover {
+  color: var(--primary-red);
+  border-bottom-color: var(--primary-red);
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline: 3px solid var(--primary-blue);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--primary-gold);
+  color: var(--blue-dark);
+}
