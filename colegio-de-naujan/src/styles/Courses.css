@@ -38,6 +38,7 @@
   gap: 1.25rem;
 }
 
+/* ── Base card ── */
 .course-card {
   background: var(--gray-50);
   border: 1.5px solid var(--gray-200);
@@ -47,12 +48,55 @@
   flex-direction: column;
   gap: 0.9rem;
   transition: box-shadow 0.22s, border-color 0.22s, transform 0.22s;
+  position: relative;
+  overflow: hidden;
 }
 
 .course-card:hover {
   box-shadow: 0 8px 28px rgba(0,0,0,0.08);
   border-color: var(--gray-300);
   transform: translateY(-3px);
+}
+
+/* ── Background image layer (BPA card) ── */
+.course-has-bg {
+  background: var(--gray-50);
+}
+
+.course-bg-img {
+  position: absolute;
+  inset: 0;
+  background-image: var(--course-bg);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.06;
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+.course-has-bg:hover .course-bg-img {
+  opacity: 0.09;
+}
+
+/* inner wrapper keeps content above the bg layer */
+.course-card-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  flex: 1;
+}
+
+/* cards without bg don't need the wrapper — target direct children */
+.course-card:not(.course-has-bg) > .course-card-top,
+.course-card:not(.course-has-bg) > .course-desc,
+.course-card:not(.course-has-bg) > .course-tags,
+.course-card:not(.course-has-bg) > .course-link {
+  position: relative;
+  z-index: 1;
 }
 
 .course-card-top {
@@ -116,41 +160,7 @@
   flex: 1;
 }
 
-.course-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.course-tag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--gray-600);
-  background: #fff;
-  border: 1px solid var(--gray-200);
-  padding: 0.22rem 0.6rem;
-  border-radius: var(--radius-sm);
-  letter-spacing: 0.2px;
-}
-
-.course-link {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--primary-blue);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: gap 0.18s, color 0.18s;
-  width: fit-content;
-  margin-top: auto;
-  letter-spacing: 0.2px;
-}
-
-.course-link:hover {
-  color: var(--primary-red);
-  gap: 0.6rem;
-}
+/* removed: .course-tags, .course-tag, .course-link */
 
 @media (max-width: 860px) {
   .courses-grid { grid-template-columns: 1fr; }

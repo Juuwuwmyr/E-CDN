@@ -1,4 +1,5 @@
 import '../../styles/Courses.css';
+import wftBg from '../../assets/images/background.jpg';
 
 const Courses = () => {
   const courses = [
@@ -9,6 +10,7 @@ const Courses = () => {
       desc: 'Focuses on the design, development, and management of information systems. Students build web apps, databases, and enterprise solutions that address real institutional needs.',
       tags: ['Web Systems', 'Database', 'Networking', 'Software Dev'],
       count: 45,
+      bg: null,
     },
     {
       code: 'BTVTED-WFT',
@@ -17,22 +19,25 @@ const Courses = () => {
       desc: 'Combines food technology with technical-vocational pedagogy. Projects include digital systems for food processing monitoring, inventory, and quality control.',
       tags: ['Food Tech', 'Process Systems', 'Inventory', 'Quality Control'],
       count: 32,
+      bg: null,
     },
     {
       code: 'BTVTED-CHS',
       color: 'gold',
-      full: 'Bachelor of Technical-Vocational Teacher Education — Consumer & Hospitality Services',
-      desc: 'Covers hospitality and consumer services education. Student projects include hotel reservation systems, service management tools, and customer portals.',
-      tags: ['Hospitality', 'Reservation', 'Service Mgmt', 'Customer Portal'],
+      full: 'Bachelor of Technical-Vocational Teacher Education — Computer Hardware Servicing',
+      desc: 'Covers computer hardware servicing and technical-vocational education. Student projects include diagnostic tools, hardware inventory systems, and service management portals.',
+      tags: ['Hardware', 'Diagnostics', 'Inventory', 'Service Mgmt'],
       count: 28,
+      bg: null,
     },
     {
-      code: 'WFT',
+      code: 'BPA',
       color: 'blue',
-      full: 'Welding and Fabrication Technology',
-      desc: 'Technical program on metal fabrication and welding. Projects cover digital job order systems, materials tracking, and fabrication workflow management tools.',
-      tags: ['Job Orders', 'Materials Tracking', 'Workflow', 'Tech Systems'],
+      full: 'Bachelor of Public Administration',
+      desc: 'Prepares students for public service and governance. Projects cover digital systems for government record management, citizen services, and administrative workflows.',
+      tags: ['Gov Systems', 'Records Mgmt', 'Public Service', 'Admin Tools'],
       count: 18,
+      bg: wftBg,
     },
   ];
 
@@ -40,7 +45,6 @@ const Courses = () => {
     <section className="courses" id="courses">
       <div className="container">
 
-        
         <div className="courses-header scroll-animate">
           <div>
             <span className="tag-label">Offered Programs</span>
@@ -55,31 +59,28 @@ const Courses = () => {
           <span className="courses-header-count">4 Programs</span>
         </div>
 
-        
         <div className="courses-grid">
           {courses.map((c, i) => (
             <div
               key={i}
-              className={`course-card course-${c.color} scroll-animate stagger-${i + 1}`}
+              className={`course-card course-${c.color} scroll-animate stagger-${i + 1}${c.bg ? ' course-has-bg' : ''}`}
+              style={c.bg ? { '--course-bg': `url(${c.bg})` } : {}}
             >
-              <div className="course-card-top">
-                <div className="course-code-wrap">
-                  <span className={`course-code code-${c.color}`}>{c.code}</span>
+              {/* background image layer — only rendered when bg is set */}
+              {c.bg && (
+                <div className="course-bg-img" aria-hidden="true" />
+              )}
+
+              <div className="course-card-inner">
+                <div className="course-card-top">
+                  <div className="course-code-wrap">
+                    <span className={`course-code code-${c.color}`}>{c.code}</span>
+                  </div>
+                  <h3 className="course-full">{c.full}</h3>
                 </div>
-                <h3 className="course-full">{c.full}</h3>
+
+                <p className="course-desc">{c.desc}</p>
               </div>
-
-              <p className="course-desc">{c.desc}</p>
-
-              <div className="course-tags">
-                {c.tags.map((t, ti) => (
-                  <span key={ti} className="course-tag">{t}</span>
-                ))}
-              </div>
-
-              <a href="#projects" className="course-link">
-                View Projects <span aria-hidden="true">→</span>
-              </a>
             </div>
           ))}
         </div>
