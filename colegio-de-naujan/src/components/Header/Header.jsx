@@ -47,7 +47,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
             </span>
           </div>
           <div className="topbar-right">
-            <span className="topbar-badge">S.Y. 2025 – 2026</span>
+            <span className="topbar-badge">S.Y. 2026 – 2027</span>
             {isAuthenticated && (
               <button className="topbar-logout" onClick={onLogout} title="Sign out">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

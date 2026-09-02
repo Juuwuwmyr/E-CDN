@@ -4,10 +4,10 @@ import bgImg from '../../assets/images/background.jpg';
 
 const Hero = ({ onLoginClick }) => {
   const stats = [
-    { value: '45+',  label: 'BSIS Projects'   },
-    { value: '120+', label: 'Total Deployed'   },
-    { value: '300+', label: 'Student Devs'     },
-    { value: '3',    label: 'Academic Years'   },
+    { value: 'Bilang',  label: 'BSIS Projects'   },
+    { value: 'Bilang',  label: 'Total Deployed'   },
+    { value: 'Bilang',  label: 'Student Devs'     },
+    { value: 'Bilang',  label: 'Academic Years'   },
   ];
 
   return (

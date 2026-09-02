@@ -43,10 +43,10 @@
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-  opacity: 0.055;
+  opacity: 0.09;
   pointer-events: none;
   z-index: 0;
-  filter: grayscale(30%);
+  filter: grayscale(100%) sepia(100%) hue-rotate(190deg) saturate(6) brightness(1.2);
 }
 
 .hero-orb {

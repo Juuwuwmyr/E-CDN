@@ -160,14 +160,30 @@
 
 }
 
+.about-banner::before {
+  content: '';
+  position: absolute;
+  left: -80px;
+  bottom: -80px;
+  width: 280px;
+  height: 280px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .about-banner::after {
   content: '';
   position: absolute;
-  right: -60px; bottom: -60px;
-  width: 260px; height: 260px;
-  background: radial-gradient(circle, rgba(255,215,0,0.14) 0%, transparent 70%);
+  left: -30px;
+  bottom: -130px;
+  width: 220px;
+  height: 220px;
+  background: rgba(255,255,255,0.05);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 0;
 }
 
 .about-banner-text {

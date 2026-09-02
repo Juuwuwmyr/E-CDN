@@ -52,7 +52,7 @@ const About = () => {
 
             <div className="about-highlight-bar">
               <div className="highlight-item">
-                <span className="highlight-val">S.Y. 2023</span>
+                <span className="highlight-val">S.Y. 2026</span>
                 <span className="highlight-lbl">Portal launched</span>
               </div>
               <div className="highlight-divider" />
