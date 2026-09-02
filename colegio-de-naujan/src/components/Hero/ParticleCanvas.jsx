@@ -41,7 +41,7 @@ const ParticleCanvas = () => {
         ctx.beginPath();
         ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
         ctx.fillStyle = a.color;
-        ctx.globalAlpha = 0.7;
+        ctx.globalAlpha = 0.28;
         ctx.fill();
         ctx.globalAlpha = 1;
 
@@ -55,7 +55,7 @@ const ParticleCanvas = () => {
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.strokeStyle = a.color;
-            ctx.globalAlpha = (1 - dist / CONNECT) * 0.22;
+            ctx.globalAlpha = (1 - dist / CONNECT) * 0.10;
             ctx.lineWidth = 0.8;
             ctx.stroke();
             ctx.globalAlpha = 1;
