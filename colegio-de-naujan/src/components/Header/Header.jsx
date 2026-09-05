@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import cdnLogo from '../../assets/images/logo.png';
+import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
 const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
   const [scrolled,   setScrolled]   = useState(false);
@@ -59,9 +60,9 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
           boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.06)',
         }}
       >
-        <div className="cdn-container flex items-center justify-between py-3 gap-8">
+        <div className="cdn-container flex items-center py-3" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center' }}>
 
-          {/* Logo */}
+          {/* Logo — left */}
           <a href="#home" onClick={() => handleNav('#home')} className="flex items-center gap-3 shrink-0 group" style={{ textDecoration: 'none' }}>
             <img
               src={cdnLogo}
@@ -79,55 +80,70 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
             </div>
           </a>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — centered */}
           <nav className="hidden lg:flex items-center gap-0.5">
-            {navLinks.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => handleNav(l.href)}
-                className="px-3.5 py-2 text-[0.88rem] font-semibold rounded-lg transition-all duration-150"
-                style={{
-                  color: activeLink === l.href ? '#002280' : '#374151',
-                  background: activeLink === l.href ? 'rgba(0,34,128,0.07)' : 'transparent',
-                  textDecoration: 'none',
-                }}
-                onMouseEnter={e => { if (activeLink !== l.href) { e.currentTarget.style.color = '#002280'; e.currentTarget.style.background = 'rgba(0,34,128,0.06)'; }}}
-                onMouseLeave={e => { if (activeLink !== l.href) { e.currentTarget.style.color = '#374151'; e.currentTarget.style.background = 'transparent'; }}}
-              >
-                {l.label}
-              </a>
-            ))}
-
-            <button
-              onClick={() => { onLoginClick(); }}
-              className="flex items-center gap-1.5 ml-2 px-4 py-2 font-bold text-[0.82rem] rounded-lg border-0 cursor-pointer transition-all duration-150"
-              style={{ background: '#002280', color: '#fff' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#001560'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#002280'; e.currentTarget.style.transform = 'none'; }}
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              {isAuthenticated ? 'Sign Out' : 'Login'}
-            </button>
+            {navLinks.map((l) => {
+              const isActive = activeLink === l.href;
+              return (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => handleNav(l.href)}
+                  className="relative px-3.5 py-2 text-[0.88rem] font-semibold transition-all duration-150"
+                  style={{
+                    color: isActive ? '#002280' : '#374151',
+                    textDecoration: 'none',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = '#002280'; }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = '#374151'; }}
+                >
+                  {l.label}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '50%',
+                      transform: isActive ? 'translateX(-50%) scaleX(1)' : 'translateX(-50%) scaleX(0)',
+                      transformOrigin: 'center',
+                      width: '70%',
+                      height: 2.5,
+                      background: '#002280',
+                      borderRadius: 2,
+                      transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1)',
+                      display: 'block',
+                    }}
+                  />
+                </a>
+              );
+            })}
           </nav>
 
-          {/* Hamburger */}
-          <button
-            className="flex lg:hidden flex-col gap-[5px] p-1.5 bg-transparent border-0 cursor-pointer"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
-                  style={{ background: '#002280', transform: menuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
-            <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
-                  style={{ background: '#002280', opacity: menuOpen ? 0 : 1 }} />
-            <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
-                  style={{ background: '#002280', transform: menuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
-          </button>
+          {/* Right side — Bagong Pilipinas logo */}
+          <div className="hidden lg:flex items-center gap-4 justify-end">
+            <img
+              src={bagongPilipinasLogo}
+              alt="Bagong Pilipinas"
+              style={{ width: 46, height: 46, objectFit: 'contain' }}
+            />
+          </div>
+
+          {/* Hamburger — mobile only */}
+          <div className="flex lg:hidden justify-end">
+            <button
+              className="flex flex-col gap-[5px] p-1.5 bg-transparent border-0 cursor-pointer"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
+                    style={{ background: '#002280', transform: menuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+              <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
+                    style={{ background: '#002280', opacity: menuOpen ? 0 : 1 }} />
+              <span className="block w-[22px] h-[2px] rounded transition-all duration-300"
+                    style={{ background: '#002280', transform: menuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+            </button>
+          </div>
+
         </div>
 
         {/* Mobile menu */}
@@ -144,13 +160,6 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
                 {l.label}
               </a>
             ))}
-            <button
-              onClick={() => { isAuthenticated ? onLogout() : onLoginClick(); setMenuOpen(false); }}
-              className="mt-3 w-full py-2.5 font-bold text-sm rounded-lg border-0 cursor-pointer"
-              style={{ background: '#002280', color: '#fff' }}
-            >
-              {isAuthenticated ? 'Sign Out' : 'Login'}
-            </button>
           </div>
         )}
       </header>
