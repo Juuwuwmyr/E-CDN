@@ -10,7 +10,7 @@ const useScrollAnimation = () => {
 
       elements.forEach((el) => {
         const rect = el.getBoundingClientRect();
-        const inView = rect.top < windowHeight - 60 && rect.bottom > 0;
+        const inView = rect.top < windowHeight - 120 && rect.bottom > 0;
 
         if (inView) {
           el.classList.add('is-visible');
