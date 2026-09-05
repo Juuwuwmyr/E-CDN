@@ -1,4 +1,6 @@
 import wftBg from '../../assets/images/background.jpg';
+import bsisBg from '../../assets/images/background.jpg';
+import chsbg from '../../assets/images/background.jpg';
 
 const colorBorder = { blue: '#002280', red: '#C8102E', gold: '#C8960C' };
 const colorPill   = {
@@ -50,17 +52,17 @@ const icons = {
 const Courses = () => {
   const courses = [
     {
-      code: 'BSIS', color: 'gold', bg: null, icon: icons.bsis,
+      code: 'BSIS', color: 'gold', bg: bsisBg, icon: icons.bsis,
       full: 'Bachelor of Science in Information Systems',
       desc: 'Focuses on the design, development, and management of information systems. Students build web apps, databases, and enterprise solutions that address real institutional needs.',
     },
     {
-      code: 'BTVTED-WFT', color: 'gold', bg: null, icon: icons.wft,
+      code: 'BTVTED-WFT', color: 'gold', bg: chsbg, icon: icons.wft,
       full: 'Bachelor of Technical-Vocational Teacher Education — Welding and Fabrication Technology',
       desc: 'Covers welding techniques, metal fabrication, and technical-vocational education. Projects include digital job order systems, materials tracking, and fabrication workflow management tools.',
     },
     {
-      code: 'BTVTED-CHS', color: 'gold', bg: null, icon: icons.chs,
+      code: 'BTVTED-CHS', color: 'gold', bg: chsbg, icon: icons.chs,
       full: 'Bachelor of Technical-Vocational Teacher Education — Computer Hardware Servicing',
       desc: 'Covers computer hardware servicing and technical-vocational education. Student projects include diagnostic tools, hardware inventory systems, and service management portals.',
     },
