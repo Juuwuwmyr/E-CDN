@@ -19,8 +19,70 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="py-20" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
-      <div className="cdn-container">
+    <section id="about" className="relative py-20 overflow-hidden" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
+
+      {/* ── dot grid (same as Hero) ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(0,34,128,0.045) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      {/* ── Oriental Mindoro map watermark ── */}
+      <div
+        aria-hidden="true"
+        className="absolute pointer-events-none z-0"
+        style={{ right: '-60px', top: '50%', transform: 'translateY(-50%)', width: 520, height: 520, opacity: 0.055 }}
+      >
+        {/* Simplified outline of Oriental Mindoro island */}
+        <svg viewBox="0 0 400 520" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+          <path
+            d="
+              M 180 10
+              C 200 8, 225 18, 240 35
+              C 258 55, 265 80, 270 105
+              C 276 135, 278 165, 272 195
+              C 266 225, 255 250, 248 278
+              C 240 308, 238 338, 232 366
+              C 226 392, 215 415, 205 438
+              C 196 458, 188 475, 178 490
+              C 170 502, 160 510, 150 508
+              C 138 506, 128 495, 120 480
+              C 110 462, 105 440, 100 418
+              C 94 394, 90 368, 88 342
+              C 85 314, 84 285, 88 257
+              C 92 228, 100 202, 105 175
+              C 110 148, 112 120, 118 95
+              C 124 70, 134 48, 148 30
+              C 158 16, 168 12, 180 10
+              Z
+            "
+            fill="#002280"
+          />
+          {/* Small island (Naujan Lake area shape) */}
+          <ellipse cx="175" cy="220" rx="28" ry="18" fill="#C8960C" opacity="0.5" />
+          {/* Naujan dot marker */}
+          <circle cx="175" cy="235" r="6" fill="#C8102E" />
+          <circle cx="175" cy="235" r="10" fill="#C8102E" opacity="0.25" />
+        </svg>
+      </div>
+
+      {/* ── soft radial glow top-left ── */}
+      <div
+        aria-hidden="true"
+        className="absolute pointer-events-none z-0"
+        style={{ left: -80, top: -80, width: 340, height: 340, background: 'radial-gradient(circle, rgba(0,34,128,0.06) 0%, transparent 70%)', borderRadius: '50%' }}
+      />
+      {/* ── soft radial glow bottom-right ── */}
+      <div
+        aria-hidden="true"
+        className="absolute pointer-events-none z-0"
+        style={{ right: -60, bottom: -60, width: 280, height: 280, background: 'radial-gradient(circle, rgba(200,150,12,0.07) 0%, transparent 70%)', borderRadius: '50%' }}
+      />
+      <div className="cdn-container relative z-10">
 
         {/* Two-column */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-14">
@@ -46,7 +108,7 @@ const About = () => {
             {/* Highlight bar */}
             <div
               className="flex items-stretch mt-2"
-              style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', borderRadius: 14, padding: '1.25rem 1.5rem' }}
+              style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid #e5e7eb', borderRadius: 14, padding: '1.25rem 1.5rem' }}
             >
               {highlights.map((h, i) => (
                 <div key={i} className="flex-1 flex flex-col gap-0.5">
@@ -65,7 +127,7 @@ const About = () => {
                 <div
                   key={i}
                   className={`relative flex items-start gap-5 p-6 transition-all duration-200 scroll-animate from-right stagger-${i + 1}`}
-                  style={{ background: '#fff', border: '1.5px solid #e5e7eb', borderRadius: 14 }}
+                  style={{ background: 'rgba(255,255,255,0.85)', border: '1.5px solid #e5e7eb', borderRadius: 14 }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = cm.borderHover; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.07)'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; }}
                 >

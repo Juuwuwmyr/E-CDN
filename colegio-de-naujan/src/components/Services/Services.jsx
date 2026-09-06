@@ -89,8 +89,7 @@ const Services = () => {
               className={`flex flex-col gap-4 p-7 transition-all duration-200 cursor-default scroll-animate stagger-${i + 1}`}
               style={{
                 background: '#fff',
-                border: `1.5px solid ${hoverBorder[s.color]}22`,
-                borderTop: `3px solid ${hoverBorder[s.color]}`,
+                border: '1.5px solid #e5e7eb',
                 borderRadius: 14,
               }}
               onMouseEnter={e => {
