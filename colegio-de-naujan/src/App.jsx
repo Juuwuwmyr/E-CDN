@@ -33,7 +33,7 @@ function App() {
         onLogout={handleLogout}
       />
 
-      <main>
+      <main style={{ paddingTop: '72px' }}>
         <Hero onLoginClick={() => setShowLogin(true)} />
         <Courses />
         <Services />
