@@ -32,7 +32,7 @@ const Services = () => {
       color: 'blue',
       icon: icons.csc,
       title: 'CSC Services',
-      acronym: 'College Student Council — Fines Management System',
+      url: 'https://student-fines-hub-vf9z.vercel.app/',
       desc: 'The CSC Fines Management System handles the recording, monitoring, and collection of student fines issued by the College Student Council.',
       features: [
         'Fine issuance & recording',
@@ -45,7 +45,7 @@ const Services = () => {
       color: 'red',
       icon: icons.osas,
       title: 'OSAS Services',
-      acronym: 'Office of Student Affairs & Services — Violation Tracking System',
+      url: 'https://osas-sys.duckdns.org/',
       desc: 'The OSAS Violation Tracking System records and monitors student violations. Once a violation is committed, it is logged and listed under the student\'s record by OSAS.',
       features: [
         'Violation logging & case recording',
@@ -58,7 +58,7 @@ const Services = () => {
       color: 'gold',
       icon: icons.admission,
       title: 'Admission Services',
-      acronym: 'Admissions Office',
+      url: 'https://ecnesis.duckdns.org/',
       desc: 'The Admission Services system streamlines the application process for incoming students — from initial inquiry through enrollment confirmation.',
       features: [
         'Online application & form submission',
@@ -103,7 +103,7 @@ const Services = () => {
             >
               {/* Icon + Title */}
               <div className="flex items-center gap-3">
-                <div style={{ width: 22, height: 22, color: hoverBorder[s.color], opacity: 0.8, flexShrink: 0 }}>
+                <div style={{ width: 22, height: 22, color: '#C8960C', flexShrink: 0 }}>
                   {s.icon}
                 </div>
                 <h3 className="m-0 font-extrabold leading-snug" style={{ fontSize: '1.05rem', color: '#0F1422' }}>
@@ -127,6 +127,32 @@ const Services = () => {
                   </li>
                 ))}
               </ul>
+
+              {/* Visit button — bottom right */}
+              <div className="flex justify-end mt-auto pt-2">
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-bold transition-all duration-150"
+                  style={{
+                    fontSize: '0.8rem',
+                    color: '#002280',
+                    textDecoration: 'none',
+                    borderBottom: '1.5px solid rgba(0,34,128,0.25)',
+                    paddingBottom: 2,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderBottomColor = '#002280'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderBottomColor = 'rgba(0,34,128,0.25)'; }}
+                >
+                  Visit
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </a>
+              </div>
             </div>
           ))}
         </div>
