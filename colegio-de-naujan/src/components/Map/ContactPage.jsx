@@ -1,4 +1,4 @@
-import MapSection from '../components/Map/MapSection';
+import MapSection from './MapSection';
 
 const ContactPage = () => (
   <>

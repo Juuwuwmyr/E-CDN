@@ -4,13 +4,13 @@ import useScrollAnimation from './hooks/useScrollAnimation';
 import Header      from './components/Header/Header';
 import Footer      from './components/Footer/Footer';
 import LoginModal  from './components/Login/LoginModal';
-import LoginPage   from './pages/LoginPage';
-import Dashboard   from './pages/Dashboard';
-import HomePage    from './pages/HomePage';
-import CoursesPage from './pages/CoursesPage';
-import ServicesPage from './pages/ServicesPage';
-import AboutPage   from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
+import LoginPage   from './components/LoginPage/LoginPage';
+import Dashboard   from './components/Dashboard/Dashboard';
+import HomePage    from './components/Home/HomePage';
+import CoursesPage from './components/Courses/CoursesPage';
+import ServicesPage from './components/Services/ServicesPage';
+import AboutPage   from './components/About/AboutPage';
+import ContactPage from './components/Map/ContactPage';
 
 /* ── Helper: read persisted session ── */
 const readSession = () => {
