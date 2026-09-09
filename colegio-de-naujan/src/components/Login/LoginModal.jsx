@@ -3,8 +3,8 @@ import './LoginModal.css';
 import cdnLogo from '../../assets/images/logo.png';
 
 const VALID_USERS = [
-  { username: 'admin', password: 'bsis2026' },
-  { username: 'bsis',  password: 'cdn2026'  },
+  { username: 'admin', password: 'bsis2026', name: 'Administrator', role: 'Admin'   },
+  { username: 'bsis',  password: 'cdn2026',  name: 'BSIS Student',  role: 'Student' },
 ];
 
 const LoginModal = ({ onLogin, onClose }) => {
@@ -37,6 +37,8 @@ const LoginModal = ({ onLogin, onClose }) => {
         (u) => u.username === username.trim() && u.password === password
       );
       if (match) {
+        const userData = { username: match.username, name: match.name, role: match.role };
+        localStorage.setItem('cdn_user', JSON.stringify(userData));
         onLogin();
       } else {
         setError('Invalid username or password.');

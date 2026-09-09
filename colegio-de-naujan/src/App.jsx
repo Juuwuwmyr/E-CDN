@@ -1,34 +1,32 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useScrollAnimation from './hooks/useScrollAnimation';
-import Header      from './components/Header/Header';
-import Footer      from './components/Footer/Footer';
-import LoginModal  from './components/Login/LoginModal';
-import LoginPage   from './components/LoginPage/LoginPage';
-import Dashboard   from './components/Dashboard/Dashboard';
-import HomePage    from './components/Home/HomePage';
-import CoursesPage from './components/Courses/CoursesPage';
-import ServicesPage from './components/Services/ServicesPage';
-import AboutPage   from './components/About/AboutPage';
-import ContactPage from './components/Map/ContactPage';
+import Header       from './components/Header/Header';
+import Footer       from './components/Footer/Footer';
+import LoginModal   from './components/Login/LoginModal';
+import Dashboard    from './components/Dashboard/Dashboard';
 
-/* ── Helper: read persisted session ── */
+/* ── Page components ── */
+import { lazy, Suspense } from 'react';
+const HomePage    = lazy(() => import('./components/Home/HomePage'));
+const CoursesPage = lazy(() => import('./components/Courses/CoursesPage'));
+const ServicesPage = lazy(() => import('./components/Services/ServicesPage'));
+const AboutPage   = lazy(() => import('./components/About/AboutPage'));
+const ContactPage = lazy(() => import('./components/Map/ContactPage'));
+
+/* ── Helpers ── */
 const readSession = () => {
   try {
     const raw = localStorage.getItem('cdn_user');
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 };
 
-/* ── Guard: redirect to /login if not authenticated ── */
 function RequireAuth({ user, children }) {
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   return children;
 }
 
-/* ── Pages that use the public Header + Footer layout ── */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -42,48 +40,50 @@ function PublicLayout({ onLoginClick }) {
       <Header onLoginClick={onLoginClick} />
       <ScrollToTop />
       <main style={{ paddingTop: '72px', flex: 1 }}>
-        <Routes>
-          <Route path="/"         element={<HomePage />}    />
-          <Route path="/courses"  element={<CoursesPage />} />
-          <Route path="/services" element={<ServicesPage />}/>
-          <Route path="/about"    element={<AboutPage />}   />
-          <Route path="/contact"  element={<ContactPage />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/"         element={<HomePage />}    />
+            <Route path="/courses"  element={<CoursesPage />} />
+            <Route path="/services" element={<ServicesPage />}/>
+            <Route path="/about"    element={<AboutPage />}   />
+            <Route path="/contact"  element={<ContactPage />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>
   );
 }
 
-/* ══ Root App ══ */
-function App() {
+/* ── Inner app — needs router context ── */
+function AppInner() {
   const [user,      setUser]      = useState(readSession);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin  = (userData) => setUser(userData);
+  const handleLogin = () => {
+    const userData = readSession();
+    setUser(userData);
+    setShowModal(false);
+    navigate('/dashboard', { replace: true });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('cdn_user');
     setUser(null);
+    navigate('/', { replace: true });
   };
 
   return (
-    <BrowserRouter>
-      {/* Legacy modal kept for the Login button in the public header */}
+    <>
       {showModal && (
         <LoginModal
-          onLogin={() => { setUser(readSession()); setShowModal(false); }}
+          onLogin={handleLogin}
           onClose={() => setShowModal(false)}
         />
       )}
 
       <Routes>
-        {/* ── Full-page login ── */}
-        <Route
-          path="/login"
-          element={<LoginPage onLogin={handleLogin} />}
-        />
-
-        {/* ── Protected dashboard ── */}
         <Route
           path="/dashboard"
           element={
@@ -92,15 +92,19 @@ function App() {
             </RequireAuth>
           }
         />
-
-        {/* ── Public website (header + footer) ── */}
         <Route
           path="/*"
           element={<PublicLayout onLoginClick={() => setShowModal(true)} />}
         />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
+  );
+}

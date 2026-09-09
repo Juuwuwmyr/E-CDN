@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
@@ -33,7 +33,6 @@ const serviceDropdown = [
 ];
 
 const Header = ({ onLoginClick }) => {
-  const navigate = useNavigate();
   const [scrolled,         setScrolled]         = useState(false);
   const [menuOpen,         setMenuOpen]         = useState(false);
   const [servicesOpen,     setServicesOpen]     = useState(false);
@@ -200,7 +199,7 @@ const Header = ({ onLoginClick }) => {
         {/* Right — Login + Bagong Pilipinas */}
         <div className="hidden lg:flex items-center gap-4 justify-end">
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => onLoginClick()}
             className="flex items-center gap-1.5 px-4 py-2 font-bold text-[0.82rem] rounded-lg border-0 cursor-pointer transition-all duration-150"
             style={{ background: '#002280', color: '#fff' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#001560'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
@@ -291,7 +290,7 @@ const Header = ({ onLoginClick }) => {
             );
           })}
           <button
-            onClick={() => { setMenuOpen(false); navigate('/login'); }}
+            onClick={() => { setMenuOpen(false); onLoginClick(); }}
             className="mt-3 w-full py-2.5 font-bold text-sm rounded-lg border-0 cursor-pointer"
             style={{ background: '#002280', color: '#fff' }}
           >

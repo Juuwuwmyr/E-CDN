@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/dashboard.css';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    ANALYTICS HELPERS  (localStorage-based)
-   ───────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const ANALYTICS_KEY  = 'cdn_analytics';
 const PAGEVIEW_KEY   = 'cdn_pageviews';
@@ -49,9 +49,9 @@ const recordPortalVisit = () => {
   saveAnalytics(analytics);
 };
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    STATIC DATA
-   ───────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const SYSTEMS = [
   {
@@ -95,73 +95,6 @@ const SYSTEMS = [
       </svg>
     ),
   },
-  {
-    id: 'student',
-    label: 'Student Portal',
-    sub: 'Grades & Enrollment',
-    url: '#',
-    color: '#10813f', bg: '#edf7f1',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'library',
-    label: 'Library System',
-    sub: 'Digital Library & Catalog',
-    url: '#',
-    color: '#7c3aed', bg: '#f5f0ff',
-    badge: 'Soon',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-        <path d="M9 7h6M9 11h4"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'faculty',
-    label: 'Faculty Portal',
-    sub: 'Schedules & Attendance',
-    url: '#',
-    color: '#0891b2', bg: '#ecf8fb',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="3" y="4" width="18" height="18" rx="2"/>
-        <path d="M16 2v4M8 2v4M3 10h18M8 14h2M12 14h4M8 18h2M12 18h2"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'finance',
-    label: 'Finance Office',
-    sub: 'Payments & Clearance',
-    url: '#',
-    color: '#dc6803', bg: '#fff4e8',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <line x1="12" y1="1" x2="12" y2="23"/>
-        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'health',
-    label: 'Health Services',
-    sub: 'Medical Records & Clinic',
-    url: '#',
-    color: '#e11d48', bg: '#fff0f3',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-        <path d="M12 8v8M8 12h8"/>
-      </svg>
-    ),
-  },
 ];
 
 const CATEGORIES = [
@@ -185,7 +118,7 @@ const CATEGORIES = [
 
 const BANNERS = [
   { id: 0, tag: 'NEW SYSTEM', title: 'Admissions Portal',
-    sub: 'Apply online — faster, paperless enrollment for AY 2026–2027.',
+    sub: 'Apply online â€” faster, paperless enrollment for AY 2026â€“2027.',
     cta: 'Apply Now', url: 'https://ecnesis.duckdns.org/',
     bg: 'linear-gradient(125deg,#002280 0%,#0044cc 100%)', accent: '#FFD700' },
   { id: 1, tag: 'CSC SERVICES', title: 'Fines Management',
@@ -198,9 +131,9 @@ const BANNERS = [
     bg: 'linear-gradient(125deg,#C8102E 0%,#9b0921 100%)', accent: '#fde68a' },
 ];
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HELPERS
-   ───────────────────────────────────────── */
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const getDayDate = () =>
   new Date().toLocaleDateString('en-PH', { weekday: 'short', year: 'numeric', month: 'short', day: '2-digit' });
 
@@ -221,9 +154,9 @@ const timeAgo = (ts) => {
   return `${Math.floor(diff / 86400)}d ago`;
 };
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    DASHBOARD COMPONENT
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const Dashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [searchQuery,  setSearchQuery]  = useState('');
@@ -279,7 +212,7 @@ const Dashboard = ({ user, onLogout }) => {
   }, [chatMessages, chatOpen]);
 
   const BOT_REPLIES = {
-    fines: 'You can check and settle your student fines at the CSC Services portal — click the card on the Overview tab.',
+    fines: 'You can check and settle your student fines at the CSC Services portal â€” click the card on the Overview tab.',
     osas:  'OSAS handles violation tracking. Click the OSAS Services card to access your records.',
     admission: 'For admissions, go to Admission Services (ECNESIS Portal) on the Overview tab.',
     student: 'The Student Portal shows grades and enrollment info. It\'s coming soon.',
@@ -338,7 +271,7 @@ const Dashboard = ({ user, onLogout }) => {
   return (
     <div className="db-root">
 
-      {/* ══ TOPBAR ══ */}
+      {/* â•â• TOPBAR â•â• */}
       <header className="db-topbar">
         <div className="db-topbar-inner">
 
@@ -358,7 +291,7 @@ const Dashboard = ({ user, onLogout }) => {
               <path d="M12 2a8 8 0 010 16c-4 0-8-5.37-8-8a8 8 0 0116 0z"/>
             </svg>
             <span>Naujan, Oriental Mindoro</span>
-            <span className="db-topbar-sep">·</span>
+            <span className="db-topbar-sep">Â·</span>
             <span>{getDayDate()}</span>
           </div>
 
@@ -422,7 +355,7 @@ const Dashboard = ({ user, onLogout }) => {
                     </div>
                   </div>
                   <div className="db-dropdown-divider" />
-                  {[{ icon: '👤', label: 'My Profile' }, { icon: '⚙️', label: 'Settings' }, { icon: '❓', label: 'Help' }]
+                  {[{ icon: 'ðŸ‘¤', label: 'My Profile' }, { icon: 'âš™ï¸', label: 'Settings' }, { icon: 'â“', label: 'Help' }]
                     .map(item => (
                       <button key={item.label} className="db-dropdown-item">
                         <span>{item.icon}</span>{item.label}
@@ -444,10 +377,10 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       </header>
 
-      {/* ══ MAIN ══ */}
+      {/* â•â• MAIN â•â• */}
       <main className="db-main">
 
-        {/* ── HERO GREETING + STATS ── */}
+        {/* â”€â”€ HERO GREETING + STATS â”€â”€ */}
         <div className="db-hero">
           <div className="db-hero-noise" aria-hidden="true" />
           <div className="db-hero-stripe" aria-hidden="true" />
@@ -462,7 +395,7 @@ const Dashboard = ({ user, onLogout }) => {
                 <span className="db-hero-name">{user?.name ?? 'User'}</span>
               </h1>
               <p className="db-hero-sub">
-                Welcome to <strong>CDN E-Portal</strong> — your gateway to all Colegio De Naujan systems.
+                Welcome to <strong>CDN E-Portal</strong> â€” your gateway to all Colegio De Naujan systems.
               </p>
               <div className="db-hero-pills">
                 <span className="db-hero-pill">
@@ -471,7 +404,7 @@ const Dashboard = ({ user, onLogout }) => {
                 </span>
                 <span className="db-hero-pill db-hero-pill--gold">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  AY 2026–2027
+                  AY 2026â€“2027
                 </span>
               </div>
             </div>
@@ -479,7 +412,7 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        {/* ── STATS SUMMARY CARDS ── */}
+        {/* â”€â”€ STATS SUMMARY CARDS â”€â”€ */}
         <div className="db-stats-row">
           {[
             {
@@ -507,7 +440,7 @@ const Dashboard = ({ user, onLogout }) => {
             },
             {
               label: 'Most Visited',
-              value: topSystems[0]?.visits > 0 ? topSystems[0].label.split(' ')[0] : '—',
+              value: topSystems[0]?.visits > 0 ? topSystems[0].label.split(' ')[0] : 'â€”',
               sub: topSystems[0]?.visits > 0 ? `${topSystems[0].visits} clicks` : 'No activity yet',
               color: '#10813f', bg: '#edf7f1',
               icon: (
@@ -520,7 +453,7 @@ const Dashboard = ({ user, onLogout }) => {
             {
               label: 'Active Systems',
               value: SYSTEMS.filter(s => s.url !== '#').length,
-              sub: `${SYSTEMS.length} total · ${SYSTEMS.filter(s => s.url === '#').length} soon`,
+              sub: `${SYSTEMS.length} total Â· ${SYSTEMS.filter(s => s.url === '#').length} soon`,
               color: '#7c3aed', bg: '#f5f0ff',
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -543,7 +476,7 @@ const Dashboard = ({ user, onLogout }) => {
           ))}
         </div>
 
-        {/* ── TABS ── */}
+        {/* â”€â”€ TABS â”€â”€ */}
         <div className="db-tabs-bar">
           {['overview', 'activity'].map(tab => (
             <button
@@ -562,7 +495,7 @@ const Dashboard = ({ user, onLogout }) => {
 
         {activeTab === 'overview' && (
           <>
-            {/* ── SEARCH ── */}
+            {/* â”€â”€ SEARCH â”€â”€ */}
             <div className="db-search-wrap">
               <div className="db-search-box">
                 <svg className="db-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -586,7 +519,7 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
 
-            {/* ── CATEGORY ICONS ── */}
+            {/* â”€â”€ CATEGORY ICONS â”€â”€ */}
             <div className="db-panel">
               <div className="db-cat-scroll">
                 {CATEGORIES.map((cat) => (
@@ -601,7 +534,7 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
 
-            {/* ── BANNER + HIGHLIGHT SIDE BY SIDE ── */}
+            {/* â”€â”€ BANNER + HIGHLIGHT SIDE BY SIDE â”€â”€ */}
             <div className="db-banner-row">
               {/* Banner carousel */}
               <div className="db-banner-col">
@@ -694,7 +627,7 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
 
-            {/* ── SERVICES GRID ── */}
+            {/* â”€â”€ SERVICES GRID â”€â”€ */}
             <div className="db-panel db-services-panel">
               <div className="db-panel-header">
                 <div className="db-panel-header-left">
@@ -960,7 +893,7 @@ const Dashboard = ({ user, onLogout }) => {
 
       </main>
 
-      {/* ══ BOTTOM NAV ══ */}
+      {/* â•â• BOTTOM NAV â•â• */}
       <nav className="db-bottom-nav">
         {[
           { label: 'Home',     active: activeTab === 'overview', tab: 'overview',
@@ -988,7 +921,7 @@ const Dashboard = ({ user, onLogout }) => {
         ))}
       </nav>
 
-      {/* ══ CHATBOT MODAL ══ */}
+      {/* â•â• CHATBOT MODAL â•â• */}
       {chatOpen && (
         <div className="db-chat-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setChatOpen(false); }}>
           <div className="db-chat-panel" role="dialog" aria-label="CDN Portal Assistant">
