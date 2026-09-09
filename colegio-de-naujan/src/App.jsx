@@ -1,48 +1,55 @@
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import useScrollAnimation from './hooks/useScrollAnimation';
-import LoginModal  from './components/Login/LoginModal';
 import Header      from './components/Header/Header';
-import Hero        from './components/Hero/Hero';
-import Courses     from './components/Courses/Courses';
-import Services    from './components/Services/Services';
-import About       from './components/About/About';
-import MapSection  from './components/Map/MapSection';
 import Footer      from './components/Footer/Footer';
+import LoginModal  from './components/Login/LoginModal';
+import HomePage    from './pages/HomePage';
+import CoursesPage from './pages/CoursesPage';
+import ServicesPage from './pages/ServicesPage';
+import AboutPage   from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showLogin,       setShowLogin]       = useState(false);
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 
+function Layout({ onLoginClick }) {
   useScrollAnimation();
-
-  const handleLogin  = () => { setIsAuthenticated(true);  setShowLogin(false); };
-  const handleLogout = () => { setIsAuthenticated(false); };
 
   return (
     <div className="w-full min-h-screen flex flex-col">
+      <Header onLoginClick={onLoginClick} />
+      <ScrollToTop />
+      <main style={{ paddingTop: '72px', flex: 1 }}>
+        <Routes>
+          <Route path="/"         element={<HomePage />}    />
+          <Route path="/courses"  element={<CoursesPage />} />
+          <Route path="/services" element={<ServicesPage />}/>
+          <Route path="/about"    element={<AboutPage />}   />
+          <Route path="/contact"  element={<ContactPage />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
+  const [showLogin, setShowLogin] = useState(false);
+
+  return (
+    <BrowserRouter>
       {showLogin && (
         <LoginModal
-          onLogin={handleLogin}
+          onLogin={() => setShowLogin(false)}
           onClose={() => setShowLogin(false)}
         />
       )}
-
-      <Header
-        isAuthenticated={isAuthenticated}
-        onLoginClick={() => setShowLogin(true)}
-        onLogout={handleLogout}
-      />
-
-      <main style={{ paddingTop: '72px' }}>
-        <Hero onLoginClick={() => setShowLogin(true)} />
-        <Courses />
-        <Services />
-        <About />
-        <MapSection />
-      </main>
-
-      <Footer />
-    </div>
+      <Layout onLoginClick={() => setShowLogin(true)} />
+    </BrowserRouter>
   );
 }
 

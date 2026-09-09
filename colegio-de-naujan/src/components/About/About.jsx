@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const pillarsConfig = {
   blue: { tagBg: 'rgba(0,34,128,0.08)',   tagColor: '#002280', borderHover: '#002280' },
   red:  { tagBg: 'rgba(200,16,46,0.08)',  tagColor: '#C8102E', borderHover: '#C8102E' },
@@ -183,15 +185,15 @@ const About = () => {
             </p>
           </div>
 
-          <a
-            href="#courses"
+          <Link
+            to="/courses"
             className="relative z-10 shrink-0 font-extrabold text-[0.95rem] rounded-lg no-underline transition-all duration-200"
             style={{ padding: '1rem 2rem', background: '#FFD700', color: '#001560', boxShadow: '0 4px 16px rgba(255,215,0,0.3)' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#ffe040'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#FFD700'; e.currentTarget.style.transform = 'none'; }}
           >
             Explore Courses
-          </a>
+          </Link>
         </div>
 
       </div>
