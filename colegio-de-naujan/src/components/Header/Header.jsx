@@ -100,13 +100,44 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
           })}
         </nav>
 
-        {/* Right side — Bagong Pilipinas logo */}
+        {/* Right side — Bagong Pilipinas logo + Login button */}
         <div className="hidden lg:flex items-center gap-4 justify-end">
           <img
             src={bagongPilipinasLogo}
             alt="Bagong Pilipinas"
             style={{ width: 46, height: 46, objectFit: 'contain' }}
           />
+          {isAuthenticated ? (
+            <button
+              onClick={onLogout}
+              className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200"
+              style={{
+                background: '#C8102E',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#a00c24'}
+              onMouseLeave={e => e.currentTarget.style.background = '#C8102E'}
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={onLoginClick}
+              className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200"
+              style={{
+                background: '#002280',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#001560'}
+              onMouseLeave={e => e.currentTarget.style.background = '#002280'}
+            >
+              Login
+            </button>
+          )}
         </div>
 
         {/* Hamburger — mobile only */}
@@ -148,6 +179,35 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
               {l.label}
             </a>
           ))}
+          <div className="pt-2 mt-2 border-t border-gray-100">
+            {isAuthenticated ? (
+              <button
+                onClick={() => { onLogout(); setMenuOpen(false); }}
+                className="w-full px-5 py-2.5 rounded-lg font-semibold text-sm"
+                style={{
+                  background: '#C8102E',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={() => { onLoginClick(); setMenuOpen(false); }}
+                className="w-full px-5 py-2.5 rounded-lg font-semibold text-sm"
+                style={{
+                  background: '#002280',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Login
+              </button>
+            )}
+          </div>
         </div>
       )}
     </header>
