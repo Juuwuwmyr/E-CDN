@@ -1,13 +1,14 @@
+import { Link } from 'react-router-dom';
 import cdnLogo from '../../assets/images/logo.png';
 
 const Footer = () => {
   const year = new Date().getFullYear();
   const quickLinks  = [
-    { label: 'Home',     href: '#home'     },
-    { label: 'Courses',  href: '#courses'  },
-    { label: 'Services', href: '#services' },
-    { label: 'About',    href: '#about'    },
-    { label: 'Contact',  href: '#contact'  },
+    { label: 'Home',     to: '/'         },
+    { label: 'Courses',  to: '/courses'  },
+    { label: 'Services', to: '/services' },
+    { label: 'About',    to: '/about'    },
+    { label: 'Contact',  to: '/contact'  },
   ];
   const courseLinks = ['BSIS', 'BTVTED-WFT', 'BTVTED-CHS', 'BPA'];
   const contactInfo = [
@@ -63,11 +64,11 @@ const Footer = () => {
             <p style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'rgba(255,255,255,0.35)', marginBottom: '1.25rem' }}>Quick Links</p>
             <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
               {quickLinks.map((l) => (
-                <li key={l.href}>
-                  <a href={l.href} style={linkStyle}
+                <li key={l.to}>
+                  <Link to={l.to} style={linkStyle}
                     onMouseEnter={e => e.currentTarget.style.color = '#FFD700'}
                     onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-                  >{l.label}</a>
+                  >{l.label}</Link>
                 </li>
               ))}
             </ul>
@@ -79,10 +80,10 @@ const Footer = () => {
             <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
               {courseLinks.map((c) => (
                 <li key={c}>
-                  <a href="#courses" style={linkStyle}
+                  <Link to="/courses" style={linkStyle}
                     onMouseEnter={e => e.currentTarget.style.color = '#FFD700'}
                     onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-                  >{c}</a>
+                  >{c}</Link>
                 </li>
               ))}
             </ul>

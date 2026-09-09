@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
-const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
-  const [scrolled,   setScrolled]   = useState(false);
-  const [menuOpen,   setMenuOpen]   = useState(false);
-  const [activeLink, setActiveLink] = useState('#home');
+const Header = () => {
+  const [scrolled,  setScrolled]  = useState(false);
+  const [menuOpen,  setMenuOpen]  = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -13,29 +14,26 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const navLinks = [
-    { label: 'Home',     href: '#home'     },
-    { label: 'Courses',  href: '#courses'  },
-    { label: 'Services', href: '#services' },
-    { label: 'About',    href: '#about'    },
-    { label: 'Contact',  href: '#contact'  },
-  ];
+  // close mobile menu on route change
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-  const handleNav = (href) => { setActiveLink(href); setMenuOpen(false); };
+  const navLinks = [
+    { label: 'Home',     to: '/'         },
+    { label: 'Courses',  to: '/courses'  },
+    { label: 'Services', to: '/services' },
+    { label: 'About',    to: '/about'    },
+    { label: 'Contact',  to: '/contact'  },
+  ];
 
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? 'rgba(255, 255, 255, 0.55)'
-          : '#ffffff',
+        background: scrolled ? 'rgba(255,255,255,0.55)' : '#ffffff',
         backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(255,255,255,0.3)' : '1.5px solid #FFD700',
-        boxShadow: scrolled
-          ? '0 4px 30px rgba(0, 0, 0, 0.08)'
-          : '0 1px 4px rgba(0,0,0,0.06)',
+        boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
       <div
@@ -44,7 +42,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
       >
 
         {/* Logo — left */}
-        <a href="#home" onClick={() => handleNav('#home')} className="flex items-center gap-3 shrink-0 group" style={{ textDecoration: 'none' }}>
+        <Link to="/" className="flex items-center gap-3 shrink-0 group" style={{ textDecoration: 'none' }}>
           <img
             src={cdnLogo}
             alt="Colegio De Naujan"
@@ -59,17 +57,16 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
               Official Website
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop nav — centered */}
         <nav className="hidden lg:flex items-center gap-0.5">
           {navLinks.map((l) => {
-            const isActive = activeLink === l.href;
+            const isActive = location.pathname === l.to;
             return (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => handleNav(l.href)}
+              <Link
+                key={l.to}
+                to={l.to}
                 className="relative px-3.5 py-2 text-[0.88rem] font-semibold transition-all duration-150"
                 style={{
                   color: isActive ? '#002280' : '#374151',
@@ -95,13 +92,13 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
                     display: 'block',
                   }}
                 />
-              </a>
+              </Link>
             );
           })}
         </nav>
 
-        {/* Right side — Bagong Pilipinas logo */}
-        <div className="hidden lg:flex items-center gap-4 justify-end">
+        {/* Right — Bagong Pilipinas logo */}
+        <div className="hidden lg:flex items-center justify-end">
           <img
             src={bagongPilipinasLogo}
             alt="Bagong Pilipinas"
@@ -109,7 +106,7 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
           />
         </div>
 
-        {/* Hamburger — mobile only */}
+        {/* Hamburger — mobile */}
         <div className="flex lg:hidden justify-end">
           <button
             className="flex flex-col gap-[5px] p-1.5 bg-transparent border-0 cursor-pointer"
@@ -132,21 +129,23 @@ const Header = ({ isAuthenticated, onLoginClick, onLogout }) => {
         <div
           className="lg:hidden px-6 pb-4 flex flex-col gap-1"
           style={{
-            background: scrolled ? 'rgba(255,255,255,0.75)' : '#fff',
+            background: scrolled ? 'rgba(255,255,255,0.85)' : '#fff',
             backdropFilter: scrolled ? 'blur(16px)' : 'none',
             borderTop: '1px solid rgba(0,34,128,0.08)',
           }}
         >
           {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => handleNav(l.href)}
+            <Link
+              key={l.to}
+              to={l.to}
               className="py-3 text-[0.95rem] font-semibold border-b border-gray-100 last:border-0"
-              style={{ color: activeLink === l.href ? '#002280' : '#374151', textDecoration: 'none' }}
+              style={{
+                color: location.pathname === l.to ? '#002280' : '#374151',
+                textDecoration: 'none',
+              }}
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}

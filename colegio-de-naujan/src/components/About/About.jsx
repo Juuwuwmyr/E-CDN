@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const pillarsConfig = {
   blue: { tagBg: 'rgba(0,34,128,0.08)',   tagColor: '#002280', borderHover: '#002280' },
   red:  { tagBg: 'rgba(200,16,46,0.08)',  tagColor: '#C8102E', borderHover: '#C8102E' },
