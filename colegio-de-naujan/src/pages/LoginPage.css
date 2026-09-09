@@ -1,0 +1,551 @@
+/* ══════════════════════════════════════════
+   LoginPage — eGovPH-inspired CDN Portal
+   ══════════════════════════════════════════ */
+
+.lp-root {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  background: #f4f6fb;
+}
+
+/* ── Brand Panel (Left) ───────────────────── */
+.lp-brand {
+  position: relative;
+  width: 44%;
+  min-width: 340px;
+  background: linear-gradient(145deg, #001a6a 0%, #002280 55%, #0033cc 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.lp-brand-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.lp-brand-stripe {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 280px;
+  height: 560px;
+  background: rgba(255, 255, 255, 0.035);
+  transform: rotate(-22deg);
+  pointer-events: none;
+  border-radius: 6px;
+}
+
+.lp-brand-stripe--2 {
+  top: auto;
+  bottom: -60px;
+  left: -40px;
+  right: auto;
+  width: 200px;
+  height: 400px;
+  transform: rotate(-22deg);
+  opacity: 0.5;
+}
+
+.lp-brand-content {
+  position: relative;
+  z-index: 2;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  flex: 1;
+  justify-content: center;
+}
+
+/* Logo row inside brand panel */
+.lp-brand-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.lp-brand-logo {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+}
+
+.lp-brand-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.lp-brand-school {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+.lp-brand-official {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.lp-brand-divider {
+  width: 48px;
+  height: 3px;
+  background: #FFD700;
+  border-radius: 2px;
+}
+
+/* Status badge */
+.lp-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: rgba(255,255,255,0.5);
+  border: 1px dashed rgba(255,255,255,0.22);
+  padding: 0.32rem 0.8rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.lp-brand-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+  animation: lpPulse 2s ease-in-out infinite;
+}
+
+@keyframes lpPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.45; transform: scale(0.7); }
+}
+
+/* Hero title */
+.lp-brand-title {
+  font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  margin: 0;
+}
+
+.lp-brand-title-accent {
+  color: #FFD700;
+}
+
+.lp-brand-sub {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.65;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* System pills */
+.lp-system-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lp-system-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.lp-system-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lp-brand-quote {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.38);
+  font-style: italic;
+  line-height: 1.6;
+  border-left: 3px solid #FFD700;
+  padding-left: 0.9rem;
+  margin: 0.25rem 0 0;
+}
+
+/* Bagong Pilipinas footer watermark */
+.lp-brand-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 2.5rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.lp-bagong-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  opacity: 0.75;
+}
+
+.lp-bagong-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.lp-corner-accent {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: rgba(255,215,0,0.08);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+/* ── Form Side (Right) ───────────────────── */
+.lp-form-side {
+  flex: 1;
+  background: #f4f6fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Mobile-only logo */
+.lp-mobile-logo {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.lp-mobile-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.lp-mobile-school {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #002280;
+  margin: 0;
+}
+
+.lp-mobile-dept {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* ── Form Card ── */
+.lp-form-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 20px;
+  border: 1.5px solid #e8ebf2;
+  box-shadow: 0 8px 40px rgba(0, 34, 128, 0.07);
+  padding: 2.5rem 2.25rem 2rem;
+}
+
+/* eGov-style portal header row */
+.lp-portal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.lp-portal-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #002280 0%, #0033cc 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0,34,128,0.25);
+}
+
+.lp-portal-icon svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+}
+
+.lp-portal-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: #002280;
+  margin: 0 0 0.15rem;
+}
+
+.lp-portal-title {
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: #0f1724;
+  letter-spacing: -1px;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.lp-portal-hint {
+  font-size: 0.84rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+}
+
+/* ── Form Fields ── */
+.lp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.lp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.lp-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.lp-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lp-input-icon {
+  position: absolute;
+  left: 0.875rem;
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.lp-input {
+  width: 100%;
+  padding: 0.8rem 2.8rem 0.8rem 2.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: #0f1724;
+  background: #f8f9fc;
+  border: 2px solid #e8ebf2;
+  border-radius: 11px;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+.lp-input::placeholder { color: #c4c9d4; }
+
+.lp-input:focus {
+  background: #fff;
+  border-color: #002280;
+  box-shadow: 0 0 0 3.5px rgba(0,34,128,0.1);
+}
+
+.lp-pass-toggle {
+  position: absolute;
+  right: 0.875rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  color: #9ca3af;
+  transition: color 0.18s;
+}
+
+.lp-pass-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lp-pass-toggle:hover { color: #002280; }
+
+/* Error */
+.lp-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #C8102E;
+  background: rgba(200,16,46,0.06);
+  border: 1.5px solid rgba(200,16,46,0.18);
+  border-radius: 9px;
+  padding: 0.65rem 0.9rem;
+}
+
+.lp-error svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Submit button */
+.lp-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: #002280;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  margin-top: 0.35rem;
+  transition: background 0.2s, transform 0.18s, box-shadow 0.18s;
+  box-shadow: 0 4px 18px rgba(0,34,128,0.28);
+}
+
+.lp-submit svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.18s;
+}
+
+.lp-submit:hover:not(:disabled) {
+  background: #001a6a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(0,34,128,0.35);
+}
+
+.lp-submit:hover:not(:disabled) svg { transform: translateX(3px); }
+
+.lp-submit:disabled { cursor: not-allowed; opacity: 0.7; }
+
+/* Spinner */
+.lp-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lpSpin 0.7s linear infinite;
+}
+
+@keyframes lpSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Footer note */
+.lp-footer-note {
+  margin-top: 1.5rem;
+  font-size: 0.76rem;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.lp-copyright {
+  position: absolute;
+  bottom: 1.25rem;
+  font-size: 0.7rem;
+  color: #c4c9d4;
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (max-width: 800px) {
+  .lp-root { flex-direction: column; }
+
+  .lp-brand {
+    width: 100%;
+    min-width: unset;
+    min-height: 240px;
+  }
+
+  .lp-brand-content {
+    padding: 2.25rem 1.5rem 1.75rem;
+    gap: 1rem;
+    justify-content: flex-start;
+  }
+
+  .lp-brand-title { font-size: 2rem; }
+  .lp-brand-quote { display: none; }
+
+  .lp-brand-footer { padding: 1rem 1.5rem; }
+
+  .lp-form-side {
+    padding: 2rem 1.25rem 4.5rem;
+    justify-content: flex-start;
+    min-height: unset;
+  }
+
+  .lp-mobile-logo { display: flex; }
+
+  .lp-form-card {
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  .lp-copyright { position: static; margin-top: 1.5rem; }
+}
+
+@media (max-width: 400px) {
+  .lp-form-card { padding: 1.5rem 1.25rem; }
+  .lp-portal-title { font-size: 1.4rem; }
+}
