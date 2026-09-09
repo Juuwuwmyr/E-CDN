@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd colegio-de-naujan && npm install && npm run build",
+  "outputDirectory": "colegio-de-naujan/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
