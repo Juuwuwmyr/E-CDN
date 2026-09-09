@@ -232,10 +232,16 @@ const Dashboard = ({ user, onLogout }) => {
   const [notifOpen,    setNotifOpen]    = useState(false);
   const [analytics,    setAnalytics]    = useState({});
   const [recentVisits, setRecentVisits] = useState([]);
-  const [activeTab,    setActiveTab]    = useState('overview'); // 'overview' | 'activity'
+  const [activeTab,    setActiveTab]    = useState('overview');
+  const [chatOpen,     setChatOpen]     = useState(false);
+  const [chatInput,    setChatInput]    = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { from: 'bot', text: 'Hi! I\'m the CDN Portal Assistant. How can I help you today?' },
+  ]);
   const bannerTimer = useRef(null);
   const profileRef  = useRef(null);
   const notifRef    = useRef(null);
+  const chatEndRef  = useRef(null);
 
   /* Record portal visit on mount */
   useEffect(() => {
@@ -265,6 +271,36 @@ const Dashboard = ({ user, onLogout }) => {
     localStorage.removeItem('cdn_user');
     onLogout();
     navigate('/', { replace: true });
+  };
+
+  /* Chatbot auto-scroll */
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, chatOpen]);
+
+  const BOT_REPLIES = {
+    fines: 'You can check and settle your student fines at the CSC Services portal — click the card on the Overview tab.',
+    osas:  'OSAS handles violation tracking. Click the OSAS Services card to access your records.',
+    admission: 'For admissions, go to Admission Services (ECNESIS Portal) on the Overview tab.',
+    student: 'The Student Portal shows grades and enrollment info. It\'s coming soon.',
+    login:  'Use your CDN credentials (username + password) provided by your department coordinator.',
+    help:   'You can access all CDN systems from the Overview tab. Click any service card to open it.',
+  };
+
+  const sendChatMessage = () => {
+    const text = chatInput.trim();
+    if (!text) return;
+    setChatMessages(m => [...m, { from: 'user', text }]);
+    setChatInput('');
+    const lower = text.toLowerCase();
+    let reply = 'I\'m not sure about that. Try asking about fines, OSAS, admissions, or login help.';
+    if (lower.includes('fine') || lower.includes('csc'))      reply = BOT_REPLIES.fines;
+    else if (lower.includes('osas') || lower.includes('viol')) reply = BOT_REPLIES.osas;
+    else if (lower.includes('admiss') || lower.includes('enroll')) reply = BOT_REPLIES.admission;
+    else if (lower.includes('student') || lower.includes('grade')) reply = BOT_REPLIES.student;
+    else if (lower.includes('login') || lower.includes('pass') || lower.includes('cred')) reply = BOT_REPLIES.login;
+    else if (lower.includes('help') || lower.includes('how'))  reply = BOT_REPLIES.help;
+    setTimeout(() => setChatMessages(m => [...m, { from: 'bot', text: reply }]), 600);
   };
 
   const handleSysClick = (sys) => {
@@ -927,21 +963,22 @@ const Dashboard = ({ user, onLogout }) => {
       {/* ══ BOTTOM NAV ══ */}
       <nav className="db-bottom-nav">
         {[
-          { label: 'Home',       active: activeTab === 'overview', tab: 'overview',
+          { label: 'Home',     active: activeTab === 'overview', tab: 'overview',
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-          { label: 'Activity',   active: activeTab === 'activity', tab: 'activity',
+          { label: 'Activity', active: activeTab === 'activity', tab: 'activity',
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
-          { label: 'Digital ID', center: true,
-            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><path d="M14 10h4M14 14h2"/></svg> },
-          { label: 'History',    active: false,
+          { label: 'Chatbot',  center: true,
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h8M8 14h5"/></svg> },
+          { label: 'History',  active: false,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
-          { label: 'Account',    active: false,
+          { label: 'Account',  active: false,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
         ].map(item => (
           <button key={item.label}
             className={`db-bnav-item${item.center ? ' db-bnav-item--center' : ''}${item.active ? ' db-bnav-item--active' : ''}`}
             onClick={() => {
-              if (item.tab)           setActiveTab(item.tab);
+              if (item.tab)                 setActiveTab(item.tab);
+              if (item.label === 'Chatbot') setChatOpen(true);
               if (item.label === 'Account') handleLogout();
             }}
             aria-label={item.label}>
@@ -950,6 +987,79 @@ const Dashboard = ({ user, onLogout }) => {
           </button>
         ))}
       </nav>
+
+      {/* ══ CHATBOT MODAL ══ */}
+      {chatOpen && (
+        <div className="db-chat-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setChatOpen(false); }}>
+          <div className="db-chat-panel" role="dialog" aria-label="CDN Portal Assistant">
+            {/* Header */}
+            <div className="db-chat-header">
+              <div className="db-chat-header-left">
+                <div className="db-chat-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="db-chat-title">CDN Assistant</p>
+                  <p className="db-chat-status"><span className="db-chat-online" />Online</p>
+                </div>
+              </div>
+              <button className="db-chat-close" onClick={() => setChatOpen(false)} aria-label="Close chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Quick prompts */}
+            <div className="db-chat-prompts">
+              {['Check fines', 'OSAS records', 'Admission info', 'Login help'].map(p => (
+                <button key={p} className="db-chat-prompt"
+                  onClick={() => { setChatInput(p); }}>
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            {/* Messages */}
+            <div className="db-chat-messages">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`db-chat-msg db-chat-msg--${msg.from}`}>
+                  {msg.from === 'bot' && (
+                    <div className="db-chat-msg-avatar">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="db-chat-bubble">{msg.text}</div>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Input */}
+            <form className="db-chat-input-row"
+              onSubmit={(e) => { e.preventDefault(); sendChatMessage(); }}>
+              <input
+                type="text"
+                className="db-chat-input"
+                placeholder="Ask about fines, OSAS, admissions..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                autoFocus
+              />
+              <button type="submit" className="db-chat-send" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );
