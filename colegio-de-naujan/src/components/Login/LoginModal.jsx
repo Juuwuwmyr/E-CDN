@@ -63,7 +63,7 @@ const LoginModal = ({ onLogin, onClose }) => {
             <img src={cdnLogo} alt="CDN Logo" className="lm-logo" />
             <div>
               <p className="lm-school">Colegio De Naujan</p>
-              <p className="lm-dept">BSIS Project Portal</p>
+              <p className="lm-dept">Official Website</p>
             </div>
           </div>
 
@@ -71,7 +71,7 @@ const LoginModal = ({ onLogin, onClose }) => {
             <span className="lm-eyebrow">Restricted Access</span>
             <h2 className="lm-title">Sign In</h2>
             <p className="lm-hint">
-              Enter your CDN credentials to access the BSIS project showcase.
+              Enter your CDN credentials to access the official website portal.
             </p>
           </div>
         </div>
@@ -162,7 +162,7 @@ const LoginModal = ({ onLogin, onClose }) => {
               <span className="lm-spinner" />
             ) : (
               <>
-                Access BSIS Projects
+                Login
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
@@ -172,7 +172,7 @@ const LoginModal = ({ onLogin, onClose }) => {
         </form>
 
         <p className="lm-footer-note">
-          For account access, contact the BSIS department coordinator.
+          For account access, contact the CDN website administrator.
         </p>
       </div>
     </div>
