@@ -520,7 +520,7 @@ const Dashboard = ({ user, onLogout }) => {
             {
               label: 'Active Systems',
               value: SYSTEMS.filter(s => s.url !== '#').length,
-              sub: `${SYSTEMS.filter(s => s.url === '#').length} coming soon`,
+              sub: `${SYSTEMS.length} total · ${SYSTEMS.filter(s => s.url === '#').length} soon`,
               color: '#7c3aed', bg: '#f5f0ff',
               icon: (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
