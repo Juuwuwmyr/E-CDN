@@ -5,6 +5,8 @@ import Header       from './components/Header/Header';
 import Footer       from './components/Footer/Footer';
 import LoginModal   from './components/Login/LoginModal';
 import Dashboard    from './components/Dashboard/Dashboard';
+import HistoryPage  from './components/Dashboard/HistoryPage';
+import AccountPage  from './components/Dashboard/AccountPage';
 
 /* ── Page components ── */
 import { lazy, Suspense } from 'react';
@@ -89,6 +91,22 @@ function AppInner() {
           element={
             <RequireAuth user={user}>
               <Dashboard user={user} onLogout={handleLogout} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/dashboard/history"
+          element={
+            <RequireAuth user={user}>
+              <HistoryPage user={user} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/dashboard/account"
+          element={
+            <RequireAuth user={user}>
+              <AccountPage user={user} onLogout={handleLogout} />
             </RequireAuth>
           }
         />

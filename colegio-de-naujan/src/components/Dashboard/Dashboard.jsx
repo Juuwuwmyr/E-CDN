@@ -824,9 +824,9 @@ const Dashboard = ({ user, onLogout }) => {
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
           { label: 'Chatbot', center: true,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h8M8 14h5"/></svg> },
-          { label: 'History', tab: 'activity',
+          { label: 'History', route: '/dashboard/history',
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-          { label: 'Account',
+          { label: 'Account', route: '/dashboard/account',
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
         ].map(item => (
           <button key={item.label}
@@ -838,7 +838,7 @@ const Dashboard = ({ user, onLogout }) => {
             onClick={() => {
               if (item.tab)                 setActiveTab(item.tab);
               if (item.label === 'Chatbot') setChatOpen(true);
-              if (item.label === 'Account') setProfileOpen(true);
+              if (item.route)               navigate(item.route);
             }}
             aria-label={item.label}>
             {item.icon}
