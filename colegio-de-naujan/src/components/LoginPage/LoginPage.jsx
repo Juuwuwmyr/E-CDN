@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css';
-import cdnLogo from '../assets/images/logo.png';
-import bagongPilipinasLogo from '../assets/images/bagong-pilipinas-seeklogo.png';
+import '../../styles/login.css';
+import cdnLogo from '../../assets/images/logo.png';
+import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
 const VALID_USERS = [
   { username: 'admin', password: 'bsis2026', name: 'Administrator', role: 'Admin' },

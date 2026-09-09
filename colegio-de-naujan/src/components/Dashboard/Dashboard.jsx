@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Dashboard.css';
-import cdnLogo from '../assets/images/logo.png';
-import bagongPilipinasLogo from '../assets/images/bagong-pilipinas-seeklogo.png';
+import '../../styles/dashboard.css';
+import cdnLogo from '../../assets/images/logo.png';
+import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 
 /* ─────────────────────────────────────────
    ANALYTICS HELPERS  (localStorage-based)
