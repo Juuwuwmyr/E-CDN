@@ -23,8 +23,8 @@ const Footer = () => {
   return (
     <footer style={{ background: '#111827' }}>
 
-      <div className="cdn-container py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-12">
+      <div className="cdn-container py-10 lg:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-8 lg:gap-12">
 
           {/* Brand */}
           <div className="flex flex-col gap-4">
@@ -96,13 +96,12 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-        <div className="cdn-container py-6 flex items-center justify-between gap-4 flex-wrap">
+        <div className="cdn-container py-6 flex flex-col sm:flex-row items-center sm:justify-between gap-3 text-center sm:text-left">
           <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
             &copy; {year} Colegio De Naujan. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
             {['Privacy Policy', 'Terms of Use', 'Sitemap'].map((l) => (
               <a key={l} href="#"
                 style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }}

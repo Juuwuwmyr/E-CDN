@@ -30,7 +30,7 @@
 
 @layer components {
   .cdn-container {
-    @apply w-full max-w-[1160px] mx-auto px-6;
+    @apply w-full max-w-[1160px] mx-auto px-4 sm:px-6;
   }
 
   .tag-label {
@@ -75,5 +75,23 @@
     border-color: #002280;
     color: #002280;
     transform: translateY(-2px);
+  }
+
+  /* Responsive section padding */
+  .section-py {
+    @apply py-12 lg:py-20;
+  }
+}
+
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .section-heading {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+  .section-sub {
+    font-size: 0.9rem;
+  }
+  .btn-primary, .btn-ghost {
+    @apply px-6 py-2.5 text-sm;
   }
 }

@@ -13,7 +13,7 @@ const items = [
 ];
 
 const MapSection = () => (
-  <section id="contact" className="py-20" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
+  <section id="contact" className="py-12 lg:py-20" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
     <div className="cdn-container">
 
       <div className="mb-10 scroll-animate">
@@ -25,12 +25,12 @@ const MapSection = () => (
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-stretch scroll-animate">
 
         {/* Map */}
-        <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid #e5e7eb', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', minHeight: 420 }}>
+        <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid #e5e7eb', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
           <iframe
             title="Colegio De Naujan Location"
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3880.5!2d121.3167!3d13.3317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd1b1b1b1b1b1b%3A0x1b1b1b1b1b1b1b1b!2sSantiago%2C+Naujan%2C+Oriental+Mindoro!5e1!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
-            width="100%" height="100%"
-            style={{ border: 0, minHeight: 420, display: 'block' }}
+            width="100%"
+            style={{ border: 0, height: 'min(50vw, 420px)', minHeight: 240, display: 'block' }}
             allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
           />
         </div>

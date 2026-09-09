@@ -70,7 +70,7 @@ const Services = () => {
   ];
 
   return (
-    <section id="services" className="py-20" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
+    <section id="services" className="py-12 lg:py-20" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
       <div className="cdn-container">
 
         <div className="mb-10 scroll-animate">

@@ -74,7 +74,7 @@ const Courses = () => {
   ];
 
   return (
-    <section id="courses" className="py-20" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
+    <section id="courses" className="py-12 lg:py-20" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
       <div className="cdn-container">
 
         {/* Header */}

@@ -21,7 +21,7 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="relative py-20 overflow-hidden" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
+    <section id="about" className="relative py-12 lg:py-20 overflow-hidden" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
 
       {/* ── dot grid (same as Hero) ── */}
       <div
@@ -87,7 +87,7 @@ const About = () => {
       <div className="cdn-container relative z-10">
 
         {/* Two-column */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-14">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-10 lg:mb-14">
 
           {/* Left */}
           <div className="flex flex-col gap-5 scroll-animate from-left">
@@ -109,11 +109,11 @@ const About = () => {
 
             {/* Highlight bar */}
             <div
-              className="flex items-stretch mt-2"
-              style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid #e5e7eb', borderRadius: 14, padding: '1.25rem 1.5rem' }}
+              className="grid grid-cols-2 sm:grid-cols-4 mt-2"
+              style={{ background: 'rgba(255,255,255,0.8)', border: '1.5px solid #e5e7eb', borderRadius: 14, padding: '1.25rem 1.5rem', gap: '1rem' }}
             >
               {highlights.map((h, i) => (
-                <div key={i} className="flex-1 flex flex-col gap-0.5">
+                <div key={i} className="flex flex-col gap-0.5">
                   <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#002280', lineHeight: 1 }}>{h.val}</span>
                   <span style={{ fontSize: '0.68rem', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 2 }}>{h.lbl}</span>
                 </div>
@@ -159,8 +159,8 @@ const About = () => {
 
         {/* Mission Banner */}
         <div
-          className="relative flex items-center justify-between gap-12 overflow-hidden scroll-animate flex-wrap"
-          style={{ background: 'linear-gradient(125deg, #002280 0%, #003399 55%, #001560 100%)', borderRadius: 20, padding: '3.5rem' }}
+          className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 overflow-hidden scroll-animate"
+          style={{ background: 'linear-gradient(125deg, #002280 0%, #003399 55%, #001560 100%)', borderRadius: 20, padding: 'clamp(1.75rem, 5vw, 3.5rem)' }}
         >
           <div className="absolute pointer-events-none" style={{ right: -60, bottom: -60, width: 260, height: 260, background: 'radial-gradient(circle, rgba(255,215,0,0.14) 0%, transparent 70%)', borderRadius: '50%' }} />
           <div className="absolute pointer-events-none" style={{ left: -40, top: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(200,16,46,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
@@ -187,7 +187,7 @@ const About = () => {
 
           <Link
             to="/courses"
-            className="relative z-10 shrink-0 font-extrabold text-[0.95rem] rounded-lg no-underline transition-all duration-200"
+            className="relative z-10 w-full lg:w-auto text-center shrink-0 font-extrabold text-[0.95rem] rounded-lg no-underline transition-all duration-200"
             style={{ padding: '1rem 2rem', background: '#FFD700', color: '#001560', boxShadow: '0 4px 16px rgba(255,215,0,0.3)' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#ffe040'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#FFD700'; e.currentTarget.style.transform = 'none'; }}

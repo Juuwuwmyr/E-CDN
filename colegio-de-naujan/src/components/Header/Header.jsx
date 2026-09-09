@@ -63,10 +63,7 @@ const Header = ({ onLoginClick }) => {
         boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.08)' : '0 1px 4px rgba(0,0,0,0.06)',
       }}
     >
-      <div
-        className="cdn-container py-3"
-        style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center' }}
-      >
+      <div className="cdn-container py-3 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr]">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 shrink-0 group" style={{ textDecoration: 'none' }}>
           <img

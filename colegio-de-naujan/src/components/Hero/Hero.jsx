@@ -13,7 +13,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative overflow-hidden flex items-center"
+      className="relative overflow-hidden flex items-start lg:items-center"
       style={{ background: '#f4f6fb', minHeight: 'calc(100vh - 72px)' }}
     >
       {/* dot grid */}
@@ -34,7 +34,7 @@ const Hero = () => {
 
       <ParticleCanvas />
 
-      <div className="cdn-container relative z-10 w-full grid lg:grid-cols-2 items-center gap-14 py-20">
+      <div className="cdn-container relative z-10 w-full grid lg:grid-cols-2 items-center gap-14 py-8 lg:py-20">
 
         {/* LEFT */}
         <div className="flex flex-col gap-6 scroll-animate from-left is-visible" style={{ transitionDelay: '0.1s' }}>
@@ -49,7 +49,7 @@ const Hero = () => {
           </div>
 
           {/* Heading */}
-          <h1 className="font-black m-0" style={{ fontSize: 'clamp(2.2rem,4.5vw,3.4rem)', lineHeight: 1.08, letterSpacing: '-1.5px', color: '#0F1422' }}>
+          <h1 className="font-black m-0" style={{ fontSize: 'clamp(2rem,5vw,3.4rem)', lineHeight: 1.08, letterSpacing: '-1.5px', color: '#0F1422' }}>
             Excellence in<br />
             <span style={{ color: '#002280' }}>Education</span>{' '}
             <span style={{ color: '#C8102E' }}>&amp; Service.</span>
@@ -69,14 +69,14 @@ const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="flex pt-6 mt-1" style={{ borderTop: '1px dashed #d1d5db' }}>
+          <div className="flex flex-wrap sm:flex-nowrap pt-6 mt-1 gap-y-4" style={{ borderTop: '1px dashed #d1d5db' }}>
             {stats.map((s, i) => (
               <div
                 key={i}
                 className="flex flex-col gap-0.5"
                 style={{
-                  paddingRight: i < stats.length - 1 ? '1.75rem' : 0,
-                  marginRight:  i < stats.length - 1 ? '1.75rem' : 0,
+                  paddingRight: '1.75rem',
+                  marginRight:  '1.75rem',
                   borderRight:  i < stats.length - 1 ? '1px solid #e5e7eb' : 'none',
                 }}
               >
@@ -87,8 +87,8 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="relative flex justify-end scroll-animate from-right is-visible" style={{ transitionDelay: '0.25s' }}>
+        {/* RIGHT — hidden on mobile */}
+        <div className="relative justify-end scroll-animate from-right is-visible hidden lg:flex" style={{ transitionDelay: '0.25s' }}>
           <div
             className="absolute rounded-full pointer-events-none"
             style={{ top: '-2rem', right: '-2rem', width: 256, height: 256, background: 'radial-gradient(circle, rgba(200,16,46,0.1) 0%, transparent 70%)' }}
