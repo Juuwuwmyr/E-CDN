@@ -31,7 +31,21 @@ function RequireAuth({ user, children }) {
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Update page title per route
+    const titles = {
+      '/':                  'Home — Colegio De Naujan',
+      '/courses':           'Courses — Colegio De Naujan',
+      '/services':          'Services — Colegio De Naujan',
+      '/about':             'About — Colegio De Naujan',
+      '/contact':           'Contact — Colegio De Naujan',
+      '/dashboard':         'Dashboard — CDN E-Portal',
+      '/dashboard/history': 'History — CDN E-Portal',
+      '/dashboard/account': 'Account — CDN E-Portal',
+    };
+    document.title = titles[pathname] ?? 'Colegio De Naujan';
+  }, [pathname]);
   return null;
 }
 
@@ -40,7 +54,6 @@ function PublicLayout({ onLoginClick }) {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <Header onLoginClick={onLoginClick} />
-      <ScrollToTop />
       <main style={{ paddingTop: '72px', flex: 1 }}>
         <Suspense fallback={null}>
           <Routes>
@@ -84,7 +97,7 @@ function AppInner() {
           onClose={() => setShowModal(false)}
         />
       )}
-
+      <ScrollToTop />
       <Routes>
         <Route
           path="/dashboard"
