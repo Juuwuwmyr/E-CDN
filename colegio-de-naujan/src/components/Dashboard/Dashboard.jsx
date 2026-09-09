@@ -203,7 +203,7 @@ const Dashboard = ({ user, onLogout }) => {
   const handleLogout = () => {
     localStorage.removeItem('cdn_user');
     onLogout();
-    navigate('/', { replace: true });
+    // navigation is handled by App's onLogout → setUser(null) → RequireAuth redirect
   };
 
   /* Chatbot auto-scroll */
@@ -902,7 +902,7 @@ const Dashboard = ({ user, onLogout }) => {
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
           { label: 'Chatbot',  center: true,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 10h8M8 14h5"/></svg> },
-          { label: 'History',  active: false,
+          { label: 'History',  active: activeTab === 'activity', tab: 'activity',
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
           { label: 'Account',  active: false,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
@@ -912,7 +912,7 @@ const Dashboard = ({ user, onLogout }) => {
             onClick={() => {
               if (item.tab)                 setActiveTab(item.tab);
               if (item.label === 'Chatbot') setChatOpen(true);
-              if (item.label === 'Account') handleLogout();
+              if (item.label === 'Account') { setProfileOpen(true); }
             }}
             aria-label={item.label}>
             {item.icon}

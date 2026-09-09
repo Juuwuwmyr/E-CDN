@@ -71,7 +71,7 @@ function AppInner() {
   const handleLogout = () => {
     localStorage.removeItem('cdn_user');
     setUser(null);
-    navigate('/', { replace: true });
+    // RequireAuth will redirect to / automatically when user is null
   };
 
   return (
