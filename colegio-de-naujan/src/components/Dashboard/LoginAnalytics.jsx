@@ -11,6 +11,7 @@ const DEPARTMENTS = [
 ];
 
 const LOGIN_ANALYTICS_KEY = 'cdn_login_analytics';
+const ACTIVE_SESSIONS_KEY = 'cdn_active_sessions';
 
 // Get login analytics data
 const getLoginAnalytics = () => {
@@ -29,53 +30,88 @@ const saveLoginAnalytics = (data) => {
   localStorage.setItem(LOGIN_ANALYTICS_KEY, JSON.stringify(data));
 };
 
-// Record a login
-export const recordLogin = (department, username) => {
+// Get active sessions (currently logged-in users)
+const getActiveSessions = () => {
+  try {
+    return JSON.parse(localStorage.getItem(ACTIVE_SESSIONS_KEY)) || {};
+  } catch {
+    return {};
+  }
+};
+
+// Save active sessions
+const saveActiveSessions = (sessions) => {
+  localStorage.setItem(ACTIVE_SESSIONS_KEY, JSON.stringify(sessions));
+};
+
+// Record a login - add to active sessions
+export const recordLogin = (department, username, userIdentifier) => {
   const analytics = getLoginAnalytics();
   
-  // Record login event
+  // Record login event in history
   analytics.logins = analytics.logins || [];
-  analytics.logins.unshift({
+  const loginRecord = {
     department,
     username,
     timestamp: Date.now(),
     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-  });
+  };
+  analytics.logins.unshift(loginRecord);
   
   // Keep only last 200 logins
   analytics.logins = analytics.logins.slice(0, 200);
   
-  // Track by department
-  analytics.byDepartment = analytics.byDepartment || {};
-  analytics.byDepartment[department] = (analytics.byDepartment[department] || 0) + 1;
-  
   saveLoginAnalytics(analytics);
+  
+  // Add to active sessions
+  const activeSessions = getActiveSessions();
+  const sessionId = userIdentifier || username;
+  activeSessions[sessionId] = {
+    department,
+    username,
+    loginTime: Date.now(),
+  };
+  saveActiveSessions(activeSessions);
+};
+
+// Record logout - remove from active sessions
+export const recordLogout = (userIdentifier, username) => {
+  const activeSessions = getActiveSessions();
+  const sessionId = userIdentifier || username;
+  delete activeSessions[sessionId];
+  saveActiveSessions(activeSessions);
 };
 
 const LoginAnalytics = () => {
   const [analytics, setAnalytics] = useState(() => getLoginAnalytics());
-  const [timeframe, setTimeframe] = useState('today'); // 'today', 'week', 'month'
+  const [activeSessions, setActiveSessions] = useState(() => getActiveSessions());
   const [chartType, setChartType] = useState('bar'); // 'bar', 'line', 'pie'
 
   // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       setAnalytics(getLoginAnalytics());
+      setActiveSessions(getActiveSessions());
     }, 2000); // Update every 2 seconds
 
     return () => clearInterval(interval);
   }, []);
 
-  // Prepare chart data
-  const chartData = DEPARTMENTS.map((dept) => ({
-    name: dept.name,
-    logins: analytics.byDepartment?.[dept.name] || 0,
-    color: dept.color,
-  }));
+  // Prepare chart data - count only currently logged-in users by department
+  const chartData = DEPARTMENTS.map((dept) => {
+    const activeInDept = Object.values(activeSessions).filter(
+      (session) => session.department === dept.name
+    ).length;
+    return {
+      name: dept.name,
+      logins: activeInDept,
+      color: dept.color,
+    };
+  });
 
-  const totalLogins = chartData.reduce((sum, d) => sum + d.logins, 0);
+  const totalActiveUsers = Object.keys(activeSessions).length;
 
-  // Time-series data (last 24 logins grouped by 5-minute intervals)
+  // Time-series data (active users over time - based on login history)
   const timeSeriesData = (() => {
     const now = Date.now();
     const intervals = Array.from({ length: 12 }, (_, i) => {
@@ -83,13 +119,17 @@ const LoginAnalytics = () => {
       const start = time - 2.5 * 60 * 1000;
       const end = time + 2.5 * 60 * 1000;
       
-      const loginsInInterval = (analytics.logins || []).filter(
+      // Count unique users who logged in during this interval
+      const usersInInterval = (analytics.logins || []).filter(
         (l) => l.timestamp >= start && l.timestamp <= end
       );
+      
+      // Get unique count (one per user)
+      const uniqueUsers = new Set(usersInInterval.map(l => l.username)).size;
 
       return {
         time: new Date(time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        count: loginsInInterval.length,
+        count: uniqueUsers,
       };
     });
     return intervals;
@@ -97,13 +137,19 @@ const LoginAnalytics = () => {
 
   // Recent logins
   const recentLogins = (analytics.logins || []).slice(0, 10);
+  
+  // Active users list
+  const activeUsersList = Object.entries(activeSessions).map(([id, session]) => ({
+    id,
+    ...session,
+  }));
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
         <div className="analytics-tooltip">
           <p className="analytics-tooltip-label">{payload[0].payload.name}</p>
-          <p className="analytics-tooltip-value">{payload[0].value} logins</p>
+          <p className="analytics-tooltip-value">{payload[0].value} users</p>
         </div>
       );
     }
@@ -115,7 +161,7 @@ const LoginAnalytics = () => {
       <div className="analytics-header">
         <div>
           <h2 className="analytics-title">Live Login Analytics</h2>
-          <p className="analytics-subtitle">Real-time user login tracking by department</p>
+          <p className="analytics-subtitle">Real-time active users currently logged in</p>
         </div>
         <div className="analytics-controls">
           <button
@@ -161,16 +207,18 @@ const LoginAnalytics = () => {
             </svg>
           </div>
           <div className="analytics-stat-content">
-            <p className="analytics-stat-label">Total Logins</p>
-            <p className="analytics-stat-value">{totalLogins}</p>
+            <p className="analytics-stat-label">Active Users</p>
+            <p className="analytics-stat-value">{totalActiveUsers}</p>
           </div>
         </div>
 
         <div className="analytics-stat-card">
           <div className="analytics-stat-icon" style={{ background: '#fdf0f2' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2">
-              <path d="M4 4v5a1 1 0 001 1h14a1 1 0 001-1V4" />
-              <rect x="3" y="9" width="18" height="11" rx="1" />
+              <path d="M4 4v5a1 1 0 001 1h4a1 1 0 001-1V4"/>
+              <path d="M14 4v5a1 1 0 001 1h4a1 1 0 001-1V4"/>
+              <path d="M4 14v5a1 1 0 001 1h4a1 1 0 001-1v-5"/>
+              <path d="M14 14v5a1 1 0 001 1h4a1 1 0 001-1v-5"/>
             </svg>
           </div>
           <div className="analytics-stat-content">
@@ -182,13 +230,15 @@ const LoginAnalytics = () => {
         <div className="analytics-stat-card">
           <div className="analytics-stat-icon" style={{ background: '#fdf8ec' }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#C8960C" strokeWidth="2">
-              <path d="M12 2a10 10 0 100 20 10 10 0 000-20z" />
+              <circle cx="12" cy="12" r="10" />
               <polyline points="12 6v6l4 2" />
             </svg>
           </div>
           <div className="analytics-stat-content">
-            <p className="analytics-stat-label">Time Frame</p>
-            <p className="analytics-stat-value">Live</p>
+            <p className="analytics-stat-label">Status</p>
+            <p className="analytics-stat-value" style={{ color: totalActiveUsers > 0 ? '#10813f' : '#999' }}>
+              {totalActiveUsers > 0 ? 'Online' : 'Idle'}
+            </p>
           </div>
         </div>
       </div>
@@ -237,7 +287,7 @@ const LoginAnalytics = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} logins`, 'Count']} />
+                <Tooltip formatter={(value) => [`${value} users`, 'Active']} />
               </PieChart>
             )}
           </ResponsiveContainer>
@@ -246,7 +296,7 @@ const LoginAnalytics = () => {
         {/* Time Series Chart */}
         <div className="analytics-chart-container">
           <div className="analytics-chart-header">
-            <h3 className="analytics-chart-title">Login Timeline</h3>
+            <h3 className="analytics-chart-title">Active Users Timeline</h3>
             <span className="analytics-chart-meta">Last 60 minutes</span>
           </div>
           <ResponsiveContainer width="100%" height={250}>
@@ -309,6 +359,52 @@ const LoginAnalytics = () => {
               <path d="M12 6v6m0 4v.01" />
             </svg>
             <p>No logins recorded yet</p>
+          </div>
+        )}
+      </div>
+
+      {/* Currently Active Users */}
+      <div className="analytics-active-users">
+        <div className="analytics-chart-header">
+          <h3 className="analytics-chart-title">Currently Active Users</h3>
+          <span className="analytics-chart-meta">{activeUsersList.length} online</span>
+        </div>
+
+        {activeUsersList.length > 0 ? (
+          <div className="analytics-table">
+            <div className="analytics-table-header">
+              <div className="analytics-table-cell">Department</div>
+              <div className="analytics-table-cell">Username</div>
+              <div className="analytics-table-cell">Login Time</div>
+            </div>
+            {activeUsersList.map((user) => {
+              const dept = DEPARTMENTS.find(d => d.name === user.department);
+              const loginDuration = Math.round((Date.now() - user.loginTime) / 60000); // in minutes
+              return (
+                <div key={user.id} className="analytics-table-row">
+                  <div className="analytics-table-cell">
+                    <span 
+                      className="analytics-dept-badge" 
+                      style={{ background: dept?.color || '#ccc', color: '#fff' }}
+                    >
+                      {user.department}
+                    </span>
+                  </div>
+                  <div className="analytics-table-cell">{user.username}</div>
+                  <div className="analytics-table-cell analytics-table-time">
+                    {loginDuration}m ago
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="analytics-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12h8M12 8v8" />
+            </svg>
+            <p>No active users at the moment</p>
           </div>
         )}
       </div>

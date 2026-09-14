@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../../styles/dashboard.css';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
+import { recordLogout } from './LoginAnalytics';
 
 /* Analytics helpers */
 const ANALYTICS_KEY = 'cdn_analytics';
@@ -215,6 +216,8 @@ const Dashboard = ({ user, onLogout }) => {
   }, [chatMessages, chatOpen]);
 
   const handleLogout = () => {
+    // Record logout in analytics
+    recordLogout(user.studentNumber || user.username, user.username);
     localStorage.removeItem('cdn_user');
     onLogout();
   };

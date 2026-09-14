@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import '../../styles/dashboard.css';
 import '../../styles/login-analytics.css';
 import cdnLogo from '../../assets/images/logo.png';
-import LoginAnalytics from './LoginAnalytics';
+import LoginAnalytics, { recordLogout } from './LoginAnalytics';
 
 const ANALYTICS_KEY = 'cdn_analytics';
 const PAGEVIEW_KEY  = 'cdn_pageviews';
@@ -28,6 +28,8 @@ const AccountPage = ({ user, onLogout }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
+    // Record logout in analytics
+    recordLogout(user.studentNumber || user.username, user.username);
     localStorage.removeItem('cdn_user');
     onLogout();
     navigate('/');
