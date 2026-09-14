@@ -222,6 +222,55 @@ export async function recordLogoutSession(sessionId) {
 }
 
 /* ──────────────────────────────────────────────────────────
+   markSessionLogoutBeacon
+   Called on browser/tab close (beforeunload).
+   Uses navigator.sendBeacon so it fires even as the page
+   is closing — async fetch would be cancelled by the browser.
+   Falls back to a regular fetch if sendBeacon isn't available.
+────────────────────────────────────────────────────────── */
+export function markSessionLogoutBeacon(sessionId) {
+  if (!sessionId) return;
+  const url  = import.meta.env.VITE_SUPABASE_URL + '/rest/v1/portal_sessions?id=eq.' + sessionId;
+  const body = JSON.stringify({ logout_at: new Date().toISOString() });
+  const headers = {
+    'Content-Type':  'application/json',
+    'apikey':        import.meta.env.VITE_SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + import.meta.env.VITE_SUPABASE_ANON_KEY,
+    'Prefer':        'return=minimal',
+  };
+
+  // sendBeacon is the only reliable way to send data on page unload
+  if (navigator.sendBeacon) {
+    const blob = new Blob([body], { type: 'application/json' });
+    // sendBeacon doesn't support custom headers directly — use fetch keepalive instead
+  }
+  // fetch with keepalive: browser keeps request alive even after page closes
+  try {
+    fetch(url, {
+      method:    'PATCH',
+      headers,
+      body,
+      keepalive: true,   // ← key: browser keeps this request alive on tab close
+    }).catch(() => {});  // silence errors on close
+  } catch (_) {}
+}
+
+/* ──────────────────────────────────────────────────────────
+   renewSession
+   Called when the app loads and finds an existing cdn_session
+   in localStorage (browser was closed without logout).
+   Clears the logout_at so the admin sees them as Online again.
+────────────────────────────────────────────────────────── */
+export async function renewSession(sessionId) {
+  if (!sessionId) return;
+  const { error } = await supabase
+    .from('portal_sessions')
+    .update({ logout_at: null })
+    .eq('id', sessionId);
+  if (error) console.error('renewSession error:', error);
+}
+
+/* ──────────────────────────────────────────────────────────
    recordSystemVisit  — logs a system click to Supabase
 ────────────────────────────────────────────────────────── */
 export async function recordSystemVisit(systemId, systemLabel, userId = null) {

@@ -855,20 +855,6 @@ const Dashboard = ({ user, onLogout }) => {
               ))}
             </div>
 
-            {/* Stats snapshot */}
-            <div className="db-account-section-title">Your Activity</div>
-            <div className="db-account-stats-row">
-              {[
-                { label: 'Portal Visits',  value: analytics.__portal || 0,  color: '#002280' },
-                { label: 'System Clicks',  value: totalClicks,               color: '#C8960C' },
-                { label: 'Recent Opens',   value: recentVisits.length,       color: '#7c3aed' },
-              ].map(s => (
-                <div key={s.label} className="db-account-stat">
-                  <p className="db-account-stat-val" style={{ color: s.color }}>{s.value}</p>
-                  <p className="db-account-stat-label">{s.label}</p>
-                </div>
-              ))}
-            </div>
 
             {/* Settings list */}
             <div className="db-account-section-title">Settings</div>

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/dashboard.css';
-import '../../styles/login-analytics.css';
 import cdnLogo from '../../assets/images/logo.png';
-import LoginAnalytics, { recordLogout } from './LoginAnalytics';
+
 
 const ANALYTICS_KEY = 'cdn_analytics';
 const PAGEVIEW_KEY  = 'cdn_pageviews';
@@ -27,12 +26,12 @@ const AccountPage = ({ user, onLogout }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleLogout = () => {
-    // Record logout in analytics
-    recordLogout(user.studentNumber || user.username, user.username);
     localStorage.removeItem('cdn_user');
+    localStorage.removeItem('cdn_session');
     onLogout();
     navigate('/');
   };
+
 
   const initial = user?.name?.charAt(0).toUpperCase() ?? 'U';
 
@@ -108,38 +107,7 @@ const AccountPage = ({ user, onLogout }) => {
           ))}
         </div>
 
-        {/* Admin: Login Analytics */}
-        {user?.role?.toLowerCase().includes('admin') && (
-          <div>
-            <LoginAnalytics />
-          </div>
-        )}
 
-        {/* Quick links */}
-        <div className="db-panel">
-          <p className="db-account-section-label">Quick Access</p>
-          {SYSTEMS.map(sys => (
-            <a key={sys.id} href={sys.url} target="_blank" rel="noopener noreferrer"
-              className="db-account-row db-account-link-row" style={{ textDecoration: 'none' }}>
-              <div className="db-account-row-icon" style={{ color: sys.color }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-                </svg>
-              </div>
-              <div className="db-account-row-body">
-                <span className="db-account-row-label">{sys.label}</span>
-                <span className="db-account-row-value" style={{ color: sys.color }}>
-                  {analytics[sys.id] || 0} visits
-                </span>
-              </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" style={{ width: 16, height: 16, flexShrink: 0 }}>
-                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-            </a>
-          ))}
-        </div>
 
         {/* Danger zone */}
         <div className="db-panel">

@@ -9,6 +9,8 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import HistoryPage      from './components/Dashboard/HistoryPage';
 import AccountPage      from './components/Dashboard/AccountPage';
 import ChatbotWidget    from './components/Chatbot/ChatbotWidget';
+import { markSessionLogoutBeacon, renewSession } from './lib/auth';
+
 /* ── Helpers ── */
 const isStudent = (user) =>
   user?.userType === 'student' || user?.role?.toLowerCase() === 'student';
@@ -81,6 +83,19 @@ function AppInner() {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const sessionId = localStorage.getItem('cdn_session');
+    if (!sessionId) return;
+
+    // Browser was reopened with an existing session — mark it active again
+    renewSession(sessionId);
+
+    // When the tab/browser closes WITHOUT logout → auto-mark as logged out
+    const handleUnload = () => markSessionLogoutBeacon(sessionId);
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
+
   const handleLogin = () => {
     const userData = readSession();
     setUser(userData);
@@ -93,6 +108,7 @@ function AppInner() {
     setUser(null);
     // RequireAuth will redirect to / automatically when user is null
   };
+
 
   return (
     <>
