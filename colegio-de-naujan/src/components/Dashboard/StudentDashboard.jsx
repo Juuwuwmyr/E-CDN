@@ -110,16 +110,17 @@ export default function StudentDashboard({ user, onLogout }) {
     catch { setRecentVisits([]); }
   }, []);
 
-  const handleOpen = async (svc) => {
-    console.log('[StudentDashboard] handleOpen called:', svc.id, svc.label, 'user:', user?.username ?? user?.studentNumber);
-    // Write to localStorage (local history tab)
+  const handleOpen = (svc) => {
+    console.log('[StudentDashboard] handleOpen:', svc.id, '| user:', user?.username ?? user?.studentNumber);
+    // Open window IMMEDIATELY (must be sync with user click — browsers block window.open after await)
+    window.open(svc.url, '_blank', 'noopener,noreferrer');
+    // Write to localStorage (local history)
     recordVisit(svc.id, svc.label);
     setAnalytics(getAnalytics());
     const views = (() => { try { return JSON.parse(localStorage.getItem(PAGEVIEW_KEY)) || []; } catch { return []; } })();
     setRecentVisits(views);
-    // Write to Supabase FIRST (await so INSERT completes before tab opens)
-    await recordSystemVisit(svc.id, svc.label, user?.username ?? user?.studentNumber ?? null);
-    window.open(svc.url, '_blank', 'noopener,noreferrer');
+    // Record to Supabase — fire-and-forget (does NOT block navigation)
+    recordSystemVisit(svc.id, svc.label, user?.username ?? user?.studentNumber ?? null);
   };
 
 
