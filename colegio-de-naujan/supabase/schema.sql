@@ -135,3 +135,21 @@ VALUES
   ('admin', 'bsis2026',  'Administrator', 'admin'),
   ('bsis',  'cdn2026',   'BSIS Student',  'staff')
 ON CONFLICT (username) DO NOTHING;
+
+-- ── 9. STUDENT ACCOUNTS (custom passwords set during registration) ──
+CREATE TABLE IF NOT EXISTS public.student_accounts (
+  id             BIGSERIAL PRIMARY KEY,
+  student_number TEXT        NOT NULL UNIQUE REFERENCES public.students(student_number),
+  password       TEXT        NOT NULL,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_student_accounts_sn ON public.student_accounts(student_number);
+
+ALTER TABLE public.student_accounts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_anon_read_student_accounts"
+  ON public.student_accounts FOR SELECT USING (true);
+
+CREATE POLICY "allow_anon_insert_student_accounts"
+  ON public.student_accounts FOR INSERT WITH CHECK (true);

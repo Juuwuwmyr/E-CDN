@@ -40,7 +40,7 @@ export async function validateLogin(username, password) {
     }
   }
 
-  // ── 2. Check students — student_number + LASTNAME ──────
+  // ── 2. Check students — student_number + custom password OR LASTNAME ──
   const { data: studentData, error: studentError } = await supabase
     .from('students')
     .select('*')
@@ -48,8 +48,18 @@ export async function validateLogin(username, password) {
     .single();
 
   if (studentData && !studentError) {
-    // Password = student's LAST NAME (uppercase, trimmed)
-    if (studentData.last_name.toUpperCase() === p.toUpperCase()) {
+    // Check custom registered password first
+    const { data: acct } = await supabase
+      .from('student_accounts')
+      .select('password')
+      .eq('student_number', u)
+      .single();
+
+    const passwordMatch = acct
+      ? acct.password === p
+      : studentData.last_name.toUpperCase() === p.toUpperCase();
+
+    if (passwordMatch) {
       if (studentData.enrollment_status === 'dropped' || studentData.enrollment_status === 'loa') {
         return {
           ok: false,
@@ -60,21 +70,20 @@ export async function validateLogin(username, password) {
       return {
         ok: true,
         user: {
-          username:      studentData.student_number,
-          name:          `${studentData.first_name} ${studentData.last_name}`,
-          role:          'Student',
-          userType:      'student',
-          course:        studentData.course,
-          yearLevel:     studentData.year_level,
-          section:       studentData.section,
-          studentNumber: studentData.student_number,
+          username:         studentData.student_number,
+          name:             `${studentData.first_name} ${studentData.last_name}`,
+          role:             'Student',
+          userType:         'student',
+          course:           studentData.course,
+          yearLevel:        studentData.year_level,
+          section:          studentData.section,
+          studentNumber:    studentData.student_number,
           enrollmentStatus: studentData.enrollment_status,
         },
         error: null,
       };
     }
-    // Student number found but wrong password
-    return { ok: false, user: null, error: 'Invalid credentials. Use your last name as password.' };
+    return { ok: false, user: null, error: 'Incorrect password. Try your last name or registered password.' };
   }
 
   return { ok: false, user: null, error: 'Invalid username or password.' };
@@ -155,4 +164,68 @@ export async function validateStudentNumber(studentNumber) {
 
   if (error || !data) return null;
   return data;
+}
+
+/* ──────────────────────────────────────────────────────────
+   registerStudent
+   Validates student number exists in students table,
+   then sets a custom password for them in student_accounts.
+   Returns: { ok, user, error }
+────────────────────────────────────────────────────────── */
+export async function registerStudent(studentNumber, password) {
+  const sn = studentNumber.trim();
+  const pw = password.trim();
+
+  if (!sn || !pw) return { ok: false, error: 'All fields are required.' };
+  if (pw.length < 6) return { ok: false, error: 'Password must be at least 6 characters.' };
+
+  // 1. Check student exists in enrollment list
+  const { data: student, error: lookupErr } = await supabase
+    .from('students')
+    .select('*')
+    .eq('student_number', sn)
+    .single();
+
+  if (lookupErr || !student) {
+    return { ok: false, error: 'Student number not found in the enrollment list. Contact the registrar.' };
+  }
+
+  if (student.enrollment_status === 'dropped' || student.enrollment_status === 'loa') {
+    return { ok: false, error: `Your enrollment status is "${student.enrollment_status}". Contact the registrar.` };
+  }
+
+  // 2. Check if already registered
+  const { data: existing } = await supabase
+    .from('student_accounts')
+    .select('student_number')
+    .eq('student_number', sn)
+    .single();
+
+  if (existing) {
+    return { ok: false, error: 'This student number is already registered. Please sign in.' };
+  }
+
+  // 3. Create account
+  const { error: insertErr } = await supabase
+    .from('student_accounts')
+    .insert({ student_number: sn, password: pw });
+
+  if (insertErr) {
+    return { ok: false, error: 'Registration failed. Please try again.' };
+  }
+
+  return {
+    ok: true,
+    user: {
+      username:      student.student_number,
+      name:          `${student.first_name} ${student.last_name}`,
+      role:          'Student',
+      userType:      'student',
+      course:        student.course,
+      yearLevel:     student.year_level,
+      studentNumber: student.student_number,
+      enrollmentStatus: student.enrollment_status,
+    },
+    error: null,
+  };
 }

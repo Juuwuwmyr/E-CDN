@@ -281,3 +281,77 @@
 
   .lm-title { font-size: 1.5rem; }
 }
+
+/* ── TABS ── */
+.lm-tabs {
+  display: flex;
+  background: #f0f2f8;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+  gap: 4px;
+}
+
+.lm-tab {
+  flex: 1;
+  padding: 0.55rem 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.lm-tab--active {
+  background: #fff;
+  color: #002280;
+  box-shadow: 0 2px 8px rgba(0, 34, 128, 0.12);
+}
+
+/* ── SWITCH LINK ── */
+.lm-switch-text {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.lm-switch-btn {
+  background: none;
+  border: none;
+  color: #002280;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: underline;
+}
+
+.lm-switch-btn:hover { color: #001560; }
+
+/* ── SUCCESS STATE ── */
+.lm-success {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #edf7f1;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #065f46;
+  margin: 0.5rem 0 1rem;
+}
+
+.lm-success svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #10813f;
+}

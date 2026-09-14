@@ -582,67 +582,8 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
 
         {/* Tabs */}
-        <div className="db-tabs-bar">
-          {['overview', 'activity'].map(tab => (
-            <button key={tab}
-              className={'db-tab' + (activeTab === tab ? ' db-tab--active' : '')}
-              onClick={() => setActiveTab(tab)}>
-              {tab === 'overview' ? (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                  </svg>
-                  Overview
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                  Site Activity
-                </>
-              )}
-            </button>
-          ))}
-        </div>
-
         {activeTab === 'overview' && (
           <>
-            {/* Search */}
-            <div className="db-search-wrap">
-              <div className="db-search-box">
-                <svg className="db-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" className="db-search-input"
-                  placeholder="Search services like Fines, Admission, OSAS..."
-                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                {searchQuery && (
-                  <button className="db-search-clear" onClick={() => setSearchQuery('')} aria-label="Clear">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Category icons */}
-            <div className="db-panel">
-              <div className="db-cat-scroll">
-                {CATEGORIES.map((cat) => (
-                  <button key={cat.key} className="db-cat-item">
-                    <div className="db-cat-icon-wrap" style={{ background: cat.bg, color: cat.color }}>
-                      {cat.icon}
-                      {cat.badge && <span className="db-cat-badge">{cat.badge}</span>}
-                    </div>
-                    <span className="db-cat-label">{cat.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Banner + highlights */}
             <div className="db-banner-row">
               <div className="db-banner-col">
