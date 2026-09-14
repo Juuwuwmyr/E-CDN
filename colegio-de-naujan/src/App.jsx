@@ -4,9 +4,13 @@ import useScrollAnimation from './hooks/useScrollAnimation';
 import Header       from './components/Header/Header';
 import Footer       from './components/Footer/Footer';
 import LoginModal   from './components/Login/LoginModal';
-import Dashboard    from './components/Dashboard/Dashboard';
-import HistoryPage  from './components/Dashboard/HistoryPage';
-import AccountPage  from './components/Dashboard/AccountPage';
+import Dashboard        from './components/Dashboard/Dashboard';
+import StudentDashboard from './components/Dashboard/StudentDashboard';
+import HistoryPage      from './components/Dashboard/HistoryPage';
+import AccountPage      from './components/Dashboard/AccountPage';
+/* ── Helpers ── */
+const isStudent = (user) =>
+  user?.userType === 'student' || user?.role?.toLowerCase() === 'student';
 
 /* ── Page components ── */
 import { lazy, Suspense } from 'react';
@@ -103,7 +107,10 @@ function AppInner() {
           path="/dashboard"
           element={
             <RequireAuth user={user}>
-              <Dashboard user={user} onLogout={handleLogout} />
+              {isStudent(user)
+                ? <StudentDashboard user={user} onLogout={handleLogout} />
+                : <Dashboard        user={user} onLogout={handleLogout} />
+              }
             </RequireAuth>
           }
         />
@@ -111,7 +118,10 @@ function AppInner() {
           path="/dashboard/history"
           element={
             <RequireAuth user={user}>
-              <HistoryPage user={user} />
+              {isStudent(user)
+                ? <StudentDashboard user={user} onLogout={handleLogout} />
+                : <HistoryPage user={user} />
+              }
             </RequireAuth>
           }
         />
@@ -119,7 +129,10 @@ function AppInner() {
           path="/dashboard/account"
           element={
             <RequireAuth user={user}>
-              <AccountPage user={user} onLogout={handleLogout} />
+              {isStudent(user)
+                ? <StudentDashboard user={user} onLogout={handleLogout} />
+                : <AccountPage user={user} onLogout={handleLogout} />
+              }
             </RequireAuth>
           }
         />

@@ -445,7 +445,7 @@ VALUES
   ('2023-0159','FREYRA','JOHN PAUL',NULL,'BTVTED-WFT',4,'enrolled','2026-2027','1st','M'),
   ('2023-0213','MAURO','JEROME','B','BTVTED-WFT',4,'enrolled','2026-2027','1st','M'),
   ('2023-0279','MORALES','JUNDELL','M','BTVTED-WFT',4,'enrolled','2026-2027','1st','M'),
-  ('2023-0171','PAMPILO','ADRIAN','R','BTVTED-WFT',4,'enrolled','2026-2027','1st','M');
+  ('2023-0171','PAMPILO','ADRIAN','R','BTVTED-WFT',4,'enrolled','2026-2027','1st','M')
 
 ON CONFLICT (student_number) DO UPDATE SET
   last_name         = EXCLUDED.last_name,
