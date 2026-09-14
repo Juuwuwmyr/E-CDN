@@ -538,7 +538,6 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F1422' }}>Activity</h2>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#6b7280' }}>Live database — updates every 5 seconds</p>
                 </div>
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
                   {/* Live indicator */}
@@ -734,7 +733,7 @@ const Dashboard = ({ user, onLogout }) => {
                     </div>
                     <div>
                       <h3 className="db-panel-title">Portal Metrics</h3>
-                      <p className="db-panel-sub">Live database totals — CDN E-Portal</p>
+                      <p className="db-panel-sub">Overall CDN E-Portal engagement</p>
                     </div>
                   </div>
                 </div>
