@@ -1,3 +1,7 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { recordSystemVisit, subscribeToSystemVisits } from '../../lib/auth';
+
 const hoverBorder = { blue: '#002280', red: '#C8102E', gold: '#C8960C' };
 
 const icons = {
@@ -26,9 +30,39 @@ const icons = {
   ),
 };
 
+/* Fetch total visit counts grouped by system_id */
+async function fetchVisitCounts() {
+  const { data, error } = await supabase
+    .from('system_visits')
+    .select('system_id');
+
+  if (error || !data) return {};
+
+  return data.reduce((acc, row) => {
+    acc[row.system_id] = (acc[row.system_id] || 0) + 1;
+    return acc;
+  }, {});
+}
+
 const Services = () => {
+  const [visitCounts, setVisitCounts] = useState({});
+
+  /* Load counts on mount and subscribe to real-time updates */
+  useEffect(() => {
+    // Initial fetch
+    fetchVisitCounts().then(setVisitCounts);
+
+    // Subscribe to new system_visits INSERTs via Supabase Realtime
+    const channel = subscribeToSystemVisits(() => {
+      fetchVisitCounts().then(setVisitCounts);
+    });
+
+    return () => channel.unsubscribe();
+  }, []);
+
   const services = [
     {
+      id: 'csc',
       color: 'blue',
       icon: icons.csc,
       title: 'CSC Services',
@@ -42,11 +76,12 @@ const Services = () => {
       ],
     },
     {
+      id: 'osas',
       color: 'red',
       icon: icons.osas,
       title: 'OSAS Services',
       url: 'https://osas-sys.duckdns.org/',
-      desc: 'The OSAS Violation Tracking System records and monitors student violations. Once a violation is committed, it is logged and listed under the student\'s record by OSAS.',
+      desc: "The OSAS Violation Tracking System records and monitors student violations. Once a violation is committed, it is logged and listed under the student's record by OSAS.",
       features: [
         'Violation logging & case recording',
         'Student violation history tracking',
@@ -55,6 +90,7 @@ const Services = () => {
       ],
     },
     {
+      id: 'admission',
       color: 'gold',
       icon: icons.admission,
       title: 'Admission Services',
@@ -68,6 +104,12 @@ const Services = () => {
       ],
     },
   ];
+
+  const handleVisit = (service) => {
+    // Record the visit in Supabase (no user id needed from public page)
+    recordSystemVisit(service.id, service.title, null);
+    window.open(service.url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section id="services" className="py-12 lg:py-20" style={{ background: '#f4f6fb', borderTop: '1px solid #e5e7eb' }}>
@@ -83,78 +125,104 @@ const Services = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col gap-4 p-7 transition-all duration-200 cursor-default scroll-animate stagger-${i + 1}`}
-              style={{
-                background: '#fff',
-                border: '1.5px solid #e5e7eb',
-                borderRadius: 14,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.boxShadow = `0 10px 30px ${hoverBorder[s.color]}20`;
-                e.currentTarget.style.transform = 'translateY(-3px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'none';
-              }}
-            >
-              {/* Icon + Title */}
-              <div className="flex items-center gap-3">
-                <div style={{ width: 22, height: 22, color: '#C8960C', flexShrink: 0 }}>
-                  {s.icon}
+          {services.map((s, i) => {
+            const count = visitCounts[s.id] || 0;
+            return (
+              <div
+                key={i}
+                className={`flex flex-col gap-4 p-7 transition-all duration-200 cursor-default scroll-animate stagger-${i + 1}`}
+                style={{
+                  background: '#fff',
+                  border: '1.5px solid #e5e7eb',
+                  borderRadius: 14,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = `0 10px 30px ${hoverBorder[s.color]}20`;
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'none';
+                }}
+              >
+                {/* Icon + Title + Live visitor badge */}
+                <div className="flex items-center gap-3">
+                  <div style={{ width: 22, height: 22, color: '#C8960C', flexShrink: 0 }}>
+                    {s.icon}
+                  </div>
+                  <h3 className="m-0 font-extrabold leading-snug" style={{ fontSize: '1.05rem', color: '#0F1422', flex: 1 }}>
+                    {s.title}
+                  </h3>
+                  {/* Live visitor count badge */}
+                  <span
+                    title="Total visits"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: hoverBorder[s.color],
+                      background: s.color === 'blue' ? '#eef1fb'
+                                : s.color === 'red'  ? '#fdf0f2'
+                                : '#fdf8ec',
+                      borderRadius: 20,
+                      padding: '2px 8px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: hoverBorder[s.color],
+                      display: 'inline-block',
+                    }} />
+                    {count} {count === 1 ? 'visit' : 'visits'}
+                  </span>
                 </div>
-                <h3 className="m-0 font-extrabold leading-snug" style={{ fontSize: '1.05rem', color: '#0F1422' }}>
-                  {s.title}
-                </h3>
+
+                {/* Description */}
+                <p className="m-0" style={{ fontSize: '0.875rem', color: '#4E5873', lineHeight: 1.7 }}>
+                  {s.desc}
+                </p>
+
+                {/* Feature list */}
+                <ul className="m-0 p-0" style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {s.features.map((f, fi) => (
+                    <li key={fi} className="flex items-start gap-2" style={{ fontSize: '0.8125rem', color: '#4E5873' }}>
+                      <span style={{ color: hoverBorder[s.color], fontWeight: 700, marginTop: 2, flexShrink: 0 }}>✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Visit button — bottom right */}
+                <div className="flex justify-end mt-auto pt-2">
+                  <button
+                    onClick={() => handleVisit(s)}
+                    className="inline-flex items-center gap-1.5 font-bold transition-all duration-150"
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#002280',
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: '1.5px solid rgba(0,34,128,0.25)',
+                      paddingBottom: 2,
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderBottomColor = '#002280'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderBottomColor = 'rgba(0,34,128,0.25)'; }}
+                  >
+                    Visit
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-
-
-
-              {/* Description */}
-              <p className="m-0" style={{ fontSize: '0.875rem', color: '#4E5873', lineHeight: 1.7 }}>
-                {s.desc}
-              </p>
-
-              {/* Feature list */}
-              <ul className="m-0 p-0" style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {s.features.map((f, fi) => (
-                  <li key={fi} className="flex items-start gap-2" style={{ fontSize: '0.8125rem', color: '#4E5873' }}>
-                    <span style={{ color: hoverBorder[s.color], fontWeight: 700, marginTop: 2, flexShrink: 0 }}>✓</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              {/* Visit button — bottom right */}
-              <div className="flex justify-end mt-auto pt-2">
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-bold transition-all duration-150"
-                  style={{
-                    fontSize: '0.8rem',
-                    color: '#002280',
-                    textDecoration: 'none',
-                    borderBottom: '1.5px solid rgba(0,34,128,0.25)',
-                    paddingBottom: 2,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderBottomColor = '#002280'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderBottomColor = 'rgba(0,34,128,0.25)'; }}
-                >
-                  Visit
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                    <polyline points="15 3 21 3 21 9"/>
-                    <line x1="10" y1="14" x2="21" y2="3"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>

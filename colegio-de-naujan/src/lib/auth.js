@@ -91,8 +91,13 @@ export async function validateLogin(username, password) {
 
 /* ──────────────────────────────────────────────────────────
    recordLoginSession  — logs a login event
+   Tries with 'course' column first; if that column doesn't
+   exist yet, retries without it so login always works.
 ────────────────────────────────────────────────────────── */
 export async function recordLoginSession(user) {
+  const courseValue = user.course || user.role || null;
+
+  // First attempt: include course column
   const { data, error } = await supabase
     .from('portal_sessions')
     .insert({
@@ -100,13 +105,108 @@ export async function recordLoginSession(user) {
       user_id:    user.username,
       full_name:  user.name,
       role:       user.role,
+      course:     courseValue,
       login_at:   new Date().toISOString(),
     })
     .select('id')
     .single();
 
-  if (error) console.error('Session record error:', error);
-  return data?.id ?? null;
+  if (!error) return data?.id ?? null;
+
+  // If error mentions 'course' column not existing, retry without it
+  console.warn('recordLoginSession first attempt error:', error.message);
+  if (error.message?.includes('course') || error.code === '42703') {
+    const { data: data2, error: error2 } = await supabase
+      .from('portal_sessions')
+      .insert({
+        user_type:  user.userType,
+        user_id:    user.username,
+        full_name:  user.name,
+        role:       user.role,
+        login_at:   new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+    if (error2) console.error('recordLoginSession retry error:', error2);
+    return data2?.id ?? null;
+  }
+
+  console.error('Session record error:', error);
+  return null;
+}
+
+/* ──────────────────────────────────────────────────────────
+   getActiveSessions  — fetch all active sessions (logout_at IS NULL)
+   Falls back to querying without 'course' column if missing.
+────────────────────────────────────────────────────────── */
+export async function getActiveSessions() {
+  // Try with course column
+  const { data, error } = await supabase
+    .from('portal_sessions')
+    .select('id, user_id, full_name, role, course, login_at, user_type')
+    .is('logout_at', null)
+    .order('login_at', { ascending: false });
+
+  if (!error) return data || [];
+
+  console.warn('getActiveSessions (with course) error:', error.message);
+
+  // Fallback: query without course column
+  const { data: data2, error: error2 } = await supabase
+    .from('portal_sessions')
+    .select('id, user_id, full_name, role, login_at, user_type')
+    .is('logout_at', null)
+    .order('login_at', { ascending: false });
+
+  if (error2) {
+    console.error('getActiveSessions fallback error:', error2);
+    return [];
+  }
+  // Map role → course so resolveDept can still group by dept
+  return (data2 || []).map(row => ({ ...row, course: row.course ?? row.role }));
+}
+
+/* ──────────────────────────────────────────────────────────
+   subscribeToActiveSessions
+   Subscribes to INSERT and UPDATE on portal_sessions via
+   Supabase Realtime and calls onChange() whenever anything
+   changes so the admin dashboard refreshes instantly.
+   Returns the channel so the caller can unsubscribe.
+────────────────────────────────────────────────────────── */
+export function subscribeToActiveSessions(onChange) {
+  const channel = supabase
+    .channel('portal_sessions_realtime')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'portal_sessions' },
+      () => onChange()
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'portal_sessions' },
+      () => onChange()
+    )
+    .subscribe();
+
+  return channel;
+}
+
+/* ──────────────────────────────────────────────────────────
+   subscribeToSystemVisits
+   Subscribes to INSERT on system_visits so the Services page
+   can show live visitor counts without a page refresh.
+────────────────────────────────────────────────────────── */
+export function subscribeToSystemVisits(onChange) {
+  const channel = supabase
+    .channel('system_visits_realtime')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'system_visits' },
+      () => onChange()
+    )
+    .subscribe();
+
+  return channel;
 }
 
 /* ──────────────────────────────────────────────────────────

@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import cdnLogo   from '../../assets/images/logo.png';
 import bagongLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
+import '../../styles/dashboard.css';
+import { recordLogoutSession } from '../../lib/auth';
+
 
 const PAGEVIEW_KEY  = 'cdn_pageviews';
 const ANALYTICS_KEY = 'cdn_analytics';
@@ -75,6 +78,31 @@ export default function StudentDashboard({ user, onLogout }) {
   const [analytics,    setAnalytics]    = useState(getAnalytics);
   const [recentVisits, setRecentVisits] = useState([]);
   const [showConfirm,  setShowConfirm]  = useState(false);
+  const [chatOpen,     setChatOpen]     = useState(false);
+  const [chatInput,    setChatInput]    = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { from: 'bot', text: 'Hi! I\'m the CDN Portal Assistant. How can I help you today?' },
+  ]);
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, chatOpen]);
+
+  const sendChat = () => {
+    const text = chatInput.trim();
+    if (!text) return;
+    setChatMessages(m => [...m, { from: 'user', text }]);
+    setChatInput('');
+    const lower = text.toLowerCase();
+    let reply = 'I\'m not sure about that. Try asking about fines, OSAS, or admissions.';
+    if (lower.includes('fine') || lower.includes('csc'))           reply = 'You can check your fines at the Student Fines portal. Tap the Student Fines card on the Home tab.';
+    else if (lower.includes('osas') || lower.includes('viol'))     reply = 'OSAS handles conduct records. Tap the OSAS Records card on the Home tab.';
+    else if (lower.includes('admiss') || lower.includes('enroll')) reply = 'For admissions, tap the Admissions card on the Home tab to access ECNESIS.';
+    else if (lower.includes('login') || lower.includes('pass'))    reply = 'Use your student number as username and your last name (or registered password) to sign in.';
+    else if (lower.includes('help') || lower.includes('how'))      reply = 'You can access all CDN services from the Home tab. Tap any service card to open it.';
+    setTimeout(() => setChatMessages(m => [...m, { from: 'bot', text: reply }]), 600);
+  };
 
   useEffect(() => {
     try { setRecentVisits(JSON.parse(localStorage.getItem(PAGEVIEW_KEY)) || []); }
@@ -89,11 +117,14 @@ export default function StudentDashboard({ user, onLogout }) {
     window.open(svc.url, '_blank', 'noopener,noreferrer');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const sessionId = localStorage.getItem('cdn_session');
+    await recordLogoutSession(sessionId);
     localStorage.removeItem('cdn_user');
     localStorage.removeItem('cdn_session');
     onLogout();
   };
+
 
   const handleNav = (key) => {
     if (key === 'portal') { setTab('home'); return; }
@@ -443,6 +474,74 @@ export default function StudentDashboard({ user, onLogout }) {
           })}
         </div>
       </nav>
+
+      {/* ══════════ CHATBOT FAB — PC only ══════════ */}
+      {!chatOpen && (
+        <button className="db-chat-fab" onClick={() => setChatOpen(true)} aria-label="Open CDN Assistant">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            <path d="M8 10h8M8 14h5"/>
+          </svg>
+          <span className="db-chat-fab-label">Ask CDN</span>
+        </button>
+      )}
+
+      {/* ══════════ CHATBOT MODAL ══════════ */}
+      {chatOpen && (
+        <div className="db-chat-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setChatOpen(false); }}>
+          <div className="db-chat-panel" role="dialog" aria-label="CDN Portal Assistant">
+            <div className="db-chat-header">
+              <div className="db-chat-header-left">
+                <div className="db-chat-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="db-chat-title">CDN Assistant</p>
+                  <p className="db-chat-status"><span className="db-chat-online" />Online</p>
+                </div>
+              </div>
+              <button className="db-chat-close" onClick={() => setChatOpen(false)} aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="db-chat-prompts">
+              {['Check fines', 'OSAS records', 'Admission info', 'Login help'].map(p => (
+                <button key={p} className="db-chat-prompt" onClick={() => setChatInput(p)}>{p}</button>
+              ))}
+            </div>
+            <div className="db-chat-messages">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={'db-chat-msg db-chat-msg--' + msg.from}>
+                  {msg.from === 'bot' && (
+                    <div className="db-chat-msg-avatar">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="db-chat-bubble">{msg.text}</div>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+            <form className="db-chat-input-row" onSubmit={(e) => { e.preventDefault(); sendChat(); }}>
+              <input type="text" className="db-chat-input"
+                placeholder="Ask about fines, OSAS, admissions..."
+                value={chatInput} onChange={(e) => setChatInput(e.target.value)} autoFocus />
+              <button type="submit" className="db-chat-send" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ══════════ SIGN OUT MODAL ══════════ */}
       {showConfirm && (

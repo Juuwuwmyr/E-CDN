@@ -8,6 +8,7 @@ import Dashboard        from './components/Dashboard/Dashboard';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import HistoryPage      from './components/Dashboard/HistoryPage';
 import AccountPage      from './components/Dashboard/AccountPage';
+import ChatbotWidget    from './components/Chatbot/ChatbotWidget';
 /* ── Helpers ── */
 const isStudent = (user) =>
   user?.userType === 'student' || user?.role?.toLowerCase() === 'student';
@@ -95,6 +96,7 @@ function AppInner() {
 
   return (
     <>
+      <ChatbotWidget />
       {showModal && (
         <LoginModal
           onLogin={handleLogin}

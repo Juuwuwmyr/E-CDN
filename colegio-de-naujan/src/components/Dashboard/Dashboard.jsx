@@ -1,13 +1,17 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   LineChart, Line, PieChart, Pie, Legend, AreaChart, Area,
 } from 'recharts';
 import '../../styles/dashboard.css';
+import '../../styles/login-analytics.css';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 import { recordLogout } from './LoginAnalytics';
+import LoginAnalytics from './LoginAnalytics';
+import { recordLogoutSession } from '../../lib/auth';
+
 
 /* Analytics helpers */
 const ANALYTICS_KEY = 'cdn_analytics';
@@ -223,12 +227,17 @@ const Dashboard = ({ user, onLogout }) => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, chatOpen]);
 
-  const handleLogout = () => {
-    // Record logout in analytics
+  const handleLogout = async () => {
+    // Record logout in Supabase so admin sees the user disappear instantly
+    const sessionId = localStorage.getItem('cdn_session');
+    await recordLogoutSession(sessionId);
+    // Keep local recordLogout for any remaining local analytics
     recordLogout(user.studentNumber || user.username, user.username);
     localStorage.removeItem('cdn_user');
+    localStorage.removeItem('cdn_session');
     onLogout();
   };
+
 
   const handleSysClick = (sys) => {
     if (sys.url === '#') return;
@@ -453,133 +462,8 @@ const Dashboard = ({ user, onLogout }) => {
           ))}
         </div>
 
-        {/* ── ANALYTICS CHARTS ── */}
-        <div className="db-panel">
-          <div className="db-panel-header">
-            <div className="db-panel-header-left">
-              <div className="db-panel-icon db-panel-icon--blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
-              </div>
-              <div>
-                <h3 className="db-panel-title">Analytics Overview</h3>
-                <p className="db-panel-sub">Tracking charts for portal activity</p>
-              </div>
-            </div>
-            <span className="db-badge-pill">Live</span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', padding: '1.25rem' }}>
-
-            {/* 1. System Clicks Bar Chart */}
-            <div style={{ background: '#f7f8fc', borderRadius: 14, padding: '1rem', border: '1.5px solid #e4e8f2' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', margin: '0 0 .75rem' }}>System Clicks</p>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart
-                  data={SYSTEMS.map(s => ({ name: s.label.split(' ')[0], value: analytics[s.id] || 0, color: s.color }))}
-                  margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
-                  barCategoryGap="35%"
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f2" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e4e8f2', borderRadius: 10, fontSize: 12 }} formatter={(v) => [v, 'Clicks']} cursor={{ fill: 'rgba(0,34,128,0.04)' }} />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                    {SYSTEMS.map((s, i) => <Cell key={i} fill={s.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* 2. Daily Visits Line Chart (last 7 days) */}
-            <div style={{ background: '#f7f8fc', borderRadius: 14, padding: '1rem', border: '1.5px solid #e4e8f2' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', margin: '0 0 .75rem' }}>Daily Visits (Last 7 Days)</p>
-              <ResponsiveContainer width="100%" height={180}>
-                <AreaChart
-                  data={(() => {
-                    const days = [];
-                    for (let i = 6; i >= 0; i--) {
-                      const d = new Date();
-                      d.setDate(d.getDate() - i);
-                      const key = d.toISOString().slice(0, 10);
-                      days.push({
-                        name: d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
-                        visits: visitorsObj[key] || 0,
-                      });
-                    }
-                    return days;
-                  })()}
-                  margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="visitGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#002280" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#002280" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f2" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e4e8f2', borderRadius: 10, fontSize: 12 }} formatter={(v) => [v, 'Visits']} cursor={{ stroke: '#002280', strokeWidth: 1.5 }} />
-                  <Area type="monotone" dataKey="visits" stroke="#002280" strokeWidth={2.5} fill="url(#visitGrad)" dot={{ fill: '#002280', r: 3 }} activeDot={{ r: 5 }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* 3. System Share Pie Chart */}
-            <div style={{ background: '#f7f8fc', borderRadius: 14, padding: '1rem', border: '1.5px solid #e4e8f2' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', margin: '0 0 .75rem' }}>Click Distribution</p>
-              <ResponsiveContainer width="100%" height={180}>
-                <PieChart>
-                  <Pie
-                    data={totalClicks > 0
-                      ? SYSTEMS.map(s => ({ name: s.label.split(' ')[0], value: analytics[s.id] || 0, color: s.color }))
-                      : SYSTEMS.map(s => ({ name: s.label.split(' ')[0], value: 1, color: s.color }))
-                    }
-                    cx="50%" cy="50%"
-                    innerRadius={45} outerRadius={72}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {SYSTEMS.map((s, i) => <Cell key={i} fill={s.color} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e4e8f2', borderRadius: 10, fontSize: 12 }} formatter={(v, n) => [totalClicks > 0 ? v + ' clicks' : '—', n]} />
-                  <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, fontWeight: 600 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* 4. Portal vs System Activity Bar */}
-            <div style={{ background: '#f7f8fc', borderRadius: 14, padding: '1rem', border: '1.5px solid #e4e8f2' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#6b7280', margin: '0 0 .75rem' }}>Overall Summary</p>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart
-                  data={[
-                    { name: 'Portal Visits',  value: totalPortalVisits, color: '#002280' },
-                    { name: 'System Clicks',  value: totalClicks,       color: '#C8960C' },
-                    { name: "Today",          value: todayVisits,       color: '#10813f' },
-                    { name: 'Day Sessions',   value: Object.keys(visitorsObj).length, color: '#7c3aed' },
-                  ]}
-                  margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
-                  barCategoryGap="30%"
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f2" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e4e8f2', borderRadius: 10, fontSize: 12 }} formatter={(v) => [v, 'Count']} cursor={{ fill: 'rgba(0,34,128,0.04)' }} />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                    {[
-                      { color: '#002280' }, { color: '#C8960C' },
-                      { color: '#10813f' }, { color: '#7c3aed' },
-                    ].map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-          </div>
-        </div>
+        {/* ── LOGIN ANALYTICS ── */}
+        <LoginAnalytics />
 
         {/* Tabs */}
         {activeTab === 'overview' && (
@@ -963,6 +847,21 @@ const Dashboard = ({ user, onLogout }) => {
           </button>
         ))}
       </nav>
+
+      {/* CHATBOT FLOATING FAB — PC only */}
+      {!chatOpen && (
+        <button
+          className="db-chat-fab"
+          onClick={() => setChatOpen(true)}
+          aria-label="Open CDN Assistant"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            <path d="M8 10h8M8 14h5"/>
+          </svg>
+          <span className="db-chat-fab-label">Ask CDN</span>
+        </button>
+      )}
 
       {/* CHATBOT MODAL */}
       {chatOpen && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './LoginModal.css';
 import cdnLogo from '../../assets/images/logo.png';
 import { validateLogin, recordLoginSession, registerStudent } from '../../lib/auth';
+import { recordLogin } from '../Dashboard/LoginAnalytics';
 
 const EyeOpen = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -61,6 +62,8 @@ const LoginModal = ({ onLogin, onClose }) => {
       const { ok, user, error } = await validateLogin(username, password);
       if (ok && user) {
         const sessionId = await recordLoginSession(user);
+        // Record in local analytics for department charts
+        recordLogin(user.course || user.role || 'Admin', user.username, user.username);
         localStorage.setItem('cdn_user',    JSON.stringify(user));
         localStorage.setItem('cdn_session', String(sessionId ?? ''));
         onLogin();
@@ -86,6 +89,7 @@ const LoginModal = ({ onLogin, onClose }) => {
       if (ok && user) {
         setRegSuccess(true);
         const sessionId = await recordLoginSession(user);
+        recordLogin(user.course || 'Student', user.username, user.username);
         localStorage.setItem('cdn_user',    JSON.stringify(user));
         localStorage.setItem('cdn_session', String(sessionId ?? ''));
         setTimeout(() => onLogin(), 1200);

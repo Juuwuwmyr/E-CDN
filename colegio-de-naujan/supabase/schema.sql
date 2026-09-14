@@ -153,3 +153,25 @@ CREATE POLICY "allow_anon_read_student_accounts"
 
 CREATE POLICY "allow_anon_insert_student_accounts"
   ON public.student_accounts FOR INSERT WITH CHECK (true);
+
+-- ── 10. COURSE COLUMN on portal_sessions (for dept/course filtering) ──
+ALTER TABLE public.portal_sessions ADD COLUMN IF NOT EXISTS course TEXT;
+
+-- ── 11. READ POLICY for portal_sessions (admin active-users list) ──
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'portal_sessions'
+    AND policyname = 'allow_anon_read_sessions'
+  ) THEN
+    CREATE POLICY "allow_anon_read_sessions"
+      ON public.portal_sessions FOR SELECT
+      USING (true);
+  END IF;
+END $$;
+
+-- ── 12. ENABLE REALTIME for live push updates (run once in SQL Editor) ──
+-- ALTER PUBLICATION supabase_realtime ADD TABLE public.portal_sessions;
+-- ALTER PUBLICATION supabase_realtime ADD TABLE public.system_visits;
+
