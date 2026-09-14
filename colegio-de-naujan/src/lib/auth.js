@@ -222,18 +222,30 @@ export async function recordLogoutSession(sessionId) {
 }
 
 /* ──────────────────────────────────────────────────────────
-   recordSystemVisit  — logs a system click
+   recordSystemVisit  — logs a system click to Supabase
 ────────────────────────────────────────────────────────── */
 export async function recordSystemVisit(systemId, systemLabel, userId = null) {
-  const { error } = await supabase
-    .from('system_visits')
-    .insert({
-      system_id:    systemId,
-      system_label: systemLabel,
-      user_id:      userId,
-      visited_at:   new Date().toISOString(),
-    });
-  if (error) console.error('System visit record error:', error);
+  console.log('[recordSystemVisit] Inserting:', { systemId, systemLabel, userId });
+  try {
+    const { data, error } = await supabase
+      .from('system_visits')
+      .insert({
+        system_id:    systemId,
+        system_label: systemLabel,
+        user_id:      userId,
+        visited_at:   new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('[recordSystemVisit] INSERT error:', error);
+    } else {
+      console.log('[recordSystemVisit] SUCCESS — inserted id:', data?.id);
+    }
+  } catch (e) {
+    console.error('[recordSystemVisit] Exception:', e);
+  }
 }
 
 /* ──────────────────────────────────────────────────────────
