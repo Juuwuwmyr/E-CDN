@@ -423,59 +423,86 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="db-stats-row">
-          {[
-            {
-              label: 'Portal Visits', value: fmt(totalPortalVisits), sub: '+' + todayVisits + ' today',
-              color: '#002280', bg: '#eef1fb',
-              icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
-            },
-            {
-              label: 'System Clicks', value: fmt(totalClicks), sub: 'across all services',
-              color: '#C8960C', bg: '#fdf8ec',
-              icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-            },
-            {
-              label: 'Most Visited',
-              value: topSystems[0]?.visits > 0 ? topSystems[0].label.split(' ')[0] : 'None',
-              sub: topSystems[0]?.visits > 0 ? topSystems[0].visits + ' clicks' : 'No activity yet',
-              color: '#10813f', bg: '#edf7f1',
-              icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
-            },
-            {
-              label: 'Active Systems', value: SYSTEMS.length, sub: 'live portals',
-              color: '#7c3aed', bg: '#f5f0ff',
-              icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
-            },
-          ].map((stat) => (
-            <div key={stat.label} className="db-stat-card" style={{ '--sc': stat.color, '--sc-bg': stat.bg }}>
-              <div className="db-stat-icon" style={{ background: stat.bg, color: stat.color }}>
-                {stat.icon}
-              </div>
-              <div className="db-stat-body">
-                <p className="db-stat-value">{stat.value}</p>
-                <p className="db-stat-label">{stat.label}</p>
-                <p className="db-stat-sub">{stat.sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── LOGIN ANALYTICS ── */}
-        <LoginAnalytics />
-
-        {/* Tabs */}
+        {/* ── HOME TAB: Hero + Stats + Live Login Analytics only ── */}
         {activeTab === 'overview' && (
-          <>
-            {/* Services grid */}
-          </>
+          <div className="db-home-content">
+            {/* Stats row */}
+            <div className="db-stats-row">
+              {[
+                {
+                  label: 'Portal Visits', value: fmt(totalPortalVisits), sub: '+' + todayVisits + ' today',
+                  color: '#002280', bg: '#eef1fb',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+                },
+                {
+                  label: 'System Clicks', value: fmt(totalClicks), sub: 'across all services',
+                  color: '#C8960C', bg: '#fdf8ec',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+                },
+                {
+                  label: 'Most Visited',
+                  value: topSystems[0]?.visits > 0 ? topSystems[0].label.split(' ')[0] : 'None',
+                  sub: topSystems[0]?.visits > 0 ? topSystems[0].visits + ' clicks' : 'No activity yet',
+                  color: '#10813f', bg: '#edf7f1',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+                },
+                {
+                  label: 'Active Systems', value: SYSTEMS.length, sub: 'live portals',
+                  color: '#7c3aed', bg: '#f5f0ff',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+                },
+              ].map((stat) => (
+                <div key={stat.label} className="db-stat-card" style={{ '--sc': stat.color, '--sc-bg': stat.bg }}>
+                  <div className="db-stat-icon" style={{ background: stat.bg, color: stat.color }}>
+                    {stat.icon}
+                  </div>
+                  <div className="db-stat-body">
+                    <p className="db-stat-value">{stat.value}</p>
+                    <p className="db-stat-label">{stat.label}</p>
+                    <p className="db-stat-sub">{stat.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Live Login Analytics — real-time active users */}
+            <LoginAnalytics />
+          </div>
         )}
 
+        {/* ── ACTIVITY TAB: Fully separate section ── */}
         {activeTab === 'activity' && (
           <div className="db-activity-layout">
 
-            {/* Top visited */}
+            {/* Activity tab header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              marginBottom: 4, padding: '4px 0 16px',
+              borderBottom: '1.5px solid #e5e7eb',
+            }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: '#fdf8ec', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#C8960C', flexShrink: 0,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F1422' }}>Activity</h2>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#6b7280' }}>System usage and portal engagement metrics</p>
+              </div>
+              <span style={{
+                marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 700,
+                background: '#fdf8ec', color: '#C8960C', borderRadius: 20,
+                padding: '3px 10px', border: '1px solid #f5e6c0',
+              }}>
+                {totalClicks} total clicks
+              </span>
+            </div>
+
+            {/* Top visited systems */}
             <div className="db-panel">
               <div className="db-panel-header">
                 <div className="db-panel-header-left">
@@ -499,7 +526,7 @@ const Dashboard = ({ user, onLogout }) => {
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                   </svg>
                   <p>No system visits recorded yet.</p>
-                  <span>Click any system on the Overview tab to start tracking.</span>
+                  <span>Click any system on the Home tab to start tracking.</span>
                 </div>
               ) : (
                 <div className="db-top-list">
@@ -528,7 +555,7 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
 
             <div className="db-activity-cols">
-              {/* Summary */}
+              {/* Visit Summary */}
               <div className="db-panel">
                 <div className="db-panel-header">
                   <div className="db-panel-header-left">
@@ -564,7 +591,7 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
 
-              {/* Activity log */}
+              {/* Recent Activity log */}
               <div className="db-panel">
                 <div className="db-panel-header">
                   <div className="db-panel-header-left">
@@ -614,7 +641,7 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
 
-            {/* Portal metrics */}
+            {/* Portal Metrics */}
             <div className="db-panel db-portal-metrics">
               <div className="db-panel-header">
                 <div className="db-panel-header-left">
@@ -653,6 +680,7 @@ const Dashboard = ({ user, onLogout }) => {
 
           </div>
         )}
+
 
         {activeTab === 'account' && (
           <div className="db-account-layout">
