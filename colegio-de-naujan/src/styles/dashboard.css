@@ -717,3 +717,233 @@
 }
 .db-chat-send:hover { background:#001a6a; transform:scale(1.05); }
 .db-chat-send svg { width:16px; height:16px; }
+
+/* ── ACCOUNT TAB ── */
+.db-account-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* Hero card */
+.db-account-hero {
+  position: relative;
+  background: linear-gradient(135deg, #002280 0%, #0044cc 100%);
+  border-radius: 1.25rem;
+  padding: 2.25rem 2rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+.db-account-hero-noise {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.db-account-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.db-account-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 3px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1;
+}
+.db-account-avatar-ring {
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.2);
+  animation: db-spin 12s linear infinite;
+}
+@keyframes db-spin { to { transform: rotate(360deg); } }
+
+.db-account-hero-info { flex: 1; min-width: 0; }
+
+.db-account-name-row {
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;
+}
+.db-account-name {
+  color: #fff; font-size: 1.4rem; font-weight: 700;
+  margin: 0; line-height: 1.2;
+}
+.db-account-edit-btn {
+  background: rgba(255,255,255,0.15);
+  border: none; border-radius: 0.5rem;
+  padding: 0.3rem; cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  display: flex; align-items: center;
+  transition: background 0.2s;
+}
+.db-account-edit-btn:hover { background: rgba(255,255,255,0.25); }
+.db-account-edit-btn svg { width: 14px; height: 14px; }
+
+.db-account-name-form {
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;
+}
+.db-account-name-input {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 0.5rem;
+  color: #fff; font-size: 1.1rem; font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  outline: none;
+}
+.db-account-name-input::placeholder { color: rgba(255,255,255,0.5); }
+.db-account-name-save {
+  background: #FFD700; color: #0f1724;
+  border: none; border-radius: 0.5rem;
+  font-size: 0.78rem; font-weight: 700;
+  padding: 0.3rem 0.75rem; cursor: pointer;
+}
+.db-account-name-cancel {
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: none; border-radius: 0.5rem;
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.3rem 0.75rem; cursor: pointer;
+}
+
+.db-account-role-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  color: #fff; font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border-radius: 999px; padding: 0.2rem 0.65rem;
+  margin-bottom: 0.3rem;
+}
+.db-account-username {
+  color: rgba(255,255,255,0.65); font-size: 0.82rem; margin: 0;
+}
+
+/* Section title */
+.db-account-section-title {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #6b7280;
+  padding: 0 0.25rem;
+}
+
+/* Info grid */
+.db-account-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.db-account-info-card {
+  background: #fff;
+  border: 1.5px solid #f0f2f8;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  display: flex; align-items: center; gap: 0.85rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.db-account-info-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  border-color: var(--ac);
+}
+.db-account-info-icon {
+  width: 38px; height: 38px;
+  border-radius: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.db-account-info-icon svg { width: 18px; height: 18px; }
+.db-account-info-body { min-width: 0; }
+.db-account-info-label {
+  font-size: 0.7rem; font-weight: 600;
+  color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;
+  margin: 0 0 0.15rem;
+}
+.db-account-info-value {
+  font-size: 0.9rem; font-weight: 700; color: #111827;
+  margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Activity stats */
+.db-account-stats-row {
+  display: flex; gap: 0.75rem;
+}
+.db-account-stat {
+  flex: 1;
+  background: #fff;
+  border: 1.5px solid #f0f2f8;
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+}
+.db-account-stat-val {
+  font-size: 1.6rem; font-weight: 800; margin: 0 0 0.2rem;
+  line-height: 1;
+}
+.db-account-stat-label {
+  font-size: 0.72rem; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.05em; margin: 0;
+}
+
+/* Settings list */
+.db-account-settings-list {
+  background: #fff;
+  border: 1.5px solid #f0f2f8;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.db-account-settings-row {
+  display: flex; align-items: center; gap: 1rem;
+  width: 100%; text-align: left;
+  padding: 1rem 1.25rem;
+  background: transparent; border: none;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.db-account-settings-row:last-child { border-bottom: none; }
+.db-account-settings-row:hover { background: #f9fafb; }
+.db-account-settings-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+}
+.db-account-settings-icon svg { width: 20px; height: 20px; }
+.db-account-settings-body { flex: 1; min-width: 0; }
+.db-account-settings-label {
+  font-size: 0.9rem; font-weight: 600; color: #111827; margin: 0 0 0.1rem;
+}
+.db-account-settings-sub {
+  font-size: 0.75rem; color: #9ca3af; margin: 0;
+}
+.db-account-settings-arrow { width: 16px; height: 16px; color: #d1d5db; flex-shrink: 0; }
+
+/* Sign out */
+.db-account-signout-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+.db-account-signout {
+  display: flex; align-items: center; gap: 0.6rem;
+  background: #fff0f2; color: #C8102E;
+  border: 1.5px solid #fecdd3;
+  border-radius: 0.875rem;
+  font-size: 0.95rem; font-weight: 700;
+  padding: 0.75rem 2rem;
+  cursor: pointer; transition: background 0.2s, border-color 0.2s;
+}
+.db-account-signout:hover { background: #ffe0e4; border-color: #C8102E; }
+.db-account-signout svg { width: 18px; height: 18px; }
+.db-account-signout-hint {
+  font-size: 0.75rem; color: #9ca3af; margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .db-account-info-grid { grid-template-columns: 1fr; }
+  .db-account-hero { flex-direction: column; text-align: center; padding: 1.75rem 1.25rem; }
+  .db-account-name-row { justify-content: center; }
+  .db-account-stats-row { flex-direction: column; }
+}

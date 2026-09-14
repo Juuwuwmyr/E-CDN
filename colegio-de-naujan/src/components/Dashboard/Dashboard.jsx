@@ -179,6 +179,10 @@ const Dashboard = ({ user, onLogout }) => {
   const [analytics,     setAnalytics]     = useState({});
   const [recentVisits,  setRecentVisits]  = useState([]);
   const [activeTab,     setActiveTab]     = useState('overview');
+  const [editingName,   setEditingName]   = useState(false);
+  const [displayName,   setDisplayName]   = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cdn_user'))?.name ?? 'User'; } catch { return 'User'; }
+  });
   const [chatOpen,      setChatOpen]      = useState(false);
   const [chatInput,     setChatInput]     = useState('');
   const [chatMessages,  setChatMessages]  = useState([
@@ -813,6 +817,166 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         )}
 
+        {activeTab === 'account' && (
+          <div className="db-account-layout">
+
+            {/* Profile card */}
+            <div className="db-account-hero">
+              <div className="db-account-hero-noise" aria-hidden="true" />
+              <div className="db-account-avatar-wrap">
+                <div className="db-account-avatar">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="db-account-avatar-ring" aria-hidden="true" />
+              </div>
+              <div className="db-account-hero-info">
+                {editingName ? (
+                  <form
+                    className="db-account-name-form"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setEditingName(false);
+                      try {
+                        const u = JSON.parse(localStorage.getItem('cdn_user')) || {};
+                        u.name = displayName;
+                        localStorage.setItem('cdn_user', JSON.stringify(u));
+                      } catch {}
+                    }}
+                  >
+                    <input
+                      className="db-account-name-input"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      autoFocus
+                    />
+                    <button type="submit" className="db-account-name-save">Save</button>
+                    <button type="button" className="db-account-name-cancel" onClick={() => setEditingName(false)}>Cancel</button>
+                  </form>
+                ) : (
+                  <div className="db-account-name-row">
+                    <h2 className="db-account-name">{displayName}</h2>
+                    <button className="db-account-edit-btn" onClick={() => setEditingName(true)} aria-label="Edit name">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                <span className="db-account-role-badge">{user?.role ?? 'Member'}</span>
+                <p className="db-account-username">@{user?.username ?? 'user'}</p>
+              </div>
+            </div>
+
+            {/* Info cards */}
+            <div className="db-account-section-title">Account Details</div>
+            <div className="db-account-info-grid">
+              {[
+                {
+                  label: 'Full Name', value: displayName,
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+                  color: '#002280', bg: '#eef1fb',
+                },
+                {
+                  label: 'Username', value: user?.username ?? '—',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>,
+                  color: '#7c3aed', bg: '#f5f0ff',
+                },
+                {
+                  label: 'Role', value: user?.role ?? '—',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+                  color: '#C8102E', bg: '#fdf0f2',
+                },
+                {
+                  label: 'Portal Access', value: 'CDN E-Portal',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>,
+                  color: '#10813f', bg: '#edf7f1',
+                },
+              ].map(item => (
+                <div key={item.label} className="db-account-info-card" style={{ '--ac': item.color, '--ac-bg': item.bg }}>
+                  <div className="db-account-info-icon" style={{ background: item.bg, color: item.color }}>
+                    {item.icon}
+                  </div>
+                  <div className="db-account-info-body">
+                    <p className="db-account-info-label">{item.label}</p>
+                    <p className="db-account-info-value">{item.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats snapshot */}
+            <div className="db-account-section-title">Your Activity</div>
+            <div className="db-account-stats-row">
+              {[
+                { label: 'Portal Visits',  value: analytics.__portal || 0,  color: '#002280' },
+                { label: 'System Clicks',  value: totalClicks,               color: '#C8960C' },
+                { label: 'Recent Opens',   value: recentVisits.length,       color: '#7c3aed' },
+              ].map(s => (
+                <div key={s.label} className="db-account-stat">
+                  <p className="db-account-stat-val" style={{ color: s.color }}>{s.value}</p>
+                  <p className="db-account-stat-label">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Settings list */}
+            <div className="db-account-section-title">Settings</div>
+            <div className="db-account-settings-list">
+              {[
+                {
+                  label: 'My Profile',
+                  sub: 'View and edit your display name',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+                  color: '#002280',
+                  action: () => setEditingName(true),
+                },
+                {
+                  label: 'Notifications',
+                  sub: 'Manage alert preferences',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>,
+                  color: '#C8960C',
+                  action: () => setNotifOpen(true),
+                },
+                {
+                  label: 'Help & Support',
+                  sub: 'FAQs and contact information',
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+                  color: '#7c3aed',
+                  action: () => setChatOpen(true),
+                },
+              ].map(item => (
+                <button key={item.label} className="db-account-settings-row" onClick={item.action}>
+                  <div className="db-account-settings-icon" style={{ color: item.color }}>
+                    {item.icon}
+                  </div>
+                  <div className="db-account-settings-body">
+                    <p className="db-account-settings-label">{item.label}</p>
+                    <p className="db-account-settings-sub">{item.sub}</p>
+                  </div>
+                  <svg className="db-account-settings-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+              ))}
+            </div>
+
+            {/* Sign out */}
+            <div className="db-account-signout-wrap">
+              <button className="db-account-signout" onClick={handleLogout}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign Out
+              </button>
+              <p className="db-account-signout-hint">You'll be returned to the main site.</p>
+            </div>
+
+          </div>
+        )}
+
       </main>
 
       {/* BOTTOM NAV */}
@@ -833,12 +997,12 @@ const Dashboard = ({ user, onLogout }) => {
             className={
               'db-bnav-item' +
               (item.center ? ' db-bnav-item--center' : '') +
-              (item.tab && activeTab === item.tab ? ' db-bnav-item--active' : '')
+              ((item.tab && activeTab === item.tab) || (item.label === 'Account' && activeTab === 'account') ? ' db-bnav-item--active' : '')
             }
             onClick={() => {
               if (item.tab)                 setActiveTab(item.tab);
               if (item.label === 'Chatbot') setChatOpen(true);
-              if (item.label === 'Account') setProfileOpen(true);
+              if (item.label === 'Account') setActiveTab('account');
             }}
             aria-label={item.label}>
             {item.icon}
