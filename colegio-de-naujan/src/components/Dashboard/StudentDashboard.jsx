@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import cdnLogo   from '../../assets/images/logo.png';
 import bagongLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 import '../../styles/dashboard.css';
-import { recordLogoutSession } from '../../lib/auth';
+import { recordLogoutSession, recordSystemVisit } from '../../lib/auth';
+
 
 
 const PAGEVIEW_KEY  = 'cdn_pageviews';
@@ -110,12 +111,16 @@ export default function StudentDashboard({ user, onLogout }) {
   }, []);
 
   const handleOpen = (svc) => {
+    // Write to localStorage (local history)
     recordVisit(svc.id, svc.label);
     setAnalytics(getAnalytics());
     const views = (() => { try { return JSON.parse(localStorage.getItem(PAGEVIEW_KEY)) || []; } catch { return []; } })();
     setRecentVisits(views);
+    // Write to Supabase → triggers Activity tab realtime update in admin dashboard
+    recordSystemVisit(svc.id, svc.label, user?.username ?? user?.studentNumber ?? null);
     window.open(svc.url, '_blank', 'noopener,noreferrer');
   };
+
 
   const handleLogout = async () => {
     const sessionId = localStorage.getItem('cdn_session');
