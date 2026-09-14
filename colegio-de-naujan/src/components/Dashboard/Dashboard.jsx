@@ -1000,12 +1000,11 @@ const Dashboard = ({ user, onLogout }) => {
             className={
               'db-bnav-item' +
               (item.center ? ' db-bnav-item--center' : '') +
-              ((item.tab && activeTab === item.tab) || (item.label === 'Account' && activeTab === 'account') ? ' db-bnav-item--active' : '')
+              (item.tab && activeTab === item.tab ? ' db-bnav-item--active' : '')
             }
             onClick={() => {
               if (item.tab)                 setActiveTab(item.tab);
               if (item.label === 'Chatbot') setChatOpen(true);
-              if (item.label === 'Account') setActiveTab('account');
               if (item.route)               navigate(item.route);
             }}
             aria-label={item.label}>
