@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import CourseModal from './CourseModal';
 import wftBg from '../../assets/images/background.jpg';
 import bsisBg from '../../assets/images/background.jpg';
 import chsbg from '../../assets/images/background.jpg';
@@ -50,26 +52,72 @@ const icons = {
 };
 
 const Courses = () => {
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  
   const courses = [
     {
       code: 'BSIS', color: 'gold', bg: bsisBg, icon: icons.bsis,
       full: 'Bachelor of Science in Information Systems',
       desc: 'Focuses on the design, development, and management of information systems. Students build web apps, databases, and enterprise solutions that address real institutional needs.',
+      duration: '4 years',
+      credits: '120+ units',
+      highlights: [
+        'Web Application Development',
+        'Database Management Systems',
+        'Enterprise Solutions Design',
+        'Systems Analysis and Design',
+        'IT Project Management',
+        'Cybersecurity Fundamentals',
+      ],
+      careerPaths: ['Software Developer', 'Systems Analyst', 'IT Manager', 'Database Admin', 'IT Consultant'],
     },
     {
       code: 'BTVTED-WFT', color: 'gold', bg: chsbg, icon: icons.wft,
       full: 'Bachelor of Technical-Vocational Teacher Education — Welding and Fabrication Technology',
       desc: 'Covers welding techniques, metal fabrication, and technical-vocational education. Projects include digital job order systems, materials tracking, and fabrication workflow management tools.',
+      duration: '4 years',
+      credits: '120+ units',
+      highlights: [
+        'Advanced Welding Techniques',
+        'Metal Fabrication Processes',
+        'Technical Education Methods',
+        'Safety and Quality Standards',
+        'Digital Documentation Systems',
+        'Industry-Standard Equipment Training',
+      ],
+      careerPaths: ['Vocational Instructor', 'Welding Technician', 'Fabrication Specialist', 'Training Coordinator', 'Quality Control Specialist'],
     },
     {
       code: 'BTVTED-CHS', color: 'gold', bg: chsbg, icon: icons.chs,
       full: 'Bachelor of Technical-Vocational Teacher Education — Computer Hardware Servicing',
       desc: 'Covers computer hardware servicing and technical-vocational education. Student projects include diagnostic tools, hardware inventory systems, and service management portals.',
+      duration: '4 years',
+      credits: '120+ units',
+      highlights: [
+        'Hardware Diagnostics & Repair',
+        'System Troubleshooting',
+        'Technical Education Delivery',
+        'Hardware Inventory Management',
+        'Preventive Maintenance',
+        'Industry Certifications',
+      ],
+      careerPaths: ['IT Technician', 'Hardware Support Specialist', 'Vocational Instructor', 'Service Center Manager', 'Technical Trainer'],
     },
     {
       code: 'BPA', color: 'gold', bg: wftBg, icon: icons.bpa,
       full: 'Bachelor of Public Administration',
       desc: 'Prepares students for public service and governance. Projects cover digital systems for government record management, citizen services, and administrative workflows.',
+      duration: '4 years',
+      credits: '120+ units',
+      highlights: [
+        'Public Policy Development',
+        'Governance & Administration',
+        'Government Information Systems',
+        'Public Finance Management',
+        'Citizen Services Programs',
+        'Administrative Leadership',
+      ],
+      careerPaths: ['Government Administrator', 'Policy Analyst', 'Public Manager', 'Civil Service Official', 'Community Development Officer'],
     },
   ];
 
@@ -98,11 +146,35 @@ const Courses = () => {
             return (
               <div
                 key={i}
-                className={`relative overflow-hidden flex flex-col gap-3.5 p-7 transition-all duration-200 cursor-default scroll-animate stagger-${i + 1}`}
+                className={`relative overflow-hidden flex flex-col gap-3.5 p-0 transition-all duration-200 cursor-pointer scroll-animate stagger-${i + 1}`}
                 style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', borderRadius: 14 }}
+                onClick={() => setSelectedCourse(c)}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = colorBorder[c.color]; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
               >
+                {/* Image Placeholder */}
+                <div
+                  className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center flex-shrink-0"
+                  style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
+                >
+                  <div className="text-center pointer-events-none">
+                    <svg
+                      className="w-12 h-12 mx-auto mb-2 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p className="text-gray-500 text-xs font-medium">Click to view details</p>
+                  </div>
+                </div>
+
                 {/* bg image for BPA */}
                 {c.bg && (
                   <div
@@ -112,36 +184,56 @@ const Courses = () => {
                   />
                 )}
 
-                {/* Icon + code pill inline */}
-                <div className="relative z-10 flex items-center gap-3">
-                  <div
-                    className="flex items-center justify-center shrink-0"
-                    style={{ width: 24, height: 24, color: pill.color }}
-                  >
-                    <div style={{ width: 24, height: 24 }}>{c.icon}</div>
+                {/* Content Container */}
+                <div className="p-7 flex flex-col gap-3.5 relative z-10">
+                  {/* Icon + code pill inline */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex items-center justify-center shrink-0"
+                      style={{ width: 24, height: 24, color: pill.color }}
+                    >
+                      <div style={{ width: 24, height: 24 }}>{c.icon}</div>
+                    </div>
+                    <span
+                      className="inline-block text-[0.72rem] font-black uppercase tracking-[1.5px] px-3 py-1 rounded"
+                      style={{ background: pill.bg, color: pill.color }}
+                    >
+                      {c.code}
+                    </span>
                   </div>
-                  <span
-                    className="inline-block text-[0.72rem] font-black uppercase tracking-[1.5px] px-3 py-1 rounded"
-                    style={{ background: pill.bg, color: pill.color }}
-                  >
-                    {c.code}
-                  </span>
+
+                  {/* Title */}
+                  <h3 className="m-0 font-extrabold leading-snug" style={{ fontSize: '0.95rem', color: '#0F1422', letterSpacing: '-0.2px' }}>
+                    {c.full}
+                  </h3>
+
+                  {/* Desc */}
+                  <p className="m-0" style={{ fontSize: '0.855rem', color: '#4E5873', lineHeight: 1.75 }}>
+                    {c.desc}
+                  </p>
+
+                  {/* Click hint */}
+                  <div className="pt-2 flex items-center gap-1 text-xs" style={{ color: colorBorder[c.color] }}>
+                    <span>Click to learn more</span>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-
-                {/* Title */}
-                <h3 className="relative z-10 m-0 font-extrabold leading-snug" style={{ fontSize: '0.95rem', color: '#0F1422', letterSpacing: '-0.2px' }}>
-                  {c.full}
-                </h3>
-
-                {/* Desc */}
-                <p className="relative z-10 m-0" style={{ fontSize: '0.855rem', color: '#4E5873', lineHeight: 1.75 }}>
-                  {c.desc}
-                </p>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Course Modal */}
+      <CourseModal 
+        course={selectedCourse} 
+        isOpen={!!selectedCourse} 
+        onClose={() => setSelectedCourse(null)}
+        colorBorder={colorBorder}
+        colorPill={colorPill}
+      />
     </section>
   );
 };
