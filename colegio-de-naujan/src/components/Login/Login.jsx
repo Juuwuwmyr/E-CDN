@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import './Login.css';
 import cdnLogo from '../../assets/images/logo.png';
+import { recordLogin } from '../Dashboard/LoginAnalytics';
 
+// Users with department info
 const VALID_USERS = [
-  { username: 'admin',   password: 'bsis2026' },
-  { username: 'bsis',    password: 'cdn2026'  },
+  { username: 'admin',   password: 'bsis2026', department: 'Admin', role: 'Administrator' },
+  { username: 'bsis',    password: 'cdn2026',  department: 'BSIS', role: 'BSIS Student' },
+  { username: 'wft',     password: 'cdn2026',  department: 'BTVTED-WFT', role: 'WFT Student' },
+  { username: 'chs',     password: 'cdn2026',  department: 'BTVTED-CHS', role: 'CHS Student' },
 ];
 
 const Login = ({ onLogin }) => {
@@ -24,6 +28,19 @@ const Login = ({ onLogin }) => {
         (u) => u.username === username.trim() && u.password === password
       );
       if (match) {
+        // Record login analytics
+        recordLogin(match.department, username);
+        
+        // Save user info to localStorage
+        const userData = {
+          username: match.username,
+          name: match.role,
+          role: match.role,
+          department: match.department,
+          loginTime: new Date().toISOString(),
+        };
+        localStorage.setItem('cdn_user', JSON.stringify(userData));
+        
         onLogin();
       } else {
         setError('Invalid username or password.');

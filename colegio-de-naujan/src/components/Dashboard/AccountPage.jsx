@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/dashboard.css';
+import '../../styles/login-analytics.css';
 import cdnLogo from '../../assets/images/logo.png';
+import LoginAnalytics from './LoginAnalytics';
 
 const ANALYTICS_KEY = 'cdn_analytics';
 const PAGEVIEW_KEY  = 'cdn_pageviews';
@@ -117,6 +119,13 @@ const AccountPage = ({ user, onLogout }) => {
             </div>
           ))}
         </div>
+
+        {/* Admin: Login Analytics */}
+        {user?.role?.toLowerCase().includes('admin') && (
+          <div>
+            <LoginAnalytics />
+          </div>
+        )}
 
         {/* Quick links */}
         <div className="db-panel">
