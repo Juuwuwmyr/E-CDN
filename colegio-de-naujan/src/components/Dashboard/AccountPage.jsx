@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '../../styles/dashboard.css';
 import '../../styles/login-analytics.css';
 import cdnLogo from '../../assets/images/logo.png';
@@ -75,45 +74,7 @@ const AccountPage = ({ user, onLogout }) => {
           <p className="db-account-role">{user?.role ?? 'Member'}</p>
           <p className="db-account-school">Colegio De Naujan</p>
           
-          {/* Metrics Bar Chart */}
-          <div style={{ marginTop: 20, padding: '16px 0' }}>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, margin: '0 0 16px 0' }}>Activity Metrics</p>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={[
-                  { name: 'Portal\nVisits', value: totalVisits, fill: '#002280' },
-                  { name: 'System\nClicks', value: totalClicks, fill: '#C8960C' },
-                  { name: 'Active\nSystems', value: SYSTEMS.length, fill: '#10813f' },
-                ]}
-                margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    background: '#fff', 
-                    border: '1px solid #e5e7eb', 
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                  formatter={(value) => [value, 'Count']}
-                  labelStyle={{ color: '#0F1422', fontWeight: 700 }}
-                  cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-                />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+
         </div>
 
         {/* Account details */}

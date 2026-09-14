@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import '../../styles/dashboard.css';
 import cdnLogo from '../../assets/images/logo.png';
 import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
@@ -447,6 +448,68 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Activity Summary Chart */}
+        <div className="db-panel">
+          <div className="db-panel-header">
+            <div className="db-panel-header-left">
+              <div className="db-panel-icon db-panel-icon--blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="db-panel-title">Activity Summary</h3>
+                <p className="db-panel-sub">Your portal usage at a glance</p>
+              </div>
+            </div>
+            <span className="db-badge-pill">Live</span>
+          </div>
+          <div style={{ padding: '1rem 1.25rem 1.25rem' }}>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart
+                data={[
+                  { name: 'Portal Visits',   value: totalPortalVisits, color: '#002280' },
+                  { name: 'System Clicks',   value: totalClicks,       color: '#C8960C' },
+                  { name: 'Today\'s Visits', value: todayVisits,       color: '#10813f' },
+                  { name: 'Active Systems',  value: SYSTEMS.length,    color: '#7c3aed' },
+                ]}
+                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                barCategoryGap="35%"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f8" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11, fill: '#9ca3af', fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{ background: '#fff', border: '1px solid #e4e8f2', borderRadius: 10, boxShadow: '0 4px 16px rgba(0,34,128,0.1)', fontSize: 13 }}
+                  formatter={(v) => [v, 'Count']}
+                  labelStyle={{ color: '#0f1724', fontWeight: 700 }}
+                  cursor={{ fill: 'rgba(0,34,128,0.04)' }}
+                />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  {[
+                    { color: '#002280' },
+                    { color: '#C8960C' },
+                    { color: '#10813f' },
+                    { color: '#7c3aed' },
+                  ].map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Tabs */}
