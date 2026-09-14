@@ -237,7 +237,7 @@ export async function recordSystemVisit(systemId, systemLabel, userId = null) {
 }
 
 /* ──────────────────────────────────────────────────────────
-   getSystemVisitStats  — returns per-system visit counts
+   getSystemVisitStats  — per-system visit counts from DB
 ────────────────────────────────────────────────────────── */
 export async function getSystemVisitStats() {
   const { data, error } = await supabase
@@ -250,6 +250,64 @@ export async function getSystemVisitStats() {
     acc[row.system_id] = (acc[row.system_id] || 0) + 1;
     return acc;
   }, {});
+}
+
+/* ──────────────────────────────────────────────────────────
+   getRecentSystemVisits  — last N system visit rows
+────────────────────────────────────────────────────────── */
+export async function getRecentSystemVisits(limit = 20) {
+  const { data, error } = await supabase
+    .from('system_visits')
+    .select('id, system_id, system_label, user_id, visited_at')
+    .order('visited_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('getRecentSystemVisits error:', error);
+    return [];
+  }
+  return data || [];
+}
+
+/* ──────────────────────────────────────────────────────────
+   getPortalMetrics  — aggregate counts for the Activity tab
+────────────────────────────────────────────────────────── */
+export async function getPortalMetrics() {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayISO = todayStart.toISOString();
+
+  // Total login sessions ever
+  const { count: totalSessions } = await supabase
+    .from('portal_sessions')
+    .select('*', { count: 'exact', head: true });
+
+  // Sessions that started today
+  const { count: todaySessions } = await supabase
+    .from('portal_sessions')
+    .select('*', { count: 'exact', head: true })
+    .gte('login_at', todayISO);
+
+  // Total system clicks
+  const { count: totalClicks } = await supabase
+    .from('system_visits')
+    .select('*', { count: 'exact', head: true });
+
+  // Unique days that had at least one session (approx via all login_at dates)
+  const { data: sessionDates } = await supabase
+    .from('portal_sessions')
+    .select('login_at');
+
+  const uniqueDays = new Set(
+    (sessionDates || []).map(r => r.login_at?.slice(0, 10))
+  ).size;
+
+  return {
+    totalSessions: totalSessions || 0,
+    todaySessions: todaySessions || 0,
+    totalClicks:   totalClicks   || 0,
+    uniqueDays,
+  };
 }
 
 /* ──────────────────────────────────────────────────────────
