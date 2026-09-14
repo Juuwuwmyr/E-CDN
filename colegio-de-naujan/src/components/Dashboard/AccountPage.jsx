@@ -75,26 +75,27 @@ const AccountPage = ({ user, onLogout }) => {
           
           {/* Metrics Bar Chart */}
           <div style={{ marginTop: 20, padding: '16px 0' }}>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, marginBottom: 12, margin: '0 0 12px 0' }}>Activity Metrics</p>
-            <ResponsiveContainer width="100%" height={250}>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, margin: '0 0 16px 0' }}>Activity Metrics</p>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={[
-                  { name: 'Portal Visits', value: totalVisits, fill: '#002280' },
-                  { name: 'System Clicks', value: totalClicks, fill: '#C8960C' },
-                  { name: 'Systems', value: SYSTEMS.length, fill: '#10813f' },
+                  { name: 'Portal\nVisits', value: totalVisits, fill: '#002280' },
+                  { name: 'System\nClicks', value: totalClicks, fill: '#C8960C' },
+                  { name: 'Active\nSystems', value: SYSTEMS.length, fill: '#10813f' },
                 ]}
-                margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                margin={{ top: 20, right: 30, left: 0, bottom: 60 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis 
                   dataKey="name" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                  style={{ fontSize: '0.75rem' }}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <YAxis 
-                  style={{ fontSize: '0.75rem' }}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -105,8 +106,9 @@ const AccountPage = ({ user, onLogout }) => {
                   }}
                   formatter={(value) => [value, 'Count']}
                   labelStyle={{ color: '#0F1422', fontWeight: 700 }}
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
                 />
-                <Bar dataKey="value" fill="#002280" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
