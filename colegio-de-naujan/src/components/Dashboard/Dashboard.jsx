@@ -766,53 +766,6 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
 
-              {/* ── Quick Admin Actions ── */}
-              <div className="db-panel db-portal-metrics">
-                <div className="db-panel-header">
-                  <div className="db-panel-header-left">
-                    <div className="db-panel-icon db-panel-icon--purple">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M12 2v2M12 20v2M4.93 4.93l1.41 1.41M18.66 18.66l1.41 1.41M2 12h2M20 12h2"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="db-panel-title">Quick Actions</h3>
-                      <p className="db-panel-sub">Shortcuts to admin tools</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="db-metrics-grid">
-                  {[
-                    {
-                      label: 'View Login History', color: '#002280', bg: '#eef1fb',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-                      onClick: () => window.location.href = '/dashboard/history',
-                    },
-                    {
-                      label: 'CSC Services', color: '#C8102E', bg: '#fdf0f2',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h10M7 12h6"/></svg>,
-                      onClick: () => window.open('https://student-fines-hub-vf9z.vercel.app/', '_blank'),
-                    },
-                    {
-                      label: 'OSAS Services', color: '#C8960C', bg: '#fdf8ec',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>,
-                      onClick: () => window.open('https://osas-sys.duckdns.org/', '_blank'),
-                    },
-                    {
-                      label: 'Admission Portal', color: '#7c3aed', bg: '#f5f0ff',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
-                      onClick: () => window.open('https://ecnesis.duckdns.org/', '_blank'),
-                    },
-                  ].map(m => (
-                    <button key={m.label} className="db-metric-card" onClick={m.onClick}
-                      style={{ cursor: 'pointer', border: 'none', background: 'white', textAlign: 'center' }}>
-                      <div className="db-metric-icon" style={{ color: m.color, background: m.bg, borderRadius: 10, padding: 8, display: 'inline-flex' }}>{m.icon}</div>
-                      <p className="db-metric-label" style={{ marginTop: 8, fontWeight: 600, color: '#0F1422' }}>{m.label}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
             </div>
           );
