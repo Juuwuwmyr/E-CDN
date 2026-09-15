@@ -194,11 +194,16 @@ const LoginAnalytics = () => {
             <span className="analytics-chart-meta"></span>          </div>
           <ResponsiveContainer width="100%" height={300}>
             {chartType === 'bar' ? (
-              <BarChart data={chartData}>
+              <BarChart data={chartData} barCategoryGap="35%">
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" />
+                <YAxis
+                  allowDecimals={false}
+                  domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
+                  tickCount={6}
+                />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="logins" radius={[8, 8, 0, 0]}>
+                <Bar dataKey="logins" radius={[8, 8, 0, 0]} maxBarSize={56}>
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -208,6 +213,11 @@ const LoginAnalytics = () => {
               <LineChart data={timeSeriesData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="time" />
+                <YAxis
+                  allowDecimals={false}
+                  domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
+                  tickCount={6}
+                />
                 <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
                 <Line type="monotone" dataKey="count" stroke="#002280" strokeWidth={2} dot={{ fill: '#002280', r: 4 }} />
               </LineChart>
@@ -242,6 +252,11 @@ const LoginAnalytics = () => {
             <LineChart data={timeSeriesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="time" />
+              <YAxis
+                allowDecimals={false}
+                domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
+                tickCount={6}
+              />
               <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
               <Line
                 type="monotone"
