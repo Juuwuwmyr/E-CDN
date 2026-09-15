@@ -157,3 +157,44 @@
   .cw-send:hover { background: #001560; }
   .cw-send svg { width: 15px; height: 15px; }
 }
+
+@media (min-width: 900px) {
+  /* Typing indicator */
+  .cw-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: .55rem .85rem;
+    min-width: 52px;
+  }
+  .cw-typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9ca3af;
+    animation: cwTyping 1.2s ease-in-out infinite;
+  }
+  .cw-typing span:nth-child(2) { animation-delay: .2s; }
+  .cw-typing span:nth-child(3) { animation-delay: .4s; }
+
+  @keyframes cwTyping {
+    0%, 80%, 100% { transform: scale(.8); opacity: .5; }
+    40%           { transform: scale(1.1); opacity: 1; }
+  }
+
+  /* Send button spinner */
+  .cw-send-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: cwSpin .6s linear infinite;
+  }
+
+  @keyframes cwSpin { to { transform: rotate(360deg); } }
+
+  .cw-send:disabled { opacity: .6; cursor: not-allowed; }
+  .cw-prompt:disabled { opacity: .5; cursor: not-allowed; }
+}
