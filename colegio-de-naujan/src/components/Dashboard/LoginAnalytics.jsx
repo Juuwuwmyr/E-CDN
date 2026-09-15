@@ -150,9 +150,7 @@ const LoginAnalytics = () => {
       <div className="analytics-header">
         <div>
           <h2 className="analytics-title">Live Login Analytics</h2>
-          <p className="analytics-subtitle">
-            Real-time active users — updates instantly when students log in or out
-          </p>
+          <p className="analytics-subtitle"></p>
         </div>
         <div className="analytics-controls">
           <button
@@ -194,7 +192,7 @@ const LoginAnalytics = () => {
         <div className="analytics-chart-container">
           <div className="analytics-chart-header">
             <h3 className="analytics-chart-title">Active Logins by Department</h3>
-            <span className="analytics-chart-meta">Live — updates instantly</span>
+            <span className="analytics-chart-meta"></span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             {chartType === 'bar' ? (
