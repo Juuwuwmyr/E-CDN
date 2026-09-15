@@ -466,23 +466,37 @@ const Dashboard = ({ user, onLogout }) => {
         {/* ── HOME TAB: Hero + Stats + Live Login Analytics only ── */}
         {activeTab === 'overview' && (
           <div className="db-home-content">
-            {/* Stats row */}
+            {/* Stats row — live from Supabase DB */}
             <div className="db-stats-row">
               {[
                 {
-                  label: 'Portal Visits', value: fmt(totalPortalVisits), sub: '+' + todayVisits + ' today',
+                  label: 'Total Login Sessions', value: activityLoading ? '…' : fmt(dbPortalMetrics.totalSessions),
+                  sub: (activityLoading ? '…' : dbPortalMetrics.todaySessions) + ' today',
                   color: '#002280', bg: '#eef1fb',
-                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+                  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
                 },
                 {
-                  label: 'System Clicks', value: fmt(totalClicks), sub: 'across all services',
+                  label: 'System Clicks', value: activityLoading ? '…' : fmt(dbPortalMetrics.totalClicks),
+                  sub: 'across all services',
                   color: '#C8960C', bg: '#fdf8ec',
                   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
                 },
                 {
                   label: 'Most Visited',
-                  value: topSystems[0]?.visits > 0 ? topSystems[0].label.split(' ')[0] : 'None',
-                  sub: topSystems[0]?.visits > 0 ? topSystems[0].visits + ' clicks' : 'No activity yet',
+                  value: activityLoading ? '…' : (
+                    SYSTEMS.map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
+                      .sort((a, b) => b.visits - a.visits)[0]?.visits > 0
+                      ? SYSTEMS.map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
+                          .sort((a, b) => b.visits - a.visits)[0].label.split(' ')[0]
+                      : 'None'
+                  ),
+                  sub: activityLoading ? '…' : (
+                    SYSTEMS.map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
+                      .sort((a, b) => b.visits - a.visits)[0]?.visits > 0
+                      ? SYSTEMS.map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
+                          .sort((a, b) => b.visits - a.visits)[0].visits + ' clicks'
+                      : 'No activity yet'
+                  ),
                   color: '#10813f', bg: '#edf7f1',
                   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
                 },

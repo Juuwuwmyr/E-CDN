@@ -188,51 +188,6 @@ const LoginAnalytics = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="analytics-stats">
-        <div className="analytics-stat-card">
-          <div className="analytics-stat-icon" style={{ background: '#eef1fb' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#002280" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <div className="analytics-stat-content">
-            <p className="analytics-stat-label">Active Users</p>
-            <p className="analytics-stat-value">{loading ? '…' : totalActiveUsers}</p>
-          </div>
-        </div>
-
-        <div className="analytics-stat-card">
-          <div className="analytics-stat-icon" style={{ background: '#fdf0f2' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2">
-              <path d="M4 4v5a1 1 0 001 1h4a1 1 0 001-1V4"/>
-              <path d="M14 4v5a1 1 0 001 1h4a1 1 0 001-1V4"/>
-              <path d="M4 14v5a1 1 0 001 1h4a1 1 0 001-1v-5"/>
-              <path d="M14 14v5a1 1 0 001 1h4a1 1 0 001-1v-5"/>
-            </svg>
-          </div>
-          <div className="analytics-stat-content">
-            <p className="analytics-stat-label">Departments</p>
-            <p className="analytics-stat-value">{DEPARTMENTS.length}</p>
-          </div>
-        </div>
-
-        <div className="analytics-stat-card">
-          <div className="analytics-stat-icon" style={{ background: '#fdf8ec' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C8960C" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6v6l4 2" />
-            </svg>
-          </div>
-          <div className="analytics-stat-content">
-            <p className="analytics-stat-label">Status</p>
-            <p className="analytics-stat-value" style={{ color: totalActiveUsers > 0 ? '#10813f' : '#999' }}>
-              {loading ? '…' : totalActiveUsers > 0 ? 'Online' : 'Idle'}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Charts */}
       <div className="analytics-charts">
