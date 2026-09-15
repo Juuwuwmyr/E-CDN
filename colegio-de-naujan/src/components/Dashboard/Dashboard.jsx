@@ -521,255 +521,221 @@ const Dashboard = ({ user, onLogout }) => {
 
             {/* Live Login Analytics — real-time active users */}
             <LoginAnalytics />
+
+            {/* ── Top Visited Systems ── */}
+            {(() => {
+              const dbTotalClicks = dbPortalMetrics.totalClicks;
+              const dbTopSystems  = SYSTEMS
+                .map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
+                .sort((a, b) => b.visits - a.visits);
+              return (
+                <>
+                  <div className="db-panel" style={{ marginTop: 24 }}>
+                    <div className="db-panel-header">
+                      <div className="db-panel-header-left">
+                        <div className="db-panel-icon db-panel-icon--gold">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="db-panel-title">Top Visited Systems</h3>
+                          <p className="db-panel-sub">Ranked by total clicks — all time</p>
+                        </div>
+                      </div>
+                      <span className="db-badge-pill db-badge-pill--gold">All time</span>
+                    </div>
+                    {activityLoading ? (
+                      <div className="db-empty-state"><p>Loading…</p></div>
+                    ) : dbTotalClicks === 0 ? (
+                      <div className="db-empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                        <p>No system visits recorded yet.</p>
+                        <span>Visits will appear here when students click any service.</span>
+                      </div>
+                    ) : (
+                      <div className="db-top-list">
+                        {dbTopSystems.map((sys, idx) => {
+                          const pct = dbTotalClicks > 0 ? Math.round((sys.visits / dbTotalClicks) * 100) : 0;
+                          return (
+                            <div key={sys.id} className="db-top-row">
+                              <span className={'db-top-rank db-top-rank--' + (idx + 1)}>#{idx + 1}</span>
+                              <div className="db-top-icon" style={{ background: sys.bg, color: sys.color }}>{sys.icon}</div>
+                              <div className="db-top-info">
+                                <div className="db-top-name-row">
+                                  <span className="db-top-name">{sys.label}</span>
+                                  <span className="db-top-count" style={{ color: sys.color }}>{sys.visits} visits</span>
+                                </div>
+                                <div className="db-top-bar-bg">
+                                  <div className="db-top-bar-fill" style={{ width: pct + '%', background: sys.color }} />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="db-activity-cols" style={{ marginTop: 24 }}>
+                    {/* ── Logins by Department ── */}
+                    <div className="db-panel">
+                      <div className="db-panel-header">
+                        <div className="db-panel-header-left">
+                          <div className="db-panel-icon db-panel-icon--blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                              <circle cx="9" cy="7" r="4"/>
+                              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="db-panel-title">Logins by Department</h3>
+                            <p className="db-panel-sub">All-time sessions per course</p>
+                          </div>
+                        </div>
+                        <span className="db-badge-pill db-badge-pill--blue">All time</span>
+                      </div>
+                      {activityLoading ? (
+                        <div className="db-empty-state"><p>Loading…</p></div>
+                      ) : dbPortalMetrics.totalSessions === 0 ? (
+                        <div className="db-empty-state">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                          </svg>
+                          <p>No login data yet.</p>
+                        </div>
+                      ) : (
+                        <div className="db-top-list">
+                          {[
+                            { key: 'BSIS',       label: 'BSIS',        color: '#002280', bg: '#eef1fb' },
+                            { key: 'BPA',        label: 'BPA',         color: '#C8102E', bg: '#fdf0f2' },
+                            { key: 'BTVTED-WFT', label: 'BTVTED-WFT', color: '#C8960C', bg: '#fdf8ec' },
+                            { key: 'BTVTED-CHS', label: 'BTVTED-CHS', color: '#7c3aed', bg: '#f5f0ff' },
+                          ].map((dept, idx) => {
+                            const count = dbPortalMetrics.deptSessions?.[dept.key] || 0;
+                            const pct = dbPortalMetrics.totalSessions > 0
+                              ? Math.round((count / dbPortalMetrics.totalSessions) * 100) : 0;
+                            return (
+                              <div key={dept.key} className="db-top-row">
+                                <span className={'db-top-rank db-top-rank--' + (idx + 1)}>#{idx + 1}</span>
+                                <div className="db-top-icon" style={{ background: dept.bg, color: dept.color }}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                  </svg>
+                                </div>
+                                <div className="db-top-info">
+                                  <div className="db-top-name-row">
+                                    <span className="db-top-name">{dept.label}</span>
+                                    <span className="db-top-count" style={{ color: dept.color }}>{count} logins</span>
+                                  </div>
+                                  <div className="db-top-bar-bg">
+                                    <div className="db-top-bar-fill" style={{ width: pct + '%', background: dept.color }} />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <div className="db-summary-total" style={{ marginTop: 12 }}>
+                            <div>
+                              <p className="db-summary-total-label">Total Sessions</p>
+                              <p className="db-summary-total-sub">All departments · all time</p>
+                            </div>
+                            <span className="db-summary-total-val">{dbPortalMetrics.totalSessions ?? 0}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── Recent Activity ── */}
+                    <div className="db-panel">
+                      <div className="db-panel-header">
+                        <div className="db-panel-header-left">
+                          <div className="db-panel-icon db-panel-icon--green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="db-panel-title">Recent Activity</h3>
+                            <p className="db-panel-sub">Latest system visits from database</p>
+                          </div>
+                        </div>
+                        <span style={{
+                          fontSize: '0.72rem', fontWeight: 700, color: '#10813f',
+                          background: '#edf7f1', borderRadius: 20, padding: '2px 8px',
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                        }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10813f', display: 'inline-block' }} />
+                          Live
+                        </span>
+                      </div>
+                      {activityLoading ? (
+                        <div className="db-empty-state"><p>Loading…</p></div>
+                      ) : dbRecentVisits.length === 0 ? (
+                        <div className="db-empty-state">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          <p>No activity yet.</p>
+                          <span>Visits will appear here in real-time.</span>
+                        </div>
+                      ) : (
+                        <div className="db-activity-log">
+                          {dbRecentVisits.map((v, i) => {
+                            const sys = SYSTEMS.find(s => s.id === v.system_id);
+                            const diffMin = Math.round((Date.now() - new Date(v.visited_at).getTime()) / 60000);
+                            const timeStr = diffMin < 1 ? 'just now'
+                              : diffMin < 60 ? diffMin + 'm ago'
+                              : diffMin < 1440 ? Math.floor(diffMin / 60) + 'h ago'
+                              : new Date(v.visited_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            return (
+                              <div key={v.id ?? i} className="db-log-row">
+                                <div className="db-log-dot" style={{ background: sys?.color ?? '#9ca3af' }} />
+                                <div className="db-log-info">
+                                  <span className="db-log-label">{v.system_label}</span>
+                                  <span className="db-log-sub">{v.user_id ? 'by ' + v.user_id : 'anonymous visit'}</span>
+                                </div>
+                                <span className="db-log-time">{timeStr}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         )}
 
-        {/* ── ACTIVITY TAB: Fully separate section — all data from Supabase ── */}
-        {activeTab === 'activity' && (() => {
-          // Derive top systems from DB stats
-          const dbTotalClicks = dbPortalMetrics.totalClicks;
-          const dbTopSystems  = SYSTEMS
-            .map(s => ({ ...s, visits: dbVisitStats[s.id] || 0 }))
-            .sort((a, b) => b.visits - a.visits);
-
-          return (
-            <div className="db-activity-layout">
-
-              {/* Header */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                marginBottom: 4, padding: '4px 0 16px',
-                borderBottom: '1.5px solid #e5e7eb',
-              }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: '#fdf8ec', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#C8960C', flexShrink: 0,
-                }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F1422' }}>Activity</h2>
-                </div>
-                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {/* Live indicator */}
-                  <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    fontSize: '0.72rem', fontWeight: 700,
-                    background: '#edf7f1', color: '#10813f', borderRadius: 20,
-                    padding: '3px 10px', border: '1px solid #bbf7d0',
-                  }}>
-                    <span style={{
-                      width: 7, height: 7, borderRadius: '50%',
-                      background: '#10813f', display: 'inline-block',
-                      animation: 'pulse 2s infinite',
-                    }} />
-                    Live
-                  </span>
-                  <span style={{
-                    fontSize: '0.72rem', fontWeight: 700,
-                    background: '#fdf8ec', color: '#C8960C', borderRadius: 20,
-                    padding: '3px 10px', border: '1px solid #f5e6c0',
-                  }}>
-                    {activityLoading ? '…' : dbTotalClicks} clicks
-                  </span>
-                </div>
-              </div>
-
-              {/* ── Top Visited Systems ── */}
-              <div className="db-panel">
-                <div className="db-panel-header">
-                  <div className="db-panel-header-left">
-                    <div className="db-panel-icon db-panel-icon--gold">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="db-panel-title">Top Visited Systems</h3>
-                      <p className="db-panel-sub">Ranked by total clicks — all time</p>
-                    </div>
-                  </div>
-                  <span className="db-badge-pill db-badge-pill--gold">All time</span>
-                </div>
-
-                {activityLoading ? (
-                  <div className="db-empty-state"><p>Loading…</p></div>
-                ) : dbTotalClicks === 0 ? (
-                  <div className="db-empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                    </svg>
-                    <p>No system visits recorded yet.</p>
-                    <span>Visits will appear here when students click any service.</span>
-                  </div>
-                ) : (
-                  <div className="db-top-list">
-                    {dbTopSystems.map((sys, idx) => {
-                      const pct = dbTotalClicks > 0 ? Math.round((sys.visits / dbTotalClicks) * 100) : 0;
-                      return (
-                        <div key={sys.id} className="db-top-row">
-                          <span className={'db-top-rank db-top-rank--' + (idx + 1)}>#{idx + 1}</span>
-                          <div className="db-top-icon" style={{ background: sys.bg, color: sys.color }}>
-                            {sys.icon}
-                          </div>
-                          <div className="db-top-info">
-                            <div className="db-top-name-row">
-                              <span className="db-top-name">{sys.label}</span>
-                              <span className="db-top-count" style={{ color: sys.color }}>{sys.visits} visits</span>
-                            </div>
-                            <div className="db-top-bar-bg">
-                              <div className="db-top-bar-fill" style={{ width: pct + '%', background: sys.color }} />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <div className="db-activity-cols">
-
-                {/* ── Department Login Breakdown ── */}
-                <div className="db-panel">
-                  <div className="db-panel-header">
-                    <div className="db-panel-header-left">
-                      <div className="db-panel-icon db-panel-icon--blue">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                          <circle cx="9" cy="7" r="4"/>
-                          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="db-panel-title">Logins by Department</h3>
-                        <p className="db-panel-sub">All-time sessions per course</p>
-                      </div>
-                    </div>
-                    <span className="db-badge-pill db-badge-pill--blue">All time</span>
-                  </div>
-                  {activityLoading ? (
-                    <div className="db-empty-state"><p>Loading…</p></div>
-                  ) : dbPortalMetrics.totalSessions === 0 ? (
-                    <div className="db-empty-state">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                      </svg>
-                      <p>No login data yet.</p>
-                    </div>
-                  ) : (
-                    <div className="db-top-list">
-                      {[
-                        { key: 'BSIS',       label: 'BSIS',        color: '#002280', bg: '#eef1fb' },
-                        { key: 'BPA',        label: 'BPA',         color: '#C8102E', bg: '#fdf0f2' },
-                        { key: 'BTVTED-WFT', label: 'BTVTED-WFT', color: '#C8960C', bg: '#fdf8ec' },
-                        { key: 'BTVTED-CHS', label: 'BTVTED-CHS', color: '#7c3aed', bg: '#f5f0ff' },
-                      ].map((dept, idx) => {
-                        const count = dbPortalMetrics.deptSessions?.[dept.key] || 0;
-                        const pct = dbPortalMetrics.totalSessions > 0
-                          ? Math.round((count / dbPortalMetrics.totalSessions) * 100) : 0;
-                        return (
-                          <div key={dept.key} className="db-top-row">
-                            <span className={'db-top-rank db-top-rank--' + (idx + 1)}>#{idx + 1}</span>
-                            <div className="db-top-icon" style={{ background: dept.bg, color: dept.color }}>
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                              </svg>
-                            </div>
-                            <div className="db-top-info">
-                              <div className="db-top-name-row">
-                                <span className="db-top-name">{dept.label}</span>
-                                <span className="db-top-count" style={{ color: dept.color }}>{count} logins</span>
-                              </div>
-                              <div className="db-top-bar-bg">
-                                <div className="db-top-bar-fill" style={{ width: pct + '%', background: dept.color }} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div className="db-summary-total" style={{ marginTop: 12 }}>
-                        <div>
-                          <p className="db-summary-total-label">Total Sessions</p>
-                          <p className="db-summary-total-sub">All departments · all time</p>
-                        </div>
-                        <span className="db-summary-total-val">{dbPortalMetrics.totalSessions ?? 0}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* ── Recent Activity (from DB) ── */}
-                <div className="db-panel">
-                  <div className="db-panel-header">
-                    <div className="db-panel-header-left">
-                      <div className="db-panel-icon db-panel-icon--green">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"/>
-                          <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="db-panel-title">Recent Activity</h3>
-                        <p className="db-panel-sub">Latest system visits from database</p>
-                      </div>
-                    </div>
-                    <span style={{
-                      fontSize: '0.72rem', fontWeight: 700, color: '#10813f',
-                      background: '#edf7f1', borderRadius: 20, padding: '2px 8px',
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                    }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10813f', display: 'inline-block' }} />
-                      Live
-                    </span>
-                  </div>
-
-                  {activityLoading ? (
-                    <div className="db-empty-state"><p>Loading…</p></div>
-                  ) : dbRecentVisits.length === 0 ? (
-                    <div className="db-empty-state">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      <p>No activity yet.</p>
-                      <span>Visits will appear here in real-time.</span>
-                    </div>
-                  ) : (
-                    <div className="db-activity-log">
-                      {dbRecentVisits.map((v, i) => {
-                        const sys = SYSTEMS.find(s => s.id === v.system_id);
-                        const diffMin = Math.round((Date.now() - new Date(v.visited_at).getTime()) / 60000);
-                        const timeStr = diffMin < 1 ? 'just now'
-                          : diffMin < 60 ? diffMin + 'm ago'
-                          : diffMin < 1440 ? Math.floor(diffMin / 60) + 'h ago'
-                          : new Date(v.visited_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        return (
-                          <div key={v.id ?? i} className="db-log-row">
-                            <div className="db-log-dot" style={{ background: sys?.color ?? '#9ca3af' }} />
-                            <div className="db-log-info">
-                              <span className="db-log-label">{v.system_label}</span>
-                              <span className="db-log-sub">
-                                {v.user_id ? 'by ' + v.user_id : 'anonymous visit'}
-                              </span>
-                            </div>
-                            <span className="db-log-time">{timeStr}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-
+        {/* ── ACTIVITY TAB: Under Maintenance ── */}
+        {activeTab === 'activity' && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            minHeight: 400, padding: '60px 24px', textAlign: 'center',
+          }}>
+            <div style={{
+              width: 72, height: 72, borderRadius: 20, background: '#fdf8ec',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 20, color: '#C8960C',
+            }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+              </svg>
             </div>
-          );
-        })()}
+            <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0F1422' }}>Under Maintenance</h2>
+            <p style={{ margin: '8px 0 0', fontSize: '0.9rem', color: '#6b7280', maxWidth: 320 }}>
+              This section is currently being updated. Check back soon.
+            </p>
+          </div>
+        )}
 
 
 
