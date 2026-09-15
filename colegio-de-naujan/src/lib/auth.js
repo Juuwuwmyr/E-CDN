@@ -354,20 +354,25 @@ export async function getPortalMetrics() {
     .from('system_visits')
     .select('*', { count: 'exact', head: true });
 
-  // Unique days that had at least one session (approx via all login_at dates)
-  const { data: sessionDates } = await supabase
+  // Per-department session counts
+  const { data: courseSessions } = await supabase
     .from('portal_sessions')
-    .select('login_at');
+    .select('course');
 
-  const uniqueDays = new Set(
-    (sessionDates || []).map(r => r.login_at?.slice(0, 10))
-  ).size;
+  const deptSessions = {};
+  (courseSessions || []).forEach(r => {
+    const c = (r.course || '').toUpperCase();
+    if (c.includes('BSIS'))       deptSessions['BSIS']        = (deptSessions['BSIS']        || 0) + 1;
+    else if (c.includes('WFT'))   deptSessions['BTVTED-WFT']  = (deptSessions['BTVTED-WFT']  || 0) + 1;
+    else if (c.includes('CHS'))   deptSessions['BTVTED-CHS']  = (deptSessions['BTVTED-CHS']  || 0) + 1;
+    else if (c.includes('BPA'))   deptSessions['BPA']         = (deptSessions['BPA']         || 0) + 1;
+  });
 
   return {
     totalSessions: totalSessions || 0,
     todaySessions: todaySessions || 0,
     totalClicks:   totalClicks   || 0,
-    uniqueDays,
+    deptSessions,
   };
 }
 

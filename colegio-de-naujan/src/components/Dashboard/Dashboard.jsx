@@ -620,42 +620,74 @@ const Dashboard = ({ user, onLogout }) => {
 
               <div className="db-activity-cols">
 
-                {/* ── Visit Summary ── */}
+                {/* ── Department Login Breakdown ── */}
                 <div className="db-panel">
                   <div className="db-panel-header">
                     <div className="db-panel-header-left">
                       <div className="db-panel-icon db-panel-icon--blue">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="3" width="18" height="18" rx="2"/>
-                          <path d="M3 9h18M9 21V9"/>
+                          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                         </svg>
                       </div>
                       <div>
-                        <h3 className="db-panel-title">Visit Summary</h3>
-                        <p className="db-panel-sub">Per-system breakdown from database</p>
+                        <h3 className="db-panel-title">Logins by Department</h3>
+                        <p className="db-panel-sub">All-time sessions per course</p>
                       </div>
                     </div>
+                    <span className="db-badge-pill db-badge-pill--blue">All time</span>
                   </div>
-                  <div className="db-summary-grid">
-                    {SYSTEMS.map(sys => (
-                      <div key={sys.id} className="db-summary-cell" style={{ '--sc': sys.color, '--sc-bg': sys.bg }}>
-                        <div className="db-summary-icon" style={{ background: sys.bg, color: sys.color }}>
-                          {sys.icon}
+                  {activityLoading ? (
+                    <div className="db-empty-state"><p>Loading…</p></div>
+                  ) : dbPortalMetrics.totalSessions === 0 ? (
+                    <div className="db-empty-state">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                      </svg>
+                      <p>No login data yet.</p>
+                    </div>
+                  ) : (
+                    <div className="db-top-list">
+                      {[
+                        { key: 'BSIS',       label: 'BSIS',        color: '#002280', bg: '#eef1fb' },
+                        { key: 'BPA',        label: 'BPA',         color: '#C8102E', bg: '#fdf0f2' },
+                        { key: 'BTVTED-WFT', label: 'BTVTED-WFT', color: '#C8960C', bg: '#fdf8ec' },
+                        { key: 'BTVTED-CHS', label: 'BTVTED-CHS', color: '#7c3aed', bg: '#f5f0ff' },
+                      ].map((dept, idx) => {
+                        const count = dbPortalMetrics.deptSessions?.[dept.key] || 0;
+                        const pct = dbPortalMetrics.totalSessions > 0
+                          ? Math.round((count / dbPortalMetrics.totalSessions) * 100) : 0;
+                        return (
+                          <div key={dept.key} className="db-top-row">
+                            <span className={'db-top-rank db-top-rank--' + (idx + 1)}>#{idx + 1}</span>
+                            <div className="db-top-icon" style={{ background: dept.bg, color: dept.color }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                              </svg>
+                            </div>
+                            <div className="db-top-info">
+                              <div className="db-top-name-row">
+                                <span className="db-top-name">{dept.label}</span>
+                                <span className="db-top-count" style={{ color: dept.color }}>{count} logins</span>
+                              </div>
+                              <div className="db-top-bar-bg">
+                                <div className="db-top-bar-fill" style={{ width: pct + '%', background: dept.color }} />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="db-summary-total" style={{ marginTop: 12 }}>
+                        <div>
+                          <p className="db-summary-total-label">Total Sessions</p>
+                          <p className="db-summary-total-sub">All departments · all time</p>
                         </div>
-                        <p className="db-summary-count" style={{ color: sys.color }}>
-                          {activityLoading ? '…' : (dbVisitStats[sys.id] || 0)}
-                        </p>
-                        <p className="db-summary-name">{sys.label.split(' ')[0]}</p>
+                        <span className="db-summary-total-val">{dbPortalMetrics.totalSessions ?? 0}</span>
                       </div>
-                    ))}
-                  </div>
-                  <div className="db-summary-total">
-                    <div>
-                      <p className="db-summary-total-label">Total System Clicks</p>
-                      <p className="db-summary-total-sub">All systems · all time · from database</p>
                     </div>
-                    <span className="db-summary-total-val">{activityLoading ? '…' : dbTotalClicks}</span>
-                  </div>
+                  )}
                 </div>
 
                 {/* ── Recent Activity (from DB) ── */}
@@ -720,41 +752,50 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               </div>
 
-              {/* ── Portal Metrics (all from DB) ── */}
+              {/* ── Quick Admin Actions ── */}
               <div className="db-panel db-portal-metrics">
                 <div className="db-panel-header">
                   <div className="db-panel-header-left">
                     <div className="db-panel-icon db-panel-icon--purple">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M12 2v2M12 20v2M4.93 4.93l1.41 1.41M18.66 18.66l1.41 1.41M2 12h2M20 12h2"/>
                       </svg>
                     </div>
                     <div>
-                      <h3 className="db-panel-title">Portal Metrics</h3>
-                      <p className="db-panel-sub">Overall CDN E-Portal engagement</p>
+                      <h3 className="db-panel-title">Quick Actions</h3>
+                      <p className="db-panel-sub">Shortcuts to admin tools</p>
                     </div>
                   </div>
                 </div>
                 <div className="db-metrics-grid">
                   {[
-                    { label: 'Total Login Sessions', value: dbPortalMetrics.totalSessions, color: '#002280',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
-                    { label: 'Logins Today', value: dbPortalMetrics.todaySessions, color: '#10813f',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-                    { label: 'System Clicks', value: dbPortalMetrics.totalClicks, color: '#C8960C',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
-                    { label: 'Active Days', value: dbPortalMetrics.uniqueDays, color: '#7c3aed',
-                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+                    {
+                      label: 'View Login History', color: '#002280', bg: '#eef1fb',
+                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+                      onClick: () => window.location.href = '/dashboard/history',
+                    },
+                    {
+                      label: 'CSC Services', color: '#C8102E', bg: '#fdf0f2',
+                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h10M7 12h6"/></svg>,
+                      onClick: () => window.open('https://student-fines-hub-vf9z.vercel.app/', '_blank'),
+                    },
+                    {
+                      label: 'OSAS Services', color: '#C8960C', bg: '#fdf8ec',
+                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>,
+                      onClick: () => window.open('https://osas-sys.duckdns.org/', '_blank'),
+                    },
+                    {
+                      label: 'Admission Portal', color: '#7c3aed', bg: '#f5f0ff',
+                      icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+                      onClick: () => window.open('https://ecnesis.duckdns.org/', '_blank'),
+                    },
                   ].map(m => (
-                    <div key={m.label} className="db-metric-card">
-                      <div className="db-metric-icon" style={{ color: m.color }}>{m.icon}</div>
-                      <p className="db-metric-val" style={{ color: m.color }}>
-                        {activityLoading ? '…' : m.value}
-                      </p>
-                      <p className="db-metric-label">{m.label}</p>
-                    </div>
+                    <button key={m.label} className="db-metric-card" onClick={m.onClick}
+                      style={{ cursor: 'pointer', border: 'none', background: 'white', textAlign: 'center' }}>
+                      <div className="db-metric-icon" style={{ color: m.color, background: m.bg, borderRadius: 10, padding: 8, display: 'inline-flex' }}>{m.icon}</div>
+                      <p className="db-metric-label" style={{ marginTop: 8, fontWeight: 600, color: '#0F1422' }}>{m.label}</p>
+                    </button>
                   ))}
                 </div>
               </div>
