@@ -592,8 +592,8 @@ const Dashboard = ({ user, onLogout }) => {
                             </svg>
                           </div>
                           <div>
-                            <h3 className="db-panel-title">Recent Activity</h3>
-                            <p className="db-panel-sub">Latest system visits from database</p>
+                            <h3 className="db-panel-title">Student System Access Log</h3>
+                            <p className="db-panel-sub">Who visited which system — real-time</p>
                           </div>
                         </div>
                         <span style={{
