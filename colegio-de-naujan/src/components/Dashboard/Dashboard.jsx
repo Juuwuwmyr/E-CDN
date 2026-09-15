@@ -541,7 +541,6 @@ const Dashboard = ({ user, onLogout }) => {
                         </div>
                         <div>
                           <h3 className="db-panel-title">Top Visited Systems</h3>
-                          <p className="db-panel-sub"></p>
                         </div>
                       </div>
                       <span className="db-badge-pill db-badge-pill--gold">All time</span>
@@ -593,7 +592,6 @@ const Dashboard = ({ user, onLogout }) => {
                           </div>
                           <div>
                             <h3 className="db-panel-title">Student System Access Log</h3>
-                            <p className="db-panel-sub"></p>
                           </div>
                         </div>
                         <span style={{

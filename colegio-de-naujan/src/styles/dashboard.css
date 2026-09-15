@@ -233,7 +233,7 @@
 }
 .db-panel-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:1.25rem 1.4rem 0; gap:.75rem;
+  padding:.9rem 1.4rem .75rem; gap:.75rem;
 }
 .db-panel-header-left { display:flex; align-items:center; gap:.85rem; }
 .db-panel-icon {
@@ -246,7 +246,7 @@
 .db-panel-icon--green  { background:#edf7f1; color:#10813f; }
 .db-panel-icon--purple { background:#f5f0ff; color:#7c3aed; }
 .db-panel-icon svg { width:20px; height:20px; }
-.db-panel-title { font-size:.92rem; font-weight:800; color:#0f1724; margin:0 0 2px; }
+.db-panel-title { font-size:.92rem; font-weight:800; color:#0f1724; margin:0; }
 .db-panel-sub   { font-size:.73rem; color:#9ca3af; font-weight:500; margin:0; }
 
 .db-badge-pill {
@@ -682,7 +682,7 @@
   .db-banner-title { font-size:1.2rem; }
   .db-banner-deco { display:none; }
 
-  .db-panel-header { padding:1rem 1rem 0; }
+  .db-panel-header { padding:.75rem 1rem .6rem; }
 
   /* Category icons smaller on mobile */
   .db-cat-item { padding:.5rem .65rem; min-width:60px; }
