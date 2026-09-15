@@ -33,6 +33,8 @@ const getFallbackReply = (text) => {
 };
 
 async function askGroq(messages) {
+  console.log('[CDN Chatbot] API Key loaded:', GROQ_API_KEY ? `${GROQ_API_KEY.slice(0, 8)}...` : 'MISSING');
+
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -50,7 +52,11 @@ async function askGroq(messages) {
     }),
   });
 
-  if (!res.ok) throw new Error(`Groq error: ${res.status}`);
+  if (!res.ok) {
+    const errBody = await res.text();
+    console.error('[CDN Chatbot] Groq API error:', res.status, errBody);
+    throw new Error(`Groq error: ${res.status}`);
+  }
   const data = await res.json();
   return data.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not process that.';
 }
