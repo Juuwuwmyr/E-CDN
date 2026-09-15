@@ -1,7 +1,13 @@
 {
   "buildCommand": "cd colegio-de-naujan && npm install && npm run build",
   "outputDirectory": "colegio-de-naujan/dist",
+  "functions": {
+    "colegio-de-naujan/api/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/colegio-de-naujan/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
