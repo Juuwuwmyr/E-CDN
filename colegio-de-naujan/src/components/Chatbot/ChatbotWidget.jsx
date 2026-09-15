@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import '../../styles/chatbot.css';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-
 const SYSTEM_PROMPT = `You are the CDN Portal Assistant for Colegio De Naujan (CDN) in Naujan, Oriental Mindoro, Philippines.
 You help students and staff with questions about:
 - Student Fines (CSC Services) — check and settle outstanding fines at https://student-fines-hub-vf9z.vercel.app/
@@ -33,26 +31,20 @@ const getFallbackReply = (text) => {
 };
 
 async function askGroq(messages) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages,
       ],
-      max_tokens: 300,
-      temperature: 0.7,
     }),
   });
 
-  if (!res.ok) throw new Error(`Groq error: ${res.status}`);
+  if (!res.ok) throw new Error(`Chat API error: ${res.status}`);
   const data = await res.json();
-  return data.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not process that.';
+  return data.reply ?? 'Sorry, I could not process that.';
 }
 
 export default function ChatbotWidget() {
