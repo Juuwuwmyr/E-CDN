@@ -294,12 +294,13 @@ export default function FacebookFeed() {
           {/* ── Sidebar — stacks below on mobile, aside on desktop ── */}
           <div className="w-full lg:w-72 flex flex-col gap-3 sm:gap-4">
 
-            {/* Mobile: horizontal scroll row of page cards */}
-            <div className="flex lg:flex-col gap-3 overflow-x-auto pb-1 lg:overflow-visible lg:pb-0"
+            {/* Mobile: compact horizontal chips / Desktop: full cards */}
+            <div className="flex lg:flex-col gap-2 lg:gap-3 overflow-x-auto pb-1 lg:overflow-visible lg:pb-0"
               style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
               {PAGES.map((page, i) => {
                 const isActive = active === i;
                 return (
+                  /* ── Mobile: slim chip row ── Desktop: full card ── */
                   <div
                     key={page.id}
                     onClick={() => setActive(i)}
@@ -307,55 +308,88 @@ export default function FacebookFeed() {
                     role="button"
                     tabIndex={0}
                     aria-label={`Switch to ${page.label}`}
-                    className="rounded-2xl p-4 sm:p-5 flex flex-col gap-3 cursor-pointer transition-all duration-200 flex-shrink-0 lg:flex-shrink"
+                    className="cursor-pointer transition-all duration-200 flex-shrink-0 lg:flex-shrink"
                     style={{
-                      minWidth: 200,
+                      /* mobile chip */
+                      borderRadius: 14,
                       background: isActive ? page.color : '#fff',
                       border: `1.5px solid ${isActive ? page.color : '#e5e7eb'}`,
-                      boxShadow: isActive ? `0 8px 28px ${page.color}33` : '0 2px 8px rgba(0,0,0,0.05)',
-                      transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
+                      boxShadow: isActive ? `0 4px 16px ${page.color}33` : '0 1px 4px rgba(0,0,0,0.05)',
                     }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: isActive ? 'rgba(255,255,255,0.2)' : page.bg }}
+                    {/* ── Mobile chip (lg:hidden) ── */}
+                    <div className="flex lg:hidden items-center gap-2 px-3 py-2">
+                      <span style={{ color: isActive ? '#fff' : page.color, opacity: isActive ? 1 : 0.7 }}>
+                        {FB_ICON(13)}
+                      </span>
+                      <span className="font-bold whitespace-nowrap"
+                        style={{ fontSize: '0.78rem', color: isActive ? '#fff' : '#374151' }}>
+                        {page.short}
+                      </span>
+                      <a
+                        href={page.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="ml-2 flex items-center gap-1 font-bold rounded-lg px-2.5 py-1 flex-shrink-0"
+                        style={{
+                          fontSize: '0.68rem',
+                          background: isActive ? 'rgba(255,255,255,0.2)' : page.bg,
+                          color: isActive ? '#fff' : page.color,
+                          border: isActive ? '1px solid rgba(255,255,255,0.3)' : `1px solid ${page.color}22`,
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap',
+                        }}
                       >
-                        <span style={{ color: isActive ? '#fff' : page.color }}>{FB_ICON(15)}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="font-bold leading-tight truncate"
-                          style={{ fontSize: '0.85rem', color: isActive ? '#fff' : '#0F1422' }}>
-                          {page.label}
-                        </span>
-                        <span style={{ fontSize: '0.7rem', color: isActive ? 'rgba(255,255,255,0.75)' : '#9ca3af' }}>
-                          {page.description}
-                        </span>
-                      </div>
-                      {isActive && (
-                        <span className="ml-auto px-2 py-0.5 rounded-full font-bold flex-shrink-0"
-                          style={{ fontSize: '0.58rem', background: 'rgba(255,255,255,0.2)', color: '#fff', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                          Viewing
-                        </span>
-                      )}
+                        {FB_ICON(10)}
+                        Follow
+                      </a>
                     </div>
-                    <a
-                      href={page.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      className="flex items-center justify-center gap-2 font-bold rounded-xl py-2 transition-all"
-                      style={{
-                        fontSize: '0.75rem',
-                        background: isActive ? 'rgba(255,255,255,0.18)' : page.bg,
-                        color: isActive ? '#fff' : page.color,
-                        border: isActive ? '1px solid rgba(255,255,255,0.25)' : `1px solid ${page.color}33`,
-                        textDecoration: 'none',
-                      }}
-                    >
-                      {FB_ICON(11)}
-                      Follow Page
-                    </a>
+
+                    {/* ── Desktop full card (hidden on mobile) ── */}
+                    <div className="hidden lg:flex flex-col gap-3 p-5"
+                      style={{ transform: isActive ? 'translateY(-2px)' : 'translateY(0)' }}>
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: isActive ? 'rgba(255,255,255,0.2)' : page.bg }}
+                        >
+                          <span style={{ color: isActive ? '#fff' : page.color }}>{FB_ICON(15)}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <span className="font-bold leading-tight truncate"
+                            style={{ fontSize: '0.85rem', color: isActive ? '#fff' : '#0F1422' }}>
+                            {page.label}
+                          </span>
+                          <span style={{ fontSize: '0.7rem', color: isActive ? 'rgba(255,255,255,0.75)' : '#9ca3af' }}>
+                            {page.description}
+                          </span>
+                        </div>
+                        {isActive && (
+                          <span className="ml-auto px-2 py-0.5 rounded-full font-bold flex-shrink-0"
+                            style={{ fontSize: '0.58rem', background: 'rgba(255,255,255,0.2)', color: '#fff', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                            Viewing
+                          </span>
+                        )}
+                      </div>
+                      <a
+                        href={page.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="flex items-center justify-center gap-2 font-bold rounded-xl py-2 transition-all"
+                        style={{
+                          fontSize: '0.75rem',
+                          background: isActive ? 'rgba(255,255,255,0.18)' : page.bg,
+                          color: isActive ? '#fff' : page.color,
+                          border: isActive ? '1px solid rgba(255,255,255,0.25)' : `1px solid ${page.color}33`,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        {FB_ICON(11)}
+                        Follow Page
+                      </a>
+                    </div>
                   </div>
                 );
               })}
