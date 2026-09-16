@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 const FB_ICON = (size = 14) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -36,26 +36,48 @@ const PAGES = [
   },
 ];
 
-function FbEmbed({ url, active }) {
-  const ref = useRef(null);
+/* Measures the container and returns a pixel width capped to 560 */
+function useContainerWidth(ref) {
+  const [width, setWidth] = useState(500);
 
   useEffect(() => {
-    if (!active) return;
-    const timer = setTimeout(() => {
-      if (window.FB && ref.current) {
-        window.FB.XFBML.parse(ref.current);
+    const measure = () => {
+      if (ref.current) {
+        // subtract card padding (2 × 20px)
+        const w = Math.min(ref.current.offsetWidth - 40, 560);
+        setWidth(Math.max(w, 180)); // never below 180
       }
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [active, url]);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (ref.current) ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [ref]);
+
+  return width;
+}
+
+function FbEmbed({ url, active, containerWidth }) {
+  const ref = useRef(null);
+
+  const parse = useCallback(() => {
+    if (window.FB && ref.current) window.FB.XFBML.parse(ref.current);
+  }, []);
+
+  // Re-parse when tab becomes visible or width changes
+  useEffect(() => {
+    if (!active) return;
+    const t = setTimeout(parse, 150);
+    return () => clearTimeout(t);
+  }, [active, containerWidth, parse]);
 
   return (
-    <div ref={ref} className="w-full flex justify-center">
+    <div ref={ref} className="w-full flex justify-center overflow-hidden">
       <div
         className="fb-page"
         data-href={url}
         data-tabs="timeline,events"
-        data-width="560"
+        data-width={String(containerWidth)}
         data-height="620"
         data-small-header="true"
         data-adapt-container-width="true"
@@ -69,6 +91,8 @@ function FbEmbed({ url, active }) {
 export default function FacebookFeed() {
   const [active, setActive] = useState(0);
   const sdkLoaded = useRef(false);
+  const feedCardRef = useRef(null);
+  const containerWidth = useContainerWidth(feedCardRef);
 
   useEffect(() => {
     if (sdkLoaded.current) return;
@@ -95,25 +119,23 @@ export default function FacebookFeed() {
     >
       <div id="fb-root" />
 
-      {/* Subtle background decoration */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
+      {/* Background dot grid */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: 'radial-gradient(circle, rgba(0,34,128,0.035) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
         }}
       />
-      {/* Colour blobs */}
-      <div aria-hidden="true" className="absolute top-0 right-0 pointer-events-none"
-        style={{ width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,34,128,0.06) 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
-      <div aria-hidden="true" className="absolute bottom-0 left-0 pointer-events-none"
-        style={{ width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,16,46,0.05) 0%, transparent 70%)', transform: 'translate(-30%, 30%)' }} />
+      {/* Colour blobs — hidden on mobile to keep it clean */}
+      <div aria-hidden="true" className="hidden sm:block absolute top-0 right-0 pointer-events-none"
+        style={{ width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,34,128,0.06) 0%, transparent 70%)', transform: 'translate(30%,-30%)' }} />
+      <div aria-hidden="true" className="hidden sm:block absolute bottom-0 left-0 pointer-events-none"
+        style={{ width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,16,46,0.05) 0%, transparent 70%)', transform: 'translate(-30%,30%)' }} />
 
       <div className="cdn-container relative z-10">
 
-        {/* ── Header ── */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-12">
+        {/* ── Section header ── */}
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-8">
           <div className="flex flex-col gap-3">
             <div
               className="inline-flex items-center gap-2 w-fit px-3.5 py-1.5 rounded-md text-[0.68rem] font-extrabold uppercase tracking-[2px]"
@@ -132,7 +154,7 @@ export default function FacebookFeed() {
             </p>
           </div>
 
-          {/* Desktop: page switcher pills */}
+          {/* Desktop pill switcher */}
           <div
             className="hidden lg:flex items-center gap-1 p-1 rounded-xl flex-shrink-0"
             style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid #e5e7eb', backdropFilter: 'blur(8px)' }}
@@ -152,10 +174,8 @@ export default function FacebookFeed() {
                     background: isActive ? page.color : 'transparent',
                     color: isActive ? '#fff' : '#6b7280',
                     boxShadow: isActive ? `0 3px 12px ${page.color}44` : 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    letterSpacing: '0.2px',
-                    whiteSpace: 'nowrap',
+                    border: 'none', cursor: 'pointer',
+                    letterSpacing: '0.2px', whiteSpace: 'nowrap',
                   }}
                 >
                   <span style={{ opacity: isActive ? 1 : 0.6 }}>{FB_ICON(12)}</span>
@@ -168,8 +188,8 @@ export default function FacebookFeed() {
 
         {/* ── Mobile tab bar ── */}
         <div
-          className="flex lg:hidden gap-2 mb-6 overflow-x-auto pb-1"
-          style={{ scrollbarWidth: 'none' }}
+          className="flex lg:hidden gap-2 mb-5 overflow-x-auto pb-1"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           role="tablist"
         >
           {PAGES.map((page, i) => {
@@ -180,9 +200,9 @@ export default function FacebookFeed() {
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActive(i)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold flex-shrink-0 transition-all duration-200"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold flex-shrink-0 transition-all duration-200"
                 style={{
-                  fontSize: '0.78rem',
+                  fontSize: '0.75rem',
                   background: isActive ? page.color : '#fff',
                   color: isActive ? '#fff' : '#6b7280',
                   border: `1.5px solid ${isActive ? page.color : '#e5e7eb'}`,
@@ -190,18 +210,19 @@ export default function FacebookFeed() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ opacity: isActive ? 1 : 0.5 }}>{FB_ICON(12)}</span>
+                <span style={{ opacity: isActive ? 1 : 0.5 }}>{FB_ICON(11)}</span>
                 {page.short}
               </button>
             );
           })}
         </div>
 
-        {/* ── Main content ── */}
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* ── Main layout ── */}
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
 
           {/* ── Feed card ── */}
           <div
+            ref={feedCardRef}
             className="w-full lg:flex-1 rounded-2xl overflow-hidden flex flex-col"
             style={{
               background: '#fff',
@@ -209,58 +230,55 @@ export default function FacebookFeed() {
               boxShadow: '0 8px 40px rgba(0,34,128,0.09)',
             }}
           >
-            {/* Card top bar */}
+            {/* Coloured header bar */}
             <div
-              className="flex items-center gap-3 px-5 py-4"
-              style={{
-                background: `linear-gradient(135deg, ${current.color} 0%, ${current.color}cc 100%)`,
-              }}
+              className="flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 sm:py-4"
+              style={{ background: `linear-gradient(135deg, ${current.color} 0%, ${current.color}cc 100%)` }}
             >
-              {/* Dot strip */}
-              <div className="flex gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(255,255,255,0.35)' }} />
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(255,255,255,0.35)' }} />
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'rgba(255,255,255,0.35)' }} />
+              <div className="flex gap-1 sm:gap-1.5">
+                {[0,1,2].map(n => (
+                  <span key={n} className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full"
+                    style={{ background: 'rgba(255,255,255,0.35)' }} />
+                ))}
               </div>
-              <div className="flex items-center gap-2 ml-2">
-                <span style={{ color: '#fff', opacity: 0.9 }}>{FB_ICON(13)}</span>
-                <span className="font-bold text-white" style={{ fontSize: '0.85rem' }}>
+              <div className="flex items-center gap-2 ml-1 sm:ml-2 min-w-0">
+                <span style={{ color: '#fff', opacity: 0.9, flexShrink: 0 }}>{FB_ICON(13)}</span>
+                <span className="font-bold text-white truncate" style={{ fontSize: '0.82rem' }}>
                   {current.label}
                 </span>
               </div>
-              {/* Live badge */}
-              <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)' }}>
+              <div className="ml-auto flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-full flex-shrink-0"
+                style={{ background: 'rgba(255,255,255,0.18)' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400"
                   style={{ animation: 'pulse 2s infinite' }} />
-                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#fff', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: '#fff', letterSpacing: '1px', textTransform: 'uppercase' }}>
                   Live
                 </span>
               </div>
             </div>
 
-            {/* Embed area */}
-            <div className="p-5 flex-1" style={{ minHeight: 640 }}>
+            {/* Embed */}
+            <div className="p-3 sm:p-5 flex-1 overflow-hidden" style={{ minHeight: 500 }}>
               {PAGES.map((page, i) => (
                 <div key={page.id} style={{ display: active === i ? 'block' : 'none' }}>
-                  <FbEmbed url={page.url} active={active === i} />
+                  <FbEmbed url={page.url} active={active === i} containerWidth={containerWidth} />
                 </div>
               ))}
             </div>
 
-            {/* Card footer */}
+            {/* Footer */}
             <div
-              className="flex items-center justify-between px-5 py-3"
+              className="flex items-center justify-between px-4 sm:px-5 py-2.5 sm:py-3 flex-wrap gap-2"
               style={{ borderTop: '1px solid #f0f0f0', background: '#fafafa' }}
             >
-              <span style={{ fontSize: '0.72rem', color: '#9ca3af' }}>
+              <span style={{ fontSize: '0.68rem', color: '#9ca3af' }}>
                 Powered by Facebook Page Plugin
               </span>
               <a
                 href={current.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 font-bold transition-colors"
+                className="flex items-center gap-1.5 font-bold"
                 style={{ fontSize: '0.75rem', color: current.color, textDecoration: 'none' }}
               >
                 Open in Facebook
@@ -273,101 +291,86 @@ export default function FacebookFeed() {
             </div>
           </div>
 
-          {/* ── Right sidebar ── */}
-          <div className="flex flex-col gap-4 lg:w-72 w-full">
+          {/* ── Sidebar — stacks below on mobile, aside on desktop ── */}
+          <div className="w-full lg:w-72 flex flex-col gap-3 sm:gap-4">
 
-            {/* Page cards */}
-            {PAGES.map((page, i) => {
-              const isActive = active === i;
-              return (
-                <div
-                  key={page.id}
-                  onClick={() => setActive(i)}
-                  onKeyDown={e => e.key === 'Enter' && setActive(i)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Switch to ${page.label}`}
-                  className="rounded-2xl p-5 flex flex-col gap-3 cursor-pointer transition-all duration-200"
-                  style={{
-                    background: isActive ? page.color : '#fff',
-                    border: `1.5px solid ${isActive ? page.color : '#e5e7eb'}`,
-                    boxShadow: isActive
-                      ? `0 8px 28px ${page.color}33`
-                      : '0 2px 8px rgba(0,0,0,0.05)',
-                    transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
-                  }}
-                >
-                  {/* Icon + label */}
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: isActive ? 'rgba(255,255,255,0.2)' : page.bg }}
-                    >
-                      <span style={{ color: isActive ? '#fff' : page.color }}>
-                        {FB_ICON(16)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span
-                        className="font-bold leading-tight"
-                        style={{ fontSize: '0.88rem', color: isActive ? '#fff' : '#0F1422' }}
-                      >
-                        {page.label}
-                      </span>
-                      <span
-                        style={{ fontSize: '0.72rem', color: isActive ? 'rgba(255,255,255,0.75)' : '#9ca3af' }}
-                      >
-                        {page.description}
-                      </span>
-                    </div>
-                    {isActive && (
-                      <div className="ml-auto flex-shrink-0">
-                        <span
-                          className="px-2 py-0.5 rounded-full font-bold"
-                          style={{ fontSize: '0.6rem', background: 'rgba(255,255,255,0.2)', color: '#fff', letterSpacing: '0.5px', textTransform: 'uppercase' }}
-                        >
-                          Viewing
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Follow button */}
-                  <a
-                    href={page.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={e => e.stopPropagation()}
-                    className="flex items-center justify-center gap-2 font-bold rounded-xl py-2 transition-all"
+            {/* Mobile: horizontal scroll row of page cards */}
+            <div className="flex lg:flex-col gap-3 overflow-x-auto pb-1 lg:overflow-visible lg:pb-0"
+              style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+              {PAGES.map((page, i) => {
+                const isActive = active === i;
+                return (
+                  <div
+                    key={page.id}
+                    onClick={() => setActive(i)}
+                    onKeyDown={e => e.key === 'Enter' && setActive(i)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Switch to ${page.label}`}
+                    className="rounded-2xl p-4 sm:p-5 flex flex-col gap-3 cursor-pointer transition-all duration-200 flex-shrink-0 lg:flex-shrink"
                     style={{
-                      fontSize: '0.78rem',
-                      background: isActive ? 'rgba(255,255,255,0.18)' : page.bg,
-                      color: isActive ? '#fff' : page.color,
-                      border: isActive ? '1px solid rgba(255,255,255,0.25)' : `1px solid ${page.color}33`,
-                      textDecoration: 'none',
+                      minWidth: 200,
+                      background: isActive ? page.color : '#fff',
+                      border: `1.5px solid ${isActive ? page.color : '#e5e7eb'}`,
+                      boxShadow: isActive ? `0 8px 28px ${page.color}33` : '0 2px 8px rgba(0,0,0,0.05)',
+                      transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
                     }}
                   >
-                    {FB_ICON(11)}
-                    Follow Page
-                  </a>
-                </div>
-              );
-            })}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: isActive ? 'rgba(255,255,255,0.2)' : page.bg }}
+                      >
+                        <span style={{ color: isActive ? '#fff' : page.color }}>{FB_ICON(15)}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="font-bold leading-tight truncate"
+                          style={{ fontSize: '0.85rem', color: isActive ? '#fff' : '#0F1422' }}>
+                          {page.label}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: isActive ? 'rgba(255,255,255,0.75)' : '#9ca3af' }}>
+                          {page.description}
+                        </span>
+                      </div>
+                      {isActive && (
+                        <span className="ml-auto px-2 py-0.5 rounded-full font-bold flex-shrink-0"
+                          style={{ fontSize: '0.58rem', background: 'rgba(255,255,255,0.2)', color: '#fff', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                          Viewing
+                        </span>
+                      )}
+                    </div>
+                    <a
+                      href={page.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="flex items-center justify-center gap-2 font-bold rounded-xl py-2 transition-all"
+                      style={{
+                        fontSize: '0.75rem',
+                        background: isActive ? 'rgba(255,255,255,0.18)' : page.bg,
+                        color: isActive ? '#fff' : page.color,
+                        border: isActive ? '1px solid rgba(255,255,255,0.25)' : `1px solid ${page.color}33`,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      {FB_ICON(11)}
+                      Follow Page
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
 
-            {/* Ad blocker tip */}
-            <div
-              className="rounded-xl p-4 flex gap-3"
-              style={{ background: '#fff', border: '1px solid #f0f0f0' }}
-            >
-              <div className="flex-shrink-0 mt-0.5">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-              </div>
+            {/* Ad blocker note */}
+            <div className="rounded-xl p-3 sm:p-4 flex gap-3"
+              style={{ background: '#fff', border: '1px solid #f0f0f0' }}>
+              <svg className="flex-shrink-0 mt-0.5" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
               <p style={{ fontSize: '0.7rem', color: '#9ca3af', lineHeight: 1.65, margin: 0 }}>
-                Feed not showing? You may have an ad blocker active. Use the <strong>Follow Page</strong> buttons above to visit us directly on Facebook.
+                Feed not showing? You may have an ad blocker active. Use the <strong>Follow Page</strong> buttons to visit us directly on Facebook.
               </p>
             </div>
 
