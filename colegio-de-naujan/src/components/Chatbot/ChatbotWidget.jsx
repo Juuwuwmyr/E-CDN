@@ -1,65 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import '../../styles/chatbot.css';
-
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-
-const SYSTEM_PROMPT = `You are the CDN Portal Assistant for Colegio De Naujan (CDN) in Naujan, Oriental Mindoro, Philippines.
-You help students and staff with questions about:
-- Student Fines (CSC Services) — check and settle outstanding fines at https://student-fines-hub-vf9z.vercel.app/
-- OSAS Records — conduct and violation tracking at https://osas-sys.duckdns.org/
-- Admissions (ECNESIS Portal) — online enrollment at https://ecnesis.duckdns.org/
-- Login help — students use their student number + last name (or registered password)
-- General CDN portal questions
-
-Keep responses concise, friendly, and helpful. Use Filipino-English (Taglish) if the user writes in Filipino. 
-Do not answer questions unrelated to CDN or the portal. 
-If asked about something outside CDN, politely redirect to CDN-related topics.`;
+import { sendToGroq } from '../../lib/groqChat';
 
 const FALLBACK_REPLIES = {
   fines:     'You can check and settle your student fines at the CSC Services portal.',
   osas:      'OSAS handles violation tracking. Access your records through the OSAS Services portal.',
   admission: 'For admissions and enrollment, visit the Admissions (ECNESIS) portal.',
   login:     'Use your student number as username and your last name (or registered password) to sign in.',
-  help:      'You can access all CDN systems from the portal dashboard. Ask me anything!',
 };
 
 const getFallbackReply = (text) => {
   const t = text.toLowerCase();
-  if (t.includes('fine') || t.includes('csc'))                  return FALLBACK_REPLIES.fines;
-  if (t.includes('osas') || t.includes('viol'))                 return FALLBACK_REPLIES.osas;
-  if (t.includes('admiss') || t.includes('enroll'))             return FALLBACK_REPLIES.admission;
-  if (t.includes('login') || t.includes('pass'))                return FALLBACK_REPLIES.login;
-  return "I'm not sure about that. Try asking about fines, OSAS, admissions, or login help.";
+  if (t.includes('fine') || t.includes('csc'))      return FALLBACK_REPLIES.fines;
+  if (t.includes('osas') || t.includes('viol'))     return FALLBACK_REPLIES.osas;
+  if (t.includes('admiss') || t.includes('enroll')) return FALLBACK_REPLIES.admission;
+  if (t.includes('login') || t.includes('pass'))    return FALLBACK_REPLIES.login;
+  return 'Sorry, I could not connect to the assistant. Please try again.';
 };
-
-async function askGroq(messages) {
-  console.log('[CDN Chatbot] API Key loaded:', GROQ_API_KEY ? `${GROQ_API_KEY.slice(0, 8)}...` : 'MISSING');
-
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'openai/gpt-oss-20b',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...messages,
-      ],
-      max_tokens: 300,
-      temperature: 0.7,
-    }),
-  });
-
-  if (!res.ok) {
-    const errBody = await res.text();
-    console.error('[CDN Chatbot] Groq API error:', res.status, errBody);
-    throw new Error(`Groq error: ${res.status}`);
-  }
-  const data = await res.json();
-  return data.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not process that.';
-}
 
 export default function ChatbotWidget() {
   const [open,     setOpen]     = useState(false);
@@ -88,11 +45,10 @@ export default function ChatbotWidget() {
       .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.text }));
 
     try {
-      const reply = await askGroq(history);
+      const reply = await sendToGroq(history);
       setMessages(m => [...m, { role: 'assistant', text: reply }]);
     } catch (err) {
       console.error('Groq error:', err);
-      // Fallback to keyword replies if API fails
       setMessages(m => [...m, { role: 'assistant', text: getFallbackReply(text) }]);
     } finally {
       setLoading(false);

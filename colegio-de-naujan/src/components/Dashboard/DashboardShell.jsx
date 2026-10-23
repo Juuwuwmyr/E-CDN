@@ -372,7 +372,28 @@ const DashboardShell = ({ user, onLogout, activeTab, onTabChange, onRoute, onDro
 
             <div className="db-chat-prompts">
               {['Check fines', 'OSAS records', 'Admission info', 'Login help'].map(p => (
-                <button key={p} className="db-chat-prompt" onClick={() => setChatInput(p)}>{p}</button>
+                <button
+                  key={p}
+                  className="db-chat-prompt"
+                  onClick={() => {
+                    setChatInput(p);
+                    setTimeout(() => {
+                      const text = p.trim();
+                      if (!text) return;
+                      const userMsg = { from: 'user', text };
+                      setChatMessages(m => [...m, userMsg]);
+                      setChatInput('');
+                      setChatLoading(true);
+                      const history = [...chatMessages, userMsg]
+                        .slice(-6)
+                        .map(m => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.text }));
+                      sendToGroq(history)
+                        .then(reply => setChatMessages(m => [...m, { from: 'bot', text: reply }]))
+                        .catch(() => setChatMessages(m => [...m, { from: 'bot', text: 'Sorry, the assistant is temporarily unavailable.' }]))
+                        .finally(() => setChatLoading(false));
+                    }, 0);
+                  }}
+                >{p}</button>
               ))}
             </div>
 

@@ -3,6 +3,7 @@ import cdnLogo   from '../../assets/images/logo.png';
 import bagongLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 import '../../styles/dashboard.css';
 import { recordLogoutSession, recordSystemVisit } from '../../lib/auth';
+import { sendToGroq } from '../../lib/groqChat';
 
 
 
@@ -90,19 +91,28 @@ export default function StudentDashboard({ user, onLogout }) {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, chatOpen]);
 
-  const sendChat = () => {
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const sendChat = async () => {
     const text = chatInput.trim();
-    if (!text) return;
-    setChatMessages(m => [...m, { from: 'user', text }]);
+    if (!text || chatLoading) return;
+    const userMsg = { from: 'user', text };
+    setChatMessages(m => [...m, userMsg]);
     setChatInput('');
-    const lower = text.toLowerCase();
-    let reply = 'I\'m not sure about that. Try asking about fines, OSAS, or admissions.';
-    if (lower.includes('fine') || lower.includes('csc'))           reply = 'You can check your fines at the Student Fines portal. Tap the Student Fines card on the Home tab.';
-    else if (lower.includes('osas') || lower.includes('viol'))     reply = 'OSAS handles conduct records. Tap the OSAS Records card on the Home tab.';
-    else if (lower.includes('admiss') || lower.includes('enroll')) reply = 'For admissions, tap the Admissions card on the Home tab to access ECNESIS.';
-    else if (lower.includes('login') || lower.includes('pass'))    reply = 'Use your student number as username and your last name (or registered password) to sign in.';
-    else if (lower.includes('help') || lower.includes('how'))      reply = 'You can access all CDN services from the Home tab. Tap any service card to open it.';
-    setTimeout(() => setChatMessages(m => [...m, { from: 'bot', text: reply }]), 600);
+    setChatLoading(true);
+
+    const history = [...chatMessages, userMsg]
+      .slice(-6)
+      .map(m => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.text }));
+
+    try {
+      const reply = await sendToGroq(history);
+      setChatMessages(m => [...m, { from: 'bot', text: reply }]);
+    } catch {
+      setChatMessages(m => [...m, { from: 'bot', text: 'Sorry, the assistant is temporarily unavailable. Please try again.' }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   useEffect(() => {
