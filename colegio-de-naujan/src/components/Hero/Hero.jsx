@@ -1,8 +1,20 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import ParticleCanvas from './ParticleCanvas';
 import bgImg from '../../assets/images/background.jpg';
 
 const Hero = () => {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const stats = [
     { value: '__',  label: 'Years of Service'  },
     { value: '__',  label: 'College Courses'    },
@@ -16,20 +28,28 @@ const Hero = () => {
       className="relative overflow-hidden flex items-start lg:items-center"
       style={{ background: '#f4f6fb', minHeight: 'calc(100vh - 72px)' }}
     >
-      {/* dot grid */}
+      {/* dot grid with parallax */}
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: 'radial-gradient(circle, rgba(0,34,128,0.045) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
+          transform: `translateY(${scrollY * 0.3}px)`,
+          transition: 'transform 0.05s linear',
         }}
       />
-      {/* bg photo */}
+      {/* bg photo with parallax */}
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-cover bg-top bg-no-repeat pointer-events-none z-0"
-        style={{ backgroundImage: `url(${bgImg})`, opacity: 0.06, filter: 'grayscale(1)' }}
+        style={{ 
+          backgroundImage: `url(${bgImg})`, 
+          opacity: 0.06, 
+          filter: 'grayscale(1)',
+          transform: `translateY(${scrollY * 0.5}px) scale(1.1)`,
+          transition: 'transform 0.05s linear',
+        }}
       />
 
       <ParticleCanvas />
@@ -37,8 +57,14 @@ const Hero = () => {
       <div className="cdn-container relative z-10 w-full grid lg:grid-cols-2 items-center gap-14 py-8 lg:py-20">
 
         {/* LEFT */}
-        <div className="flex flex-col gap-6 scroll-animate from-left is-visible" style={{ transitionDelay: '0.1s' }}>
-
+        <div 
+          className="flex flex-col gap-6 scroll-animate from-left is-visible" 
+          style={{ 
+            transitionDelay: '0.1s',
+            transform: `translateY(${scrollY * -0.1}px)`,
+            transition: 'transform 0.05s linear',
+          }}
+        >
           {/* Eyebrow */}
           <div
             className="inline-flex items-center gap-2 w-fit px-3.5 py-1.5 rounded text-[0.68rem] font-extrabold uppercase tracking-[2px]"
@@ -88,8 +114,14 @@ const Hero = () => {
         </div>
 
         {/* RIGHT — hidden on mobile */}
-        <div className="relative justify-end scroll-animate from-right is-visible hidden lg:flex" style={{ transitionDelay: '0.25s' }}>
-          <div
+        <div 
+          className="relative justify-end scroll-animate from-right is-visible hidden lg:flex" 
+          style={{ 
+            transitionDelay: '0.25s',
+            transform: `translateY(${scrollY * -0.15}px)`,
+            transition: 'transform 0.05s linear',
+          }}
+        >          <div
             className="absolute rounded-full pointer-events-none"
             style={{ top: '-2rem', right: '-2rem', width: 256, height: 256, background: 'radial-gradient(circle, rgba(200,16,46,0.1) 0%, transparent 70%)' }}
           />
@@ -125,7 +157,7 @@ const Hero = () => {
               </div>
             </div>
 
-            {/* Float card top */}
+            {/* Float card top with parallax */}
             <div
               className="absolute flex flex-col gap-0.5"
               style={{
@@ -133,7 +165,8 @@ const Hero = () => {
                 background: '#fff', borderRadius: 14, padding: '0.875rem 1.125rem',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                 minWidth: 190, borderLeft: '3px solid #002280',
-                transform: 'rotate(1.5deg)',
+                transform: `rotate(1.5deg) translateY(${scrollY * -0.2}px)`,
+                transition: 'transform 0.05s linear',
               }}
             >
               <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#C8102E', textTransform: 'uppercase', letterSpacing: '1px' }}>DepEd Recognized</span>
@@ -141,7 +174,7 @@ const Hero = () => {
               <span style={{ fontSize: '0.68rem', color: '#6b7280', fontWeight: 600 }}>Santiago, Oriental Mindoro</span>
             </div>
 
-            {/* Float card bottom */}
+            {/* Float card bottom with parallax */}
             <div
               className="absolute flex flex-col gap-0.5"
               style={{
@@ -149,7 +182,8 @@ const Hero = () => {
                 background: '#fff', borderRadius: 14, padding: '0.875rem 1.125rem',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                 minWidth: 190, borderLeft: '3px solid #FFD700',
-                transform: 'rotate(-1deg)',
+                transform: `rotate(-1deg) translateY(${scrollY * -0.25}px)`,
+                transition: 'transform 0.05s linear',
               }}
             >
               <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#002280', lineHeight: 1 }}>4 Programs</span>

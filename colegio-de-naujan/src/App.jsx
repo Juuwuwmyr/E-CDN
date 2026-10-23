@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useScrollAnimation from './hooks/useScrollAnimation';
 import Header       from './components/Header/Header';
@@ -9,7 +9,9 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import HistoryPage      from './components/Dashboard/HistoryPage';
 import AccountPage      from './components/Dashboard/AccountPage';
 import ChatbotWidget    from './components/Chatbot/ChatbotWidget';
-import { markSessionLogoutBeacon, renewSession } from './lib/auth';
+import { markSessionLogoutBeacon, renewSession, recordLogoutSession } from './lib/auth';
+import { logActivity } from './lib/activityLogger';
+import useIdleTimeout from './hooks/useIdleTimeout';
 
 /* ── Helpers ── */
 const isStudent = (user) =>

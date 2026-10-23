@@ -18,6 +18,8 @@ const SYSTEMS = [
   { id: 'admission', label: 'Admission Services', color: '#C8960C', url: 'https://ecnesis.duckdns.org/' },
 ];
 
+const isAdmin = (u) => u?.role === 'Admin';
+
 const AccountPage = ({ user, onLogout }) => {
   const navigate   = useNavigate();
   const analytics  = getAnalytics();
@@ -175,6 +177,12 @@ const AccountPage = ({ user, onLogout }) => {
           </svg>
           <span>Chatbot</span>
         </button>
+        {isAdmin(user) && (
+          <button className="db-bnav-item" onClick={() => navigate('/dashboard?tab=admin')} aria-label="Systems">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v6M14.5 17h6"/></svg>
+            <span>Systems</span>
+          </button>
+        )}
         <button className="db-bnav-item" onClick={() => navigate('/dashboard/history')} aria-label="History">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>

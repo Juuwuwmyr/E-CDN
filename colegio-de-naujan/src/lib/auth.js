@@ -453,3 +453,43 @@ export async function registerStudent(studentNumber, password) {
     error: null,
   };
 }
+
+/* ──────────────────────────────────────────────────────────
+   getSystemApplications  — fetch all active system apps from DB
+────────────────────────────────────────────────────────── */
+export async function getSystemApplications(includeInactive = false) {
+  let query = supabase
+    .from('system_applications')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (!includeInactive) {
+    query = query.eq('is_active', true);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('getSystemApplications error:', error);
+    return [];
+  }
+  return data || [];
+}
+
+/* ──────────────────────────────────────────────────────────
+   subscribeToSystemApplications
+   Subscribes to changes on system_applications table
+   so the dashboard updates when apps are added/edited/deleted
+────────────────────────────────────────────────────────── */
+export function subscribeToSystemApplications(onChange) {
+  const channel = supabase
+    .channel('system_applications_realtime')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'system_applications' },
+      () => onChange()
+    )
+    .subscribe();
+
+  return channel;
+}
