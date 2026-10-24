@@ -62,7 +62,7 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   /* guard: admin-only tabs */
-  const resolvedTab = (activeTab === 'admin' || activeTab === 'students' || activeTab === 'accounts') && user?.role !== 'Admin'
+  const resolvedTab = (activeTab === 'admin' || activeTab === 'students' || activeTab === 'accounts') && user?.role?.toLowerCase() !== 'admin'
     ? 'overview'
     : activeTab;
 

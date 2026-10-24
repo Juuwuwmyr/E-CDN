@@ -213,15 +213,19 @@ const AccountsPage = ({ user }) => {
   };
 
   const handleToggle = async (u) => {
-    await toggleUserActive(u.id, !u.is_active);
+    const key = u.id ?? u.student_number;
+    if (!key) return;
+    await toggleUserActive(key, !u.is_active);
     await logActivity("user_toggled", `${u.is_active ? "Deactivated" : "Activated"} ${u.username}`, user?.username, "success", "Accounts");
     showToast(`Account ${u.is_active ? "deactivated" : "activated"}.`);
     await fetchAll();
   };
 
   const handleDelete = async (u) => {
+    const key = u.id ?? u.student_number;
+    if (!key) return;
     if (!window.confirm(`Delete account "${u.username}"? This cannot be undone.`)) return;
-    await deletePortalUser(u.id);
+    await deletePortalUser(key);
     await logActivity("user_deleted", `Deleted account: ${u.username}`, user?.username, "success", "Accounts");
     showToast(`Account "${u.username}" deleted.`);
     await fetchAll();

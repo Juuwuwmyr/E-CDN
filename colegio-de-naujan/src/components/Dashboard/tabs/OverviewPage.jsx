@@ -70,11 +70,15 @@ const OverviewPage = ({ user }) => {
     return () => { channel.unsubscribe(); clearInterval(poll); };
   }, []);
 
-  const handleSysClick = (sys) => {
+  const handleSysClick = async (sys) => {
     if (sys.url === '#') return;
     recordLocalVisit(sys.id, sys.label);
-    recordSystemVisit(sys.id, sys.label, user?.username ?? null);
-    logActivity('system_access', Accessed , user?.username ?? 'anonymous', 'success', sys.label);
+    try {
+      await recordSystemVisit(sys.id, sys.label, user?.username ?? null);
+      await logActivity('system_access', 'Accessed', user?.username ?? 'anonymous', 'success', sys.label);
+    } catch (e) {
+      console.error('handleSysClick error:', e);
+    }
     window.open(sys.url, '_blank', 'noopener,noreferrer');
   };
 

@@ -10,7 +10,7 @@ import {
   subscribeToSystemApplications,
 } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
-import { fmt } from '../constants';
+import { SYSTEMS, fmt } from '../constants';
 
 const SystemsPage = () => {
   const [totalApps,    setTotalApps]    = useState(0);
@@ -41,7 +41,7 @@ const SystemsPage = () => {
       setTotalApps(all);
       setActiveApps(active);
       setTotalClicks(metrics.totalClicks);
-      setTopSystem(topEntry ? { id: topEntry[0], visits: topEntry[1] } : null);
+      setTopSystem(topEntry ? { id: topEntry[0], label: (SYSTEMS.find(s => s.id === topEntry[0])?.label ?? topEntry[0]), visits: topEntry[1] } : null);
     } catch (e) {
       console.error('SystemsPage fetchStats:', e);
     } finally {
@@ -96,7 +96,7 @@ const SystemsPage = () => {
     },
     {
       label: 'Most Used System',
-      value: loading ? '…' : (topSystem?.id ?? 'None'),
+       value: loading ? '…' : (topSystem?.label ?? 'None'),
       sub:   loading ? '…' : (topSystem ? `${topSystem.visits} clicks` : 'No visits yet'),
       color: '#7c3aed', bg: '#f5f0ff',
       icon: (
