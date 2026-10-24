@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DashboardShell
  * ─────────────────────────────────────────────
  * Persistent chrome: topbar, sidebar/bottom-nav,

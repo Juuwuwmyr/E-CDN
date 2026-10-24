@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dashboard.jsx
  * ─────────────────────────────────────────────
  * Thin orchestrator — owns routing state only.
@@ -17,14 +17,16 @@ import ActivityPage    from './tabs/ActivityPage';
 import SystemsPage     from './tabs/SystemsPage';
 import StudentsPage    from './tabs/StudentsPage';
 import AccountsPage    from './tabs/AccountsPage';
+import AnnouncementsPage from './tabs/AnnouncementsPage';
 
 /* ── tab → component map ─────────────────────────────────── */
 const TAB_PAGES = {
-  overview: OverviewPage,
-  activity: ActivityPage,
-  admin:    SystemsPage,
-  students: StudentsPage,
-  accounts: AccountsPage,
+  overview:      OverviewPage,
+  activity:      ActivityPage,
+  admin:         SystemsPage,
+  students:      StudentsPage,
+  accounts:      AccountsPage,
+  announcements: AnnouncementsPage,
 };
 
 /* ── Dashboard ───────────────────────────────────────────── */
@@ -62,7 +64,8 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   /* guard: admin-only tabs */
-  const resolvedTab = (activeTab === 'admin' || activeTab === 'students' || activeTab === 'accounts') && user?.role?.toLowerCase() !== 'admin'
+  const ADMIN_TABS = ['admin', 'students', 'accounts', 'announcements'];
+  const resolvedTab = ADMIN_TABS.includes(activeTab) && user?.role?.toLowerCase() !== 'admin'
     ? 'overview'
     : activeTab;
 

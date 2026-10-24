@@ -55,9 +55,16 @@ export async function validateLogin(username, password) {
       .eq('student_number', u)
       .single();
 
+    // full_name is stored as "LAST, FIRST" or "LAST FIRST" — derive last name for fallback
+    const fullName = studentData.full_name || '';
+    // Try splitting on comma first ("DELA CRUZ, JUAN"), else take first word
+    const derivedLastName = fullName.includes(',')
+      ? fullName.split(',')[0].trim()
+      : fullName.split(' ')[0].trim();
+
     const passwordMatch = acct
       ? acct.password === p
-      : studentData.last_name.toUpperCase() === p.toUpperCase();
+      : derivedLastName.toUpperCase() === p.toUpperCase();
 
     if (passwordMatch) {
       if (studentData.enrollment_status === 'dropped' || studentData.enrollment_status === 'loa') {
@@ -71,7 +78,7 @@ export async function validateLogin(username, password) {
         ok: true,
         user: {
           username:         studentData.student_number,
-          name:             `${studentData.first_name} ${studentData.last_name}`,
+          name:             fullName,
           role:             'Student',
           userType:         'student',
           course:           studentData.course,
@@ -442,7 +449,7 @@ export async function registerStudent(studentNumber, password) {
     ok: true,
     user: {
       username:      student.student_number,
-      name:          `${student.first_name} ${student.last_name}`,
+      name:          student.full_name || student.student_number,
       role:          'Student',
       userType:      'student',
       course:        student.course,

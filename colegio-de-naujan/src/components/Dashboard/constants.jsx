@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Shared Dashboard constants — single source of truth.
  * Import from here; never duplicate in individual pages.
  */
@@ -140,6 +140,18 @@ export const NAV_GROUPS = [
         ),
       },
       {
+        label: 'Announce',
+        tab: 'announcements',
+        role: 'Admin',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/>
+            <path d="M12 17V3"/>
+            <path d="M5 10l7-7 7 7"/>
+          </svg>
+        ),
+      },
+      {
         label: 'Students',
         tab: 'students',
         role: 'Admin',
@@ -200,6 +212,18 @@ export const NAV_ITEMS = [
         <rect x="14" y="3" width="7" height="7" rx="1" />
         <rect x="3" y="14" width="7" height="7" rx="1" />
         <path d="M17.5 14v6M14.5 17h6" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Announce',
+    tab: 'announcements',
+    role: 'Admin',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/>
+        <path d="M12 17V3"/>
+        <path d="M5 10l7-7 7 7"/>
       </svg>
     ),
   },
