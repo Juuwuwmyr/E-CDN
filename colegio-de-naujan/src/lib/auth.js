@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import bcrypt from 'bcryptjs';
 
 /* ──────────────────────────────────────────────────────────
    validateLogin
@@ -63,7 +64,14 @@ export async function validateLogin(username, password) {
       : fullName.split(' ')[0].trim();
 
     const passwordMatch = acct
-      ? acct.password === p
+      ? (() => {
+          // bcrypt hash check (new accounts)
+          if (acct.password?.startsWith('$2')) {
+            return bcrypt.compareSync(p, acct.password);
+          }
+          // Legacy plaintext fallback (old accounts — encourage re-register)
+          return acct.password === p;
+        })()
       : derivedLastName.toUpperCase() === p.toUpperCase();
 
     if (passwordMatch) {
@@ -436,10 +444,13 @@ export async function registerStudent(studentNumber, password) {
     return { ok: false, error: 'This student number is already registered. Please sign in.' };
   }
 
-  // 3. Create account
+  // 3. Hash password before storing (cost factor 10)
+  const hashedPassword = bcrypt.hashSync(pw, 10);
+
+  // 4. Create account with hashed password
   const { error: insertErr } = await supabase
     .from('student_accounts')
-    .insert({ student_number: sn, password: pw });
+    .insert({ student_number: sn, password: hashedPassword });
 
   if (insertErr) {
     return { ok: false, error: 'Registration failed. Please try again.' };
