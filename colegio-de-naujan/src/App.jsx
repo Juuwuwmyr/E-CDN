@@ -19,11 +19,24 @@ const isStudent = (user) =>
 
 /* ── Page components ── */
 import { lazy, Suspense } from 'react';
-const HomePage    = lazy(() => import('./components/Home/HomePage'));
-const CoursesPage = lazy(() => import('./components/Courses/CoursesPage'));
-const ServicesPage = lazy(() => import('./components/Services/ServicesPage'));
-const AboutPage   = lazy(() => import('./components/About/AboutPage'));
-const ContactPage = lazy(() => import('./components/Map/ContactPage'));
+const HomePage    = lazy(() => import('./components/Home/LandingPage'));
+
+/* ── ScrollRedirect: navigates to "/" then scrolls to a section id ── */
+function ScrollRedirect({ id }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/', { replace: true });
+    const timer = setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 72;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [id, navigate]);
+  return null;
+}
 
 /* ── Helpers ── */
 const readSession = () => {
@@ -66,11 +79,12 @@ function PublicLayout({ onLoginClick }) {
       <main style={{ paddingTop: '72px', flex: 1 }}>
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/"         element={<HomePage />}    />
-            <Route path="/courses"  element={<CoursesPage />} />
-            <Route path="/services" element={<ServicesPage />}/>
-            <Route path="/about"    element={<AboutPage />}   />
-            <Route path="/contact"  element={<ContactPage />} />
+            <Route path="/"         element={<HomePage />} />
+            {/* Legacy routes — redirect to landing and scroll to section */}
+            <Route path="/courses"  element={<ScrollRedirect id="courses" />} />
+            <Route path="/services" element={<ScrollRedirect id="services" />} />
+            <Route path="/about"    element={<ScrollRedirect id="about" />} />
+            <Route path="/contact"  element={<ScrollRedirect id="contact" />} />
           </Routes>
         </Suspense>
       </main>

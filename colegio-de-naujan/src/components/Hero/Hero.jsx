@@ -1,205 +1,236 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import ParticleCanvas from './ParticleCanvas';
 import bgImg from '../../assets/images/background.jpg';
 
 const Hero = () => {
+  const [muted,   setMuted]   = useState(true);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const stats = [
-    { value: '__',  label: 'Years of Service'  },
-    { value: '__',  label: 'College Courses'    },
-    { value: '__',  label: 'Students Enrolled'  },
-    { value: '__',  label: 'Passing Rate'       },
-  ];
 
   return (
     <section
       id="home"
-      className="relative overflow-hidden flex items-start lg:items-center"
-      style={{ background: '#f4f6fb', minHeight: 'calc(100vh - 72px)' }}
+      style={{
+        position: 'relative',
+        width: '100%',
+        minHeight: 'calc(100vh - 72px)',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      {/* dot grid with parallax */}
+      {/* Background image with parallax */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none z-0"
         style={{
-          backgroundImage: 'radial-gradient(circle, rgba(0,34,128,0.045) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-          transform: `translateY(${scrollY * 0.3}px)`,
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: `url(${bgImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          transform: `scale(1.08) translateY(${scrollY * 0.3}px)`,
           transition: 'transform 0.05s linear',
         }}
       />
-      {/* bg photo with parallax */}
+
+      {/* Dark navy overlay */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-top bg-no-repeat pointer-events-none z-0"
-        style={{ 
-          backgroundImage: `url(${bgImg})`, 
-          opacity: 0.06, 
-          filter: 'grayscale(1)',
-          transform: `translateY(${scrollY * 0.5}px) scale(1.1)`,
-          transition: 'transform 0.05s linear',
+        style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'linear-gradient(160deg, rgba(5,10,35,0.78) 0%, rgba(0,22,80,0.72) 60%, rgba(5,10,35,0.65) 100%)',
         }}
       />
 
-      <ParticleCanvas />
+      {/* Gold top accent bar */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: 4, background: '#C8960C', zIndex: 10,
+      }} />
 
-      <div className="cdn-container relative z-10 w-full grid lg:grid-cols-2 items-center gap-14 py-8 lg:py-20">
+      {/* Main content — centered */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center',
+        padding: '5rem 1.5rem 8rem',
+        maxWidth: 760, margin: '0 auto', width: '100%',
+      }}>
 
-        {/* LEFT */}
-        <div 
-          className="flex flex-col gap-6 scroll-animate from-left is-visible" 
-          style={{ 
-            transitionDelay: '0.1s',
-            transform: `translateY(${scrollY * -0.1}px)`,
-            transition: 'transform 0.05s linear',
-          }}
-        >
-          {/* Eyebrow */}
-          <div
-            className="inline-flex items-center gap-2 w-fit px-3.5 py-1.5 rounded text-[0.68rem] font-extrabold uppercase tracking-[2px]"
-            style={{ background: '#fff', border: '1px solid #e5e7eb', color: '#6b7280', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}
+        {/* Eyebrow badge */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          borderRadius: 999, padding: '6px 18px',
+          marginBottom: '1.75rem',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: '#4ade80', display: 'inline-block',
+            animation: 'heroPulse 2s ease-in-out infinite',
+          }} />
+          <span style={{
+            fontSize: '.68rem', fontWeight: 800,
+            textTransform: 'uppercase', letterSpacing: '2px',
+            color: 'rgba(255,255,255,0.75)',
+          }}>
+            Colegio De Naujan — Official Portal
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{
+          margin: '0 0 1.25rem',
+          fontSize: 'clamp(2.4rem, 6vw, 4rem)',
+          fontWeight: 900,
+          lineHeight: 1.1,
+          letterSpacing: '-1.5px',
+          color: '#fff',
+        }}>
+          Excellence in<br />
+          <span style={{ color: '#C8960C' }}>Higher Education</span>
+        </h1>
+
+        {/* Subtitle */}
+        <p style={{
+          margin: '0 0 2.5rem',
+          fontSize: 'clamp(.9rem, 2vw, 1.05rem)',
+          color: 'rgba(255,255,255,0.72)',
+          lineHeight: 1.7,
+          maxWidth: 520,
+        }}>
+          Shaping future leaders through innovative academic programs,
+          experienced faculty, and state-of-the-art facilities.
+        </p>
+
+        {/* CTA buttons */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link
+            to="/courses"
+            style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '13px 28px', borderRadius: 8, border: 'none',
+              background: '#C8960C', color: '#fff',
+              fontWeight: 800, fontSize: '.9rem',
+              textTransform: 'uppercase', letterSpacing: '1px',
+              textDecoration: 'none',
+              boxShadow: '0 4px 20px rgba(200,150,12,.45)',
+              transition: 'transform .15s, box-shadow .15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(200,150,12,.55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 20px rgba(200,150,12,.45)'; }}
           >
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#C8102E', animation: 'pulse 2s infinite' }} />
-            Colegio De Naujan — Official Website
-          </div>
-
-          {/* Heading */}
-          <h1 className="font-black m-0" style={{ fontSize: 'clamp(2rem,5vw,3.4rem)', lineHeight: 1.08, letterSpacing: '-1.5px', color: '#0F1422' }}>
-            Excellence in<br />
-            <span style={{ color: '#002280' }}>Education</span>{' '}
-            <span style={{ color: '#C8102E' }}>&amp; Service.</span>
-          </h1>
-
-          {/* Body */}
-          <p className="text-[1rem] m-0" style={{ color: '#4E5873', lineHeight: 1.8, maxWidth: 460 }}>
-            Colegio De Naujan is a premier institution in Santiago, Oriental Mindoro —
-            committed to quality education, community service, and developing future
-            leaders through values-driven learning.
-          </p>
-
-          {/* Actions */}
-          <div className="flex gap-3.5 flex-wrap">
-            <Link to="/courses" className="btn-primary">Explore Courses</Link>
-            <Link to="/about"   className="btn-ghost">Learn More</Link>
-          </div>
-
-          {/* Stats */}
-          <div className="flex flex-wrap sm:flex-nowrap pt-6 mt-1 gap-y-4" style={{ borderTop: '1px dashed #d1d5db' }}>
-            {stats.map((s, i) => (
-              <div
-                key={i}
-                className="flex flex-col gap-0.5"
-                style={{
-                  paddingRight: '1.75rem',
-                  marginRight:  '1.75rem',
-                  borderRight:  i < stats.length - 1 ? '1px solid #e5e7eb' : 'none',
-                }}
-              >
-                <span className="font-black leading-none" style={{ fontSize: '1.7rem', color: '#002280', letterSpacing: '-0.5px' }}>{s.value}</span>
-                <span className="font-semibold uppercase" style={{ fontSize: '0.68rem', color: '#6b7280', letterSpacing: '0.75px' }}>{s.label}</span>
-              </div>
-            ))}
-          </div>
+            Start Your Journey
+          </Link>
+          <Link
+            to="/about"
+            style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '12px 28px', borderRadius: 8,
+              border: '2px solid rgba(255,255,255,0.65)',
+              background: 'transparent', color: '#fff',
+              fontWeight: 700, fontSize: '.9rem',
+              textTransform: 'uppercase', letterSpacing: '1px',
+              textDecoration: 'none',
+              transition: 'background .15s, border-color .15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor='#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(255,255,255,0.65)'; }}
+          >
+            Learn More
+          </Link>
         </div>
+      </div>
 
-        {/* RIGHT — hidden on mobile */}
-        <div 
-          className="relative justify-end scroll-animate from-right is-visible hidden lg:flex" 
-          style={{ 
-            transitionDelay: '0.25s',
-            transform: `translateY(${scrollY * -0.15}px)`,
-            transition: 'transform 0.05s linear',
-          }}
-        >          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{ top: '-2rem', right: '-2rem', width: 256, height: 256, background: 'radial-gradient(circle, rgba(200,16,46,0.1) 0%, transparent 70%)' }}
-          />
+      {/* Large faint watermark bottom-right */}
+      <div style={{
+        position: 'absolute', bottom: 56, right: 0, zIndex: 2,
+        padding: '0 1.5rem',
+        pointerEvents: 'none',
+      }}>
+        <p style={{
+          margin: 0,
+          fontSize: 'clamp(1.8rem, 5vw, 3.2rem)',
+          fontWeight: 900,
+          color: 'rgba(255,255,255,0.07)',
+          textTransform: 'uppercase',
+          letterSpacing: '3px',
+          lineHeight: 1,
+          userSelect: 'none',
+        }}>
+          MEETS OPPORTUNITY
+        </p>
+      </div>
 
-          <div className="relative w-full" style={{ maxWidth: 490 }}>
-            {/* Main image */}
-            <div
-              className="overflow-hidden relative"
-              style={{
-                borderRadius: 14,
-                boxShadow: '0 20px 60px rgba(0,34,128,0.14)',
-                background: '#002280',
-                transform: 'rotate(-0.8deg)',
-                transition: 'transform 0.4s ease',
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'rotate(0deg)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'rotate(-0.8deg)'}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=900&q=85"
-                alt="Students at Colegio De Naujan"
-                className="w-full block"
-                style={{ aspectRatio: '16/11', objectFit: 'cover', animation: 'heroFloat 7s ease-in-out infinite' }}
-              />
-              {/* browser bar */}
-              <div className="absolute top-0 left-0 right-0 flex items-center gap-2 px-4 py-2" style={{ background: 'rgba(8,12,30,0.88)' }}>
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#4ade80' }} />
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#facc15' }} />
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#f87171' }} />
-                <span className="ml-1 font-mono" style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.3px' }}>
-                  cdn-official-website
-                </span>
-              </div>
-            </div>
+      {/* Mute button */}
+      <button
+        onClick={() => setMuted(m => !m)}
+        aria-label={muted ? 'Unmute' : 'Mute'}
+        style={{
+          position: 'absolute', bottom: '1.5rem', right: '1.5rem',
+          zIndex: 10,
+          width: 38, height: 38, borderRadius: '50%',
+          border: '1.5px solid rgba(255,255,255,0.35)',
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(6px)',
+          color: '#fff', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background .15s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.2)'}
+        onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.1)'}
+      >
+        {muted ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
+          </svg>
+        )}
+      </button>
 
-            {/* Float card top with parallax */}
-            <div
-              className="absolute flex flex-col gap-0.5"
-              style={{
-                top: '3rem', left: '-2.5rem',
-                background: '#fff', borderRadius: 14, padding: '0.875rem 1.125rem',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                minWidth: 190, borderLeft: '3px solid #002280',
-                transform: `rotate(1.5deg) translateY(${scrollY * -0.2}px)`,
-                transition: 'transform 0.05s linear',
-              }}
-            >
-              <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#C8102E', textTransform: 'uppercase', letterSpacing: '1px' }}>DepEd Recognized</span>
-              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F1422', lineHeight: 1.3 }}>School of Excellence</span>
-              <span style={{ fontSize: '0.68rem', color: '#6b7280', fontWeight: 600 }}>Santiago, Oriental Mindoro</span>
-            </div>
-
-            {/* Float card bottom with parallax */}
-            <div
-              className="absolute flex flex-col gap-0.5"
-              style={{
-                bottom: '1.5rem', right: '-1.75rem',
-                background: '#fff', borderRadius: 14, padding: '0.875rem 1.125rem',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                minWidth: 190, borderLeft: '3px solid #FFD700',
-                transform: `rotate(-1deg) translateY(${scrollY * -0.25}px)`,
-                transition: 'transform 0.05s linear',
-              }}
-            >
-              <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#002280', lineHeight: 1 }}>4 Programs</span>
-              <span style={{ fontSize: '0.68rem', color: '#6b7280', fontWeight: 600, lineHeight: 1.5 }}>
-                BSIS · BTVTED-WFT<br />BTVTED-CHS · BPA
-              </span>
-            </div>
+      {/* Stats bar */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        zIndex: 3,
+        background: 'rgba(0,0,0,0.45)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '0.9rem 2rem',
+        gap: '3rem',
+        flexWrap: 'wrap',
+      }}>
+        {[
+          { value: '50+',  label: 'Years of Service'  },
+          { value: '4',    label: 'College Programs'  },
+          { value: '500+', label: 'Students Enrolled' },
+          { value: '98%',  label: 'Passing Rate'      },
+        ].map((s, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#C8960C', lineHeight: 1 }}>{s.value}</span>
+            <span style={{ fontSize: '.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '1px' }}>{s.label}</span>
           </div>
-        </div>
-
+        ))}
       </div>
 
       <style>{`
-        @keyframes heroFloat {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-8px); }
+        @keyframes heroPulse {
+          0%,100% { opacity:1; transform:scale(1); }
+          50%      { opacity:.4; transform:scale(.7); }
         }
       `}</style>
     </section>
