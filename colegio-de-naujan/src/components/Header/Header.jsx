@@ -50,7 +50,7 @@ const Header = ({ onLoginClick }) => {
   useEffect(() => {
     if (location.pathname !== '/') return;
 
-    const sectionIds = ['home', 'courses', 'services', 'about', 'contact'];
+    const sectionIds = ['home', 'courses', 'services', 'about', 'governance', 'contact'];
 
     const observe = () => {
       // Disconnect any existing observer
