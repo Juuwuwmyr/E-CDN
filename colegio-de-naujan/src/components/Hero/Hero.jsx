@@ -113,15 +113,20 @@ const Hero = () => {
 
         {/* CTA buttons */}
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Link
-            to="/courses"
+          <button
+            onClick={() => {
+              const el = document.getElementById('courses');
+              if (!el) return;
+              const top = el.getBoundingClientRect().top + window.scrollY - 72;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }}
             style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '13px 28px', borderRadius: 8, border: 'none',
               background: '#C8960C', color: '#fff',
               fontWeight: 800, fontSize: '.9rem',
               textTransform: 'uppercase', letterSpacing: '1px',
-              textDecoration: 'none',
+              cursor: 'pointer', fontFamily: 'inherit',
               boxShadow: '0 4px 20px rgba(200,150,12,.45)',
               transition: 'transform .15s, box-shadow .15s',
             }}
@@ -129,7 +134,7 @@ const Hero = () => {
             onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 20px rgba(200,150,12,.45)'; }}
           >
             Start Your Journey
-          </Link>
+          </button>
           <Link
             to="/about"
             style={{
