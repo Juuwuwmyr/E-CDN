@@ -1,136 +1,112 @@
-import { useState } from 'react';
-
 const CourseModal = ({ course, isOpen, onClose, colorBorder, colorPill }) => {
   if (!isOpen || !course) return null;
+
+  const c = colorPill[course.color];
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+        style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', zIndex:40, backdropFilter:'blur(3px)' }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg my-8">
-          {/* Header with close button */}
-          <div className="relative">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-1 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Close modal"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      <div style={{
+        position:'fixed', inset:0, zIndex:50,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        padding:'1rem', overflowY:'auto',
+      }}>
+        <div style={{
+          width:'100%', maxWidth:560,
+          background:'#fff', borderRadius:12,
+          boxShadow:'0 20px 60px rgba(0,0,0,0.2)',
+          maxHeight:'90vh', display:'flex', flexDirection:'column',
+          margin:'auto',
+        }}>
 
-            {/* Image Placeholder */}
-            <div
-              className="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center rounded-t-lg"
-              style={{ borderBottom: `4px solid ${colorBorder[course.color]}` }}
-            >
-              <div className="text-center">
-                <svg
-                  className="w-16 h-16 mx-auto mb-2 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p className="text-gray-500 text-sm font-medium">Click to add course image</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-8">
-            {/* Code Pill */}
-            <div className="flex items-center gap-3 mb-4">
-              <span
-                className="inline-block text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded"
-                style={{
-                  background: colorPill[course.color].bg,
-                  color: colorPill[course.color].color,
-                }}
-              >
+          {/* Header */}
+          <div style={{
+            padding:'1.1rem 1.25rem',
+            borderBottom:'1px solid #f1f5f9',
+            display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'1rem',
+            flexShrink:0,
+          }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', flexWrap:'wrap' }}>
+              <span style={{
+                fontSize:'.68rem', fontWeight:800, textTransform:'uppercase',
+                letterSpacing:'1.2px', padding:'4px 10px', borderRadius:5,
+                background: c.bg, color: c.color,
+              }}>
                 {course.code}
               </span>
+              {course.duration && (
+                <span style={{ fontSize:'.72rem', color:'#9ca3af', fontWeight:600 }}>
+                  {course.duration} · {course.credits}
+                </span>
+              )}
             </div>
+            <button
+              onClick={onClose}
+              style={{
+                width:28, height:28, borderRadius:6, border:'1px solid #e5e7eb',
+                background:'#f9fafb', cursor:'pointer', flexShrink:0,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                color:'#6b7280',
+              }}
+              aria-label="Close"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Scrollable body */}
+          <div style={{ overflowY:'auto', padding:'1.25rem', display:'flex', flexDirection:'column', gap:'1rem' }}>
 
             {/* Title */}
-            <h2 className="text-2xl font-extrabold mb-4" style={{ color: '#0F1422' }}>
+            <h2 style={{ margin:0, fontSize:'1rem', fontWeight:800, color:'#0F1422', lineHeight:1.4 }}>
               {course.full}
             </h2>
 
             {/* Description */}
-            <p className="text-base mb-6" style={{ color: '#4E5873', lineHeight: 1.8 }}>
+            <p style={{ margin:0, fontSize:'.85rem', color:'#4E5873', lineHeight:1.75 }}>
               {course.desc}
             </p>
 
-            {/* Course Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-200">
-              {course.duration && (
-                <div>
-                  <h4 className="font-bold text-sm uppercase tracking-wide mb-2" style={{ color: colorPill[course.color].color }}>
-                    Duration
-                  </h4>
-                  <p style={{ color: '#4E5873' }}>{course.duration}</p>
-                </div>
-              )}
-              {course.credits && (
-                <div>
-                  <h4 className="font-bold text-sm uppercase tracking-wide mb-2" style={{ color: colorPill[course.color].color }}>
-                    Credits
-                  </h4>
-                  <p style={{ color: '#4E5873' }}>{course.credits}</p>
-                </div>
-              )}
-            </div>
-
             {/* Highlights */}
-            {course.highlights && course.highlights.length > 0 && (
-              <div className="mb-6">
-                <h4 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: colorPill[course.color].color }}>
+            {course.highlights?.length > 0 && (
+              <div>
+                <p style={{ margin:'0 0 8px', fontSize:'.68rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.08em', color: c.color }}>
                   Key Features
-                </h4>
-                <ul className="space-y-2">
-                  {course.highlights.map((highlight, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span
-                        className="flex-shrink-0 w-1.5 h-1.5 rounded-full mt-2"
-                        style={{ background: colorPill[course.color].color }}
-                      />
-                      <span style={{ color: '#4E5873' }}>{highlight}</span>
-                    </li>
+                </p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px' }}>
+                  {course.highlights.map((h, i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:6, fontSize:'.8rem', color:'#374151' }}>
+                      <svg style={{ width:13, height:13, color: c.color, flexShrink:0, marginTop:2 }} viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                      {h}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
 
             {/* Career Paths */}
-            {course.careerPaths && course.careerPaths.length > 0 && (
+            {course.careerPaths?.length > 0 && (
               <div>
-                <h4 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: colorPill[course.color].color }}>
+                <p style={{ margin:'0 0 8px', fontSize:'.68rem', fontWeight:800, textTransform:'uppercase', letterSpacing:'.08em', color: c.color }}>
                   Career Paths
-                </h4>
-                <div className="flex flex-wrap gap-2">
+                </p>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                   {course.careerPaths.map((path, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-2 rounded-full text-xs font-medium"
-                      style={{
-                        background: colorPill[course.color].bg,
-                        color: colorPill[course.color].color,
-                      }}
-                    >
+                    <span key={i} style={{
+                      padding:'4px 10px', borderRadius:20,
+                      fontSize:'.75rem', fontWeight:600,
+                      background: c.bg, color: c.color,
+                    }}>
                       {path}
                     </span>
                   ))}
@@ -139,17 +115,23 @@ const CourseModal = ({ course, isOpen, onClose, colorBorder, colorPill }) => {
             )}
           </div>
 
-          {/* Close Button */}
-          <div className="px-8 pb-8 flex gap-3">
+          {/* Footer */}
+          <div style={{
+            padding:'0.9rem 1.25rem',
+            borderTop:'1px solid #f1f5f9',
+            flexShrink:0,
+          }}>
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-lg font-semibold transition-colors"
               style={{
-                background: `${colorPill[course.color].color}20`,
-                color: colorPill[course.color].color,
+                width:'100%', padding:'9px', borderRadius:7,
+                border:'1.5px solid #e5e7eb', background:'#f9fafb',
+                fontSize:'.85rem', fontWeight:700, color:'#374151',
+                cursor:'pointer', fontFamily:'inherit',
+                transition:'background .12s',
               }}
-              onMouseEnter={e => e.target.style.background = `${colorPill[course.color].color}30`}
-              onMouseLeave={e => e.target.style.background = `${colorPill[course.color].color}20`}
+              onMouseEnter={e => e.currentTarget.style.background='#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background='#f9fafb'}
             >
               Close
             </button>
