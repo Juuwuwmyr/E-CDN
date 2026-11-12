@@ -136,7 +136,13 @@ const Hero = () => {
             Start Your Journey
           </button>
           <Link
-            to="/about"
+          <button
+            onClick={() => {
+              const el = document.getElementById('about');
+              if (!el) return;
+              const top = el.getBoundingClientRect().top + window.scrollY - 72;
+              window.scrollTo({ top, behavior: 'smooth' });
+            }}
             style={{
               display: 'inline-flex', alignItems: 'center',
               padding: '12px 28px', borderRadius: 8,
@@ -144,14 +150,14 @@ const Hero = () => {
               background: 'transparent', color: '#fff',
               fontWeight: 700, fontSize: '.9rem',
               textTransform: 'uppercase', letterSpacing: '1px',
-              textDecoration: 'none',
+              cursor: 'pointer', fontFamily: 'inherit',
               transition: 'background .15s, border-color .15s',
             }}
             onMouseEnter={e => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.borderColor='#fff'; }}
             onMouseLeave={e => { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(255,255,255,0.65)'; }}
           >
             Learn More
-          </Link>
+          </button>
         </div>
       </div>
 
