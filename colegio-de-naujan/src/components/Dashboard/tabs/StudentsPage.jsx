@@ -211,11 +211,11 @@ const StudentsPage = () => {
 
   /* stat cards config */
   const STAT_CARDS = [
-    { label:"Total Students",  value:counts.total,          color:"#002280" },
-    { label:"BSIS",            value:counts["BSIS"],         color:"#002280" },
-    { label:"BTVTED-WFT",      value:counts["BTVTED-WFT"],  color:"#C8960C" },
-    { label:"BTVTED-CHS",      value:counts["BTVTED-CHS"],  color:"#7c3aed" },
-    { label:"BPA",             value:counts["BPA"],          color:"#10813f" },
+    { label:"Total Students",  value:counts.total,          color:"#002280", bg:"#eef1fb" },
+    { label:"BSIS",            value:counts["BSIS"],         color:"#002280", bg:"#eef1fb" },
+    { label:"BTVTED-WFT",      value:counts["BTVTED-WFT"],  color:"#C8960C", bg:"#fdf8ec" },
+    { label:"BTVTED-CHS",      value:counts["BTVTED-CHS"],  color:"#7c3aed", bg:"#f5f0ff" },
+    { label:"BPA",             value:counts["BPA"],          color:"#10813f", bg:"#edf7f1" },
   ];
 
   return (
@@ -227,22 +227,19 @@ const StudentsPage = () => {
       )}
 
       {/* KPI bar — compact horizontal stat cards */}
-      <div style={{display:"flex", gap:"0.75rem", marginBottom:"1.5rem", flexWrap:"wrap"}}>
+      <div className="sl-stats-row" style={{ marginBottom: "1.5rem" }}>
         {STAT_CARDS.map(s => (
-          <div key={s.label} style={{
-            display:"flex", alignItems:"center", gap:"0.75rem",
-            background:"#fff", border:"1px solid #e5e7eb",
-            borderLeft:"4px solid " + s.color,
-            borderRadius:"6px", padding:"0.6rem 1rem",
-            minWidth:"130px", flex:"1"
-          }}>
-            <div>
-              <div style={{fontSize:"1.4rem", fontWeight:800, color:s.color, lineHeight:1}}>
-                {loading ? "…" : s.value}
-              </div>
-              <div style={{fontSize:"0.7rem", color:"#6b7280", marginTop:"2px", textTransform:"uppercase", letterSpacing:"0.04em"}}>
-                {s.label}
-              </div>
+          <div key={s.label} className="db-stat-card" style={{"--sc":s.color,"--sc-bg":s.bg}}>
+            <div className="db-stat-icon" style={{background:s.bg, color:s.color}}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+            <div className="db-stat-body">
+              <p className="db-stat-value">{loading ? "…" : s.value}</p>
+              <p className="db-stat-label">{s.label}</p>
             </div>
           </div>
         ))}

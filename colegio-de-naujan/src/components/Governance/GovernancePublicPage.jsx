@@ -591,7 +591,16 @@ const MunicipalSection = () => {
                 onMouseLeave={e=>{e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none';}}
               >
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
-                  <p style={{ margin:0, fontWeight:800, fontSize:'.9rem', color:'#0F1422' }}>{portal.name}</p>
+                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                    <img
+                      src={`https://www.google.com/s2/favicons?domain=${new URL(portal.url).hostname}&sz=64`}
+                      alt={portal.name}
+                      width={28} height={28}
+                      style={{ borderRadius:6, objectFit:'contain', background:'#f8fafc', border:'1px solid #e8edf5', padding:2, flexShrink:0 }}
+                      onError={e=>{ e.currentTarget.style.display='none'; }}
+                    />
+                    <p style={{ margin:0, fontWeight:800, fontSize:'.9rem', color:'#0F1422' }}>{portal.name}</p>
+                  </div>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" style={{ flexShrink:0 }}>
                     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
                     <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>

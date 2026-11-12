@@ -1300,11 +1300,23 @@ const ParticipationTab = ({ user }) => {
    MAIN GovernancePage
 ═══════════════════════════════════════════════════════════ */
 const GovernancePage = ({ user }) => {
-  const [subTab, setSubTab] = useState('transparency');
+  const [subTab, setSubTab] = useState(() => {
+    // Read the desired subtab set by the dropdown before this component mounted
+    const initial = window.__govSubTab || 'transparency';
+    window.__govSubTab = null; // consume it
+    return initial;
+  });
   const [docStats,      setDocStats]      = useState({});
   const [concernStats,  setConcernStats]  = useState({});
   const [partStats,     setPartStats]     = useState({});
   const [loadingStats,  setLoadingStats]  = useState(true);
+
+  /* Listen for subtab selection from the nav dropdown */
+  useEffect(() => {
+    const handler = (e) => setSubTab(e.detail);
+    window.addEventListener('gov-subtab', handler);
+    return () => window.removeEventListener('gov-subtab', handler);
+  }, []);
 
   useEffect(() => {
     Promise.all([getDocumentStats(), getConcernStats(), getParticipationStats()])
@@ -1320,14 +1332,32 @@ const GovernancePage = ({ user }) => {
     { label:'Active Consultations', value:loadingStats?'…':partStats.active||0,    color:'#7c3aed', bg:'#f5f0ff', icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> },
   ];
 
-  const SUB_TABS = [
-    { key:'transparency',  label:'Documents'     },
-    { key:'accountability',label:'Concerns'       },
-    { key:'participation', label:'Consultations'  },
-  ];
+  /* Active sub-tab label for the page header */
+  const SUB_LABELS = { transparency:'Documents', accountability:'Concerns', participation:'Consultations' };
 
   return (
     <div className="db-home-content" style={{ paddingBottom:'4rem' }}>
+
+      {/* Page header — shows which section is active */}
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'1.25rem' }}>
+        <div style={{
+          width:34, height:34, borderRadius:9, background:'#eef1fb', color:'#002280',
+          display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+          </svg>
+        </div>
+        <div>
+          <p style={{ margin:0, fontSize:'.97rem', fontWeight:800, color:'#0f1724' }}>
+            Governance — {SUB_LABELS[subTab]}
+          </p>
+          <p style={{ margin:0, fontSize:'.72rem', color:'#94a3b8' }}>
+            Use the Governance dropdown in the nav bar to switch sections
+          </p>
+        </div>
+      </div>
+
       {/* Stat cards */}
       <div className="db-stats-row" style={{ marginBottom:'1.5rem' }}>
         {STAT_CARDS.map(s => (
@@ -1341,22 +1371,8 @@ const GovernancePage = ({ user }) => {
         ))}
       </div>
 
-      {/* Sub-tab switcher */}
-      <div style={{ display:'flex', gap:8, marginBottom:16, background:'#f4f6fb', borderRadius:14, padding:4 }}>
-        {SUB_TABS.map(t => (
-          <button key={t.key} onClick={()=>setSubTab(t.key)} style={{
-            flex:1, display:'flex', alignItems:'center', justifyContent:'center',
-            padding:'10px 12px', borderRadius:10, border:'none', cursor:'pointer',
-            fontWeight:700, fontSize:'.82rem', fontFamily:'inherit', transition:'all .15s',
-            background: subTab===t.key ? '#fff' : 'transparent',
-            color: subTab===t.key ? '#002280' : '#6b7280',
-            boxShadow: subTab===t.key ? '0 1px 4px rgba(0,0,0,.08)' : 'none',
-          }}>{t.label}</button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {subTab === 'transparency'  && <TransparencyTab  user={user}/>}
+      {/* Content — only the selected section */}
+      {subTab === 'transparency'   && <TransparencyTab   user={user}/>}
       {subTab === 'accountability' && <AccountabilityTab user={user}/>}
       {subTab === 'participation'  && <ParticipationTab  user={user}/>}
     </div>

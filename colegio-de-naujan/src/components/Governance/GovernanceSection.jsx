@@ -609,18 +609,29 @@ const GovernanceSection = () => {
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:'.85rem' }}>
             {MUNICIPAL_PORTALS.map(portal=>{
               const pc=PORTAL_COLORS[portal.category]||{color:'#374151',bg:'#f3f4f6'};
+              const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(portal.url).hostname}&sz=64`;
               return (
                 <a key={portal.name} href={portal.url} target="_blank" rel="noopener noreferrer"
-                  style={{ display:'flex',flexDirection:'column',gap:'.45rem',background:'#fff',border:'1.5px solid #e8edf5',borderRadius:12,padding:'.95rem 1.1rem',textDecoration:'none',transition:'box-shadow .18s,transform .18s' }}
+                  style={{ display:'flex',flexDirection:'column',gap:'.55rem',background:'#fff',border:'1.5px solid #e8edf5',borderRadius:12,padding:'.95rem 1.1rem',textDecoration:'none',transition:'box-shadow .18s,transform .18s' }}
                   onMouseEnter={e=>{e.currentTarget.style.boxShadow=`0 4px 16px ${pc.color}20`;e.currentTarget.style.transform='translateY(-2px)';}}
                   onMouseLeave={e=>{e.currentTarget.style.boxShadow='none';e.currentTarget.style.transform='none';}}
                 >
+                  {/* Logo + category row */}
                   <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:6 }}>
-                    <span style={{ fontSize:'.63rem',fontWeight:800,padding:'2px 8px',borderRadius:20,textTransform:'uppercase',letterSpacing:'.04em',background:pc.bg,color:pc.color }}>{portal.category}</span>
+                    <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+                      <img
+                        src={faviconUrl}
+                        alt={portal.name}
+                        width={28} height={28}
+                        style={{ borderRadius:6, objectFit:'contain', background:'#f8fafc', border:'1px solid #e8edf5', padding:2 }}
+                        onError={e=>{ e.currentTarget.style.display='none'; }}
+                      />
+                      <span style={{ fontSize:'.62rem',fontWeight:800,padding:'2px 8px',borderRadius:20,textTransform:'uppercase',letterSpacing:'.04em',background:pc.bg,color:pc.color }}>{portal.category}</span>
+                    </div>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                   </div>
                   <p style={{ margin:0,fontWeight:800,fontSize:'.87rem',color:'#0F1422',lineHeight:1.3 }}>{portal.name}</p>
-                  <p style={{ margin:0,fontSize:'.73rem',color:'#7c3aed',fontWeight:600 }}>{portal.office}</p>
+                  <p style={{ margin:0,fontSize:'.73rem',color:'#6b7280',fontWeight:600 }}>{portal.office}</p>
                 </a>
               );
             })}

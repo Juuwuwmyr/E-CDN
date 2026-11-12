@@ -135,7 +135,6 @@ const Hero = () => {
           >
             Start Your Journey
           </button>
-          <Link
           <button
             onClick={() => {
               const el = document.getElementById('about');
