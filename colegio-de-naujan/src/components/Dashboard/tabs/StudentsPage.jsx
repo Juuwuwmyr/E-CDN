@@ -39,7 +39,7 @@ const StudentCard = ({ student }) => {
   const dept  = parseDept(student.course);
   const dc    = DEPT_COLORS[dept] || DEPT_COLORS["Unknown"];
   return (
-    <div className="sl-card">
+    <div className="sl-card" style={{ padding: "0.75rem" }}>
       <div className="sl-card-avatar">
         <Avatar student={student} />
       </div>
@@ -96,6 +96,20 @@ const ImportModal = ({ rows, skipped, onConfirm, onCancel, loading }) => (
       </div>
     </div>
   </div>
+);
+
+/* ── list view table header (reused for skeleton and data) ── */
+const TableHeader = () => (
+  <thead>
+    <tr style={{background:"#f8fafc", borderBottom:"2px solid #e5e7eb"}}>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em", width:"40px"}}>#</th>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em"}}>Student</th>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em"}}>Course</th>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em"}}>Year</th>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em"}}>Sex</th>
+      <th style={{padding:"0.5rem 0.75rem", textAlign:"left", fontSize:"0.68rem", fontWeight:600, color:"#6b7280", textTransform:"uppercase", letterSpacing:"0.05em"}}>Status</th>
+    </tr>
+  </thead>
 );
 
 /* ── main page ── */
@@ -174,7 +188,7 @@ const StudentsPage = () => {
     }
   };
 
-    const confirmImport = async () => {
+  const confirmImport = async () => {
     if (!preview) return;
     setImporting(true);
     try {
@@ -197,11 +211,11 @@ const StudentsPage = () => {
 
   /* stat cards config */
   const STAT_CARDS = [
-    { label:"Total Students",  value:counts.total,          color:"#002280", bg:"#eef1fb" },
-    { label:"BSIS",            value:counts["BSIS"],         color:"#002280", bg:"#eef1fb" },
-    { label:"BTVTED-WFT",     value:counts["BTVTED-WFT"],   color:"#C8960C", bg:"#fdf8ec" },
-    { label:"BTVTED-CHS",     value:counts["BTVTED-CHS"],   color:"#7c3aed", bg:"#f5f0ff" },
-    { label:"BPA",             value:counts["BPA"],          color:"#10813f", bg:"#edf7f1" },
+    { label:"Total Students",  value:counts.total,          color:"#002280" },
+    { label:"BSIS",            value:counts["BSIS"],         color:"#002280" },
+    { label:"BTVTED-WFT",      value:counts["BTVTED-WFT"],  color:"#C8960C" },
+    { label:"BTVTED-CHS",      value:counts["BTVTED-CHS"],  color:"#7c3aed" },
+    { label:"BPA",             value:counts["BPA"],          color:"#10813f" },
   ];
 
   return (
@@ -212,20 +226,23 @@ const StudentsPage = () => {
         <div className={`sl-toast sl-toast--${toast.type}`}>{toast.msg}</div>
       )}
 
-      {/* stat cards */}
-      <div className="sl-stats-row" style={{ marginBottom: "1.5rem" }}>
+      {/* KPI bar — compact horizontal stat cards */}
+      <div style={{display:"flex", gap:"0.75rem", marginBottom:"1.5rem", flexWrap:"wrap"}}>
         {STAT_CARDS.map(s => (
-          <div key={s.label} className="db-stat-card" style={{"--sc":s.color,"--sc-bg":s.bg}}>
-            <div className="db-stat-icon" style={{background:s.bg,color:s.color}}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-              </svg>
-            </div>
-            <div className="db-stat-body">
-              <p className="db-stat-value">{loading ? "…" : s.value}</p>
-              <p className="db-stat-label">{s.label}</p>
+          <div key={s.label} style={{
+            display:"flex", alignItems:"center", gap:"0.75rem",
+            background:"#fff", border:"1px solid #e5e7eb",
+            borderLeft:"4px solid " + s.color,
+            borderRadius:"6px", padding:"0.6rem 1rem",
+            minWidth:"130px", flex:"1"
+          }}>
+            <div>
+              <div style={{fontSize:"1.4rem", fontWeight:800, color:s.color, lineHeight:1}}>
+                {loading ? "…" : s.value}
+              </div>
+              <div style={{fontSize:"0.7rem", color:"#6b7280", marginTop:"2px", textTransform:"uppercase", letterSpacing:"0.04em"}}>
+                {s.label}
+              </div>
             </div>
           </div>
         ))}
@@ -233,12 +250,14 @@ const StudentsPage = () => {
 
       {/* toolbar */}
       <div className="sl-toolbar">
-        <div className="sl-search-wrap">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div style={{position:"relative", display:"flex", alignItems:"center"}}>
+          <svg style={{position:"absolute", left:"0.6rem", pointerEvents:"none", color:"#9ca3af"}}
+            width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
           <input
             className="sl-search"
+            style={{paddingLeft:"2rem"}}
             placeholder="Search name or student no…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -308,11 +327,49 @@ const StudentsPage = () => {
         </div>
       )}
 
-      {/* grid */}
+      {/* loading state */}
       {loading ? (
-        <div className="sl-loading">
-          {[...Array(8)].map((_,i) => <div key={i} className="sl-card sl-card--skeleton"/>)}
-        </div>
+        viewMode === "list" ? (
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%", borderCollapse:"collapse", fontSize:"0.82rem"}}>
+              <TableHeader />
+              <tbody>
+                {[...Array(8)].map((_, i) => (
+                  <tr key={i} style={{borderBottom:"1px solid #f0f0f0"}}>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{width:"20px", height:"14px", background:"#e5e7eb", borderRadius:"3px"}} />
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{display:"flex", alignItems:"center", gap:"0.5rem"}}>
+                        <div style={{width:"32px", height:"32px", borderRadius:"50%", background:"#e5e7eb"}} />
+                        <div>
+                          <div style={{width:"120px", height:"12px", background:"#e5e7eb", borderRadius:"3px", marginBottom:"4px"}} />
+                          <div style={{width:"80px", height:"10px", background:"#f3f4f6", borderRadius:"3px"}} />
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{width:"70px", height:"18px", background:"#e5e7eb", borderRadius:"999px"}} />
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{width:"60px", height:"12px", background:"#e5e7eb", borderRadius:"3px"}} />
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{width:"50px", height:"18px", background:"#e5e7eb", borderRadius:"999px"}} />
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{width:"60px", height:"18px", background:"#e5e7eb", borderRadius:"999px"}} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="sl-loading">
+            {[...Array(8)].map((_,i) => <div key={i} className="sl-card sl-card--skeleton"/>)}
+          </div>
+        )
       ) : filtered.length === 0 ? (
         <div className="db-empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -327,32 +384,87 @@ const StudentsPage = () => {
           {paginated.map(s => <StudentCard key={s.student_number} student={s}/>)}
         </div>
       ) : (
-        <div className="sl-list">
-          {paginated.map((s, i) => {
-            const globalI = page * PAGE_SIZE + i;
-            const dept = parseDept(s.course);
-            const dc   = DEPT_COLORS[dept] || DEPT_COLORS["Unknown"];
-            const color = avatarColor(s.student_number);
-            const parts = (s.full_name||"").split(",");
-            const init  = ((parts[0]?.[0]||"")+(parts[1]?.trim()?.[0]||"")).toUpperCase()||"?";
-            return (
-              <div key={s.student_number} className="sl-list-row">
-                <span className="sl-list-num">{globalI+1}</span>
-                <div className="sl-list-avatar" style={{background:color}}>{init}</div>
-                <div className="sl-list-info">
-                  <p className="sl-list-name">{s.full_name||"—"}</p>
-                  <p className="sl-list-sn">{s.student_number}</p>
-                </div>
-                <span className="sl-dept-badge" style={{color:dc.color,background:dc.bg}}>{dept}</span>
-                <span className="sl-year-badge">{yearLabel(s.year_level)}</span>
-                {s.sex && <span className={"sl-sex-badge sl-sex-" + s.sex.toLowerCase()}>{s.sex}</span>}
-                <span className={"sl-status-badge sl-status-"+s.enrollment_status}>{s.enrollment_status}</span>
-              </div>
-            );
-          })}
+        /* ── professional registry table ── */
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%", borderCollapse:"collapse", fontSize:"0.82rem"}}>
+            <TableHeader />
+            <tbody>
+              {paginated.map((s, i) => {
+                const globalI = page * PAGE_SIZE + i;
+                const deptKey = parseDept(s.course);
+                const dc = DEPT_COLORS[deptKey] || DEPT_COLORS["Unknown"];
+                const color = avatarColor(s.student_number);
+                const parts = (s.full_name || "").split(",");
+                const init = ((parts[0]?.[0] || "") + (parts[1]?.trim()?.[0] || "")).toUpperCase() || "?";
+                const isEven = i % 2 === 0;
+                return (
+                  <tr
+                    key={s.student_number}
+                    style={{background: isEven ? "#fff" : "#fafafa", borderBottom:"1px solid #f0f0f0", cursor:"default"}}
+                    onMouseEnter={e => e.currentTarget.style.background = "#eff6ff"}
+                    onMouseLeave={e => { e.currentTarget.style.background = isEven ? "#fff" : "#fafafa"; }}
+                  >
+                    <td style={{padding:"0.5rem 0.75rem", color:"#9ca3af", fontSize:"0.75rem", fontVariantNumeric:"tabular-nums"}}>
+                      {globalI + 1}
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <div style={{display:"flex", alignItems:"center", gap:"0.5rem"}}>
+                        <div style={{
+                          width:"32px", height:"32px", borderRadius:"50%",
+                          background:color, color:"#fff",
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          fontSize:"0.7rem", fontWeight:800, flexShrink:0
+                        }}>{init}</div>
+                        <div>
+                          <div style={{fontWeight:600, color:"#111827", lineHeight:1.2}}>{s.full_name || "—"}</div>
+                          <div style={{fontSize:"0.7rem", color:"#9ca3af", marginTop:"1px"}}>{s.student_number}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      <span style={{
+                        display:"inline-block", padding:"2px 8px", borderRadius:"999px",
+                        fontSize:"0.7rem", fontWeight:600,
+                        color:dc.color, background:dc.bg
+                      }}>{deptKey}</span>
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem", color:"#374151", whiteSpace:"nowrap"}}>
+                      {yearLabel(s.year_level)}
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      {s.sex ? (
+                        <span style={{
+                          display:"inline-block", padding:"2px 8px", borderRadius:"999px",
+                          fontSize:"0.7rem", fontWeight:600,
+                          color: s.sex.toLowerCase() === "female" ? "#be185d" : "#1d4ed8",
+                          background: s.sex.toLowerCase() === "female" ? "#fdf2f8" : "#eff6ff"
+                        }}>{s.sex}</span>
+                      ) : "—"}
+                    </td>
+                    <td style={{padding:"0.5rem 0.75rem"}}>
+                      {(() => {
+                        const st = (s.enrollment_status || "").toLowerCase();
+                        const sc = st === "enrolled"
+                          ? { color:"#065f46", bg:"#d1fae5" }
+                          : st === "dropped"
+                          ? { color:"#991b1b", bg:"#fee2e2" }
+                          : { color:"#92400e", bg:"#fef3c7" };
+                        return (
+                          <span style={{
+                            display:"inline-block", padding:"2px 8px", borderRadius:"999px",
+                            fontSize:"0.7rem", fontWeight:600,
+                            color:sc.color, background:sc.bg
+                          }}>{s.enrollment_status || "—"}</span>
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
-
 
       {/* pagination */}
       {!loading && !error && totalPages > 1 && (
@@ -370,7 +482,6 @@ const StudentsPage = () => {
 
           <div className="sl-page-nums">
             {Array.from({ length: totalPages }, (_, i) => {
-              // Show first, last, current ±1, and ellipsis
               if (
                 i === 0 || i === totalPages - 1 ||
                 Math.abs(i - page) <= 1
@@ -406,6 +517,7 @@ const StudentsPage = () => {
           </span>
         </div>
       )}
+
       {/* import modal */}
       {preview && (
         <ImportModal
