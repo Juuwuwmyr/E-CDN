@@ -3,12 +3,13 @@
  * Single scrollable page with all public sections.
  * Each section has an id matching the nav key.
  */
-import Hero       from '../Hero/Hero';
-import FacebookFeed from './FacebookFeed';
-import Courses    from '../Courses/Courses';
-import Services   from '../Services/Services';
-import About      from '../About/About';
-import MapSection from '../Map/MapSection';
+import Hero           from '../Hero/Hero';
+import FacebookFeed   from './FacebookFeed';
+import Courses        from '../Courses/Courses';
+import Services       from '../Services/Services';
+import About          from '../About/About';
+import MapSection     from '../Map/MapSection';
+import GovernanceSection from '../Governance/GovernanceSection';
 
 const LandingPage = () => (
   <>
@@ -27,6 +28,10 @@ const LandingPage = () => (
 
     <section id="about">
       <About />
+    </section>
+
+    <section id="governance">
+      <GovernanceSection />
     </section>
 
     <section id="contact">

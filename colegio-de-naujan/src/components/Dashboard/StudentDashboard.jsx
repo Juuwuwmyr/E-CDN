@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import cdnLogo    from '../../assets/images/logo.png';
 import bagongLogo from '../../assets/images/bagong-pilipinas-seeklogo.png';
 import '../../styles/dashboard.css';
-import { recordLogoutSession, recordSystemVisit } from '../../lib/auth';
+import { recordLogoutSession, recordSystemVisit, getSystemApplications } from '../../lib/auth';
 import { sendToGroq } from '../../lib/groqChat';
 import { fetchAnnouncements } from '../../lib/announcements';
 import { supabase } from '../../lib/supabase';
@@ -24,30 +24,48 @@ const recordVisit = (id, label) => {
   localStorage.setItem(PAGEVIEW_KEY, JSON.stringify(views.slice(0, 200)));
 };
 
-const SERVICES = [
-  { id: 'csc',       label: 'Student Fines', sub: 'Check and settle your outstanding fines', url: 'https://student-fines-hub-vf9z.vercel.app/', color: '#002280', bg: '#eef1fb' },
-  { id: 'osas',      label: 'OSAS Records',  sub: 'View your conduct and violation records', url: 'https://osas-sys.duckdns.org/',              color: '#C8102E', bg: '#fdf0f2' },
-  { id: 'admission', label: 'Admissions',    sub: 'Online enrollment and admission portal',  url: 'https://ecnesis.duckdns.org/',               color: '#C8960C', bg: '#fdf8ec' },
-];
-const SVC_ICONS = {
-  csc:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h10M7 12h6"/></svg>,
-  osas:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>,
-  admission: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+/* SVC_ICON_DEFAULT — fallback for DB services without a known category icon */
+const SVC_ICON_DEFAULT = (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z"/>
+  </svg>
+);
+/* Per-category icons (solid fill) */
+const SVC_ICON_BY_CATEGORY = {
+  fines:      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>,
+  records:    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99L7 9.5l1.41-1.41L12 11.17l3.59-3.58L17 9l-5 5z"/></svg>,
+  admission:  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>,
+  portal:     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V8h14v10z"/><path d="M7 10h10v2H7zm0 4h7v2H7z"/></svg>,
+  finance:    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>,
 };
+
+const getSvcIcon = (svc) =>
+  SVC_ICON_BY_CATEGORY[svc.category?.toLowerCase()] ?? SVC_ICON_DEFAULT;
+
 const NAV_ICONS = {
-  home:          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-  history:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  account:       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
-  announcements: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/><path d="M12 17V3"/><path d="M5 10l7-7 7 7"/></svg>,
+  home: (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    </svg>
+  ),
+  account: (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+    </svg>
+  ),
+  announcements: (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+      <path d="M7 9h10v2H7zm0 4h7v2H7z"/>
+    </svg>
+  ),
 };
 
 const STUDENT_NAV_GROUPS = [
-  { group: 'Portal',  items: [{ key: 'home', label: 'Home' }, { key: 'history', label: 'History' }, { key: 'announcements', label: 'Announcements' }] },
+  { group: 'Portal',  items: [{ key: 'home', label: 'Home' }, { key: 'announcements', label: 'Announcements' }] },
   { group: 'Account', items: [{ key: 'account', label: 'My Profile' }] },
 ];
-const MOBILE_NAV = [{ key: 'home', label: 'Home' }, { key: 'history', label: 'History' }, { key: 'announcements', label: 'Alerts' }, { key: 'account', label: 'Profile' }];
-const SVC_GRADIENTS   = ['linear-gradient(130deg,#002280,#0044cc)', 'linear-gradient(130deg,#C8102E,#9b0921)', 'linear-gradient(130deg,#b45309,#C8960C)'];
-const SVC_TAGS        = ['CSC Services', 'OSAS Services', 'Admissions'];
+const MOBILE_NAV = [{ key: 'home', label: 'Home' }, { key: 'announcements', label: 'Alerts' }, { key: 'account', label: 'Profile' }];
 const NOTIF_STATIC = [];
 
 const ANN_TYPE = {
@@ -88,6 +106,8 @@ export default function StudentDashboard({ user, onLogout }) {
   const [annSeenKey]                          = useState(() => `cdn_ann_seen_${user?.studentNumber || 'student'}`);
   const [toasts,          setToasts]          = useState([]);
   const [selectedAnn,     setSelectedAnn]     = useState(null); // opened message modal
+  const [services,        setServices]        = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const profileRef = useRef(null);
   const notifRef   = useRef(null);
   const chatEndRef = useRef(null);
@@ -198,6 +218,14 @@ export default function StudentDashboard({ user, onLogout }) {
   }, []);
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages, chatOpen]);
   useEffect(() => { try { setRecentVisits(JSON.parse(localStorage.getItem(PAGEVIEW_KEY)) || []); } catch { setRecentVisits([]); } }, []);
+
+  /* ── Load services from system_applications table ───────── */
+  useEffect(() => {
+    getSystemApplications(false)
+      .then(data => setServices(data))
+      .catch(err => console.warn('[Services]', err))
+      .finally(() => setServicesLoading(false));
+  }, []);
 
   const displayName = user?.name || user?.username || user?.studentNumber || 'Student';
   const initial     = displayName.charAt(0).toUpperCase();
@@ -372,18 +400,22 @@ export default function StudentDashboard({ user, onLogout }) {
                 <div className="db-panel-icon db-panel-icon--blue">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 </div>
-                <div><p className="db-panel-title">My Services</p><p className="db-panel-sub">{SERVICES.length} systems connected</p></div>
+                <div><p className="db-panel-title">My Services</p><p className="db-panel-sub">{services.length} systems connected</p></div>
               </div>
               <span className="db-badge-pill">Quick Access</span>
             </div>
             <div className="db-sys-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
-              {SERVICES.map(svc => (
-                <button key={svc.id} onClick={() => handleOpen(svc)} className="db-sys-card" style={{ '--sc': svc.color, '--sc-bg': svc.bg }}>
-                  <div className="db-sys-icon-wrap" style={{ background: svc.bg, color: svc.color }}>{SVC_ICONS[svc.id]}</div>
+              {servicesLoading ? (
+                <p style={{ padding: '1.5rem', fontSize: '.83rem', color: '#9ca3af', gridColumn: '1/-1' }}>Loading services…</p>
+              ) : services.length === 0 ? (
+                <p style={{ padding: '1.5rem', fontSize: '.83rem', color: '#9ca3af', gridColumn: '1/-1' }}>No services available.</p>
+              ) : services.map(svc => (
+                <button key={svc.id} onClick={() => handleOpen(svc)} className="db-sys-card" style={{ '--sc': svc.color || '#002280', '--sc-bg': svc.bg || '#eef1fb' }}>
+                  <div className="db-sys-icon-wrap" style={{ background: svc.bg || '#eef1fb', color: svc.color || '#002280' }}>{getSvcIcon(svc)}</div>
                   <div className="db-sys-info"><p className="db-sys-label">{svc.label}</p><p className="db-sys-sub">{svc.sub}</p></div>
                   <div className="db-sys-footer">
                     {analytics[svc.id] > 0 && (
-                      <div className="db-sys-visits" style={{ color: svc.color }}>
+                      <div className="db-sys-visits" style={{ color: svc.color || '#002280' }}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         {analytics[svc.id]}
                       </div>
@@ -407,12 +439,12 @@ export default function StudentDashboard({ user, onLogout }) {
                 <button onClick={() => setTab('history')} style={{ fontSize: '.75rem', fontWeight: 700, color: '#002280', background: '#eef1fb', border: 'none', borderRadius: 8, padding: '.3rem .8rem', cursor: 'pointer', fontFamily: 'inherit' }}>See all</button>
               </div>
               {recentVisits.slice(0, 4).map((v, i) => {
-                const svc = SERVICES.find(s => s.id === v.id);
+                const svc = services.find(s => s.id === v.id);
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '.85rem 1.25rem', borderBottom: i < Math.min(recentVisits.length, 4) - 1 ? '1px solid #f3f4f6' : 'none' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: svc?.color || '#9ca3af', flexShrink: 0 }}/>
                     <div style={{ width: 34, height: 34, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: svc?.bg || '#f3f4f6', color: svc?.color || '#6b7280' }}>
-                      <span style={{ width: 16, height: 16, display: 'flex' }}>{SVC_ICONS[svc?.id]}</span>
+                      <span style={{ width: 16, height: 16, display: 'flex' }}>{svc ? getSvcIcon(svc) : SVC_ICON_DEFAULT}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}><p style={{ fontSize: '.83rem', fontWeight: 700, color: '#0f1724', margin: 0 }}>{v.label}</p></div>
                     <span style={{ fontSize: '.68rem', fontWeight: 600, color: '#9ca3af', flexShrink: 0 }}>{timeAgo(v.ts)}</span>
@@ -506,14 +538,14 @@ export default function StudentDashboard({ user, onLogout }) {
                 <p>No visits yet</p><p style={{ fontSize: '.78rem', color: '#9ca3af' }}>Your service visits will appear here.</p>
               </div>
             ) : recentVisits.map((v, i) => {
-              const svc = SERVICES.find(s => s.id === v.id);
+              const svc = services.find(s => s.id === v.id);
               return (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', borderBottom: i < recentVisits.length - 1 ? '1px solid #f3f4f6' : 'none' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#f7f8fc'}
                   onMouseLeave={e => e.currentTarget.style.background = ''}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: svc?.color || '#9ca3af', flexShrink: 0 }}/>
                   <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: svc?.bg || '#f3f4f6', color: svc?.color || '#6b7280' }}>
-                    <span style={{ width: 18, height: 18, display: 'flex' }}>{SVC_ICONS[svc?.id]}</span>
+                    <span style={{ width: 18, height: 18, display: 'flex' }}>{svc ? getSvcIcon(svc) : SVC_ICON_DEFAULT}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: '.88rem', fontWeight: 700, color: '#0f1724', margin: '0 0 2px' }}>{v.label}</p>
@@ -566,13 +598,13 @@ export default function StudentDashboard({ user, onLogout }) {
                 <p className="db-panel-title">Quick Access</p>
               </div>
             </div>
-            {SERVICES.map((svc, i) => (
+            {services.map((svc, i) => (
               <button key={svc.id} onClick={() => handleOpen(svc)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', border: 'none', background: 'none', borderBottom: i < SERVICES.length - 1 ? '1px solid #f3f4f6' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'background .12s' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', border: 'none', background: 'none', borderBottom: i < services.length - 1 ? '1px solid #f3f4f6' : 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'background .12s' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f7f8fc'}
                 onMouseLeave={e => e.currentTarget.style.background = ''}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: svc.bg, color: svc.color }}>
-                  <span style={{ width: 18, height: 18, display: 'flex' }}>{SVC_ICONS[svc.id]}</span>
+                <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: svc.bg || '#eef1fb', color: svc.color || '#002280' }}>
+                  <span style={{ width: 18, height: 18, display: 'flex' }}>{getSvcIcon(svc)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '.88rem', fontWeight: 700, color: '#0f1724', margin: '0 0 2px' }}>{svc.label}</p>

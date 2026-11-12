@@ -224,13 +224,15 @@ const SystemAppsManager = () => {
             color: '#fff',
             border: 'none',
             borderRadius: 8,
-            padding: '10px 20px',
-            fontSize: '0.875rem',
+            padding: '8px 14px',
+            fontSize: '0.84rem',
             fontWeight: 700,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 6,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
           }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 18, height: 18 }}>

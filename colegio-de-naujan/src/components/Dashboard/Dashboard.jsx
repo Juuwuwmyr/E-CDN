@@ -13,20 +13,20 @@ import { logActivity }          from '../../lib/activityLogger';
 
 import DashboardShell  from './DashboardShell';
 import OverviewPage    from './tabs/OverviewPage';
-import ActivityPage    from './tabs/ActivityPage';
 import SystemsPage     from './tabs/SystemsPage';
 import StudentsPage    from './tabs/StudentsPage';
 import AccountsPage    from './tabs/AccountsPage';
 import AnnouncementsPage from './tabs/AnnouncementsPage';
+import GovernancePage    from './tabs/GovernancePage';
 
 /* ── tab → component map ─────────────────────────────────── */
 const TAB_PAGES = {
   overview:      OverviewPage,
-  activity:      ActivityPage,
   admin:         SystemsPage,
   students:      StudentsPage,
   accounts:      AccountsPage,
   announcements: AnnouncementsPage,
+  governance:    GovernancePage,
 };
 
 /* ── Dashboard ───────────────────────────────────────────── */
@@ -64,7 +64,7 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   /* guard: admin-only tabs */
-  const ADMIN_TABS = ['admin', 'students', 'accounts', 'announcements'];
+  const ADMIN_TABS = ['admin', 'students', 'accounts', 'announcements', 'governance'];
   const resolvedTab = ADMIN_TABS.includes(activeTab) && user?.role?.toLowerCase() !== 'admin'
     ? 'overview'
     : activeTab;

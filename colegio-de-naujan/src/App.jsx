@@ -19,7 +19,8 @@ const isStudent = (user) =>
 
 /* ── Page components ── */
 import { lazy, Suspense } from 'react';
-const HomePage    = lazy(() => import('./components/Home/LandingPage'));
+const HomePage            = lazy(() => import('./components/Home/LandingPage'));
+const GovernancePublicPage = lazy(() => import('./components/Governance/GovernancePublicPage'));
 
 /* ── ScrollRedirect: navigates to "/" then scrolls to a section id ── */
 function ScrollRedirect({ id }) {
@@ -65,6 +66,7 @@ function ScrollToTop() {
       '/dashboard':         'Dashboard — CDN E-Portal',
       '/dashboard/history': 'History — CDN E-Portal',
       '/dashboard/account': 'Account — CDN E-Portal',
+      '/governance':        'OPEN Governance — CDN',
     };
     document.title = titles[pathname] ?? 'Colegio De Naujan';
   }, [pathname]);
@@ -79,7 +81,7 @@ function PublicLayout({ onLoginClick }) {
       <main style={{ paddingTop: '72px', flex: 1 }}>
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/"         element={<HomePage />} />
+            <Route path="/"          element={<HomePage />} />
             {/* Legacy routes — redirect to landing and scroll to section */}
             <Route path="/courses"  element={<ScrollRedirect id="courses" />} />
             <Route path="/services" element={<ScrollRedirect id="services" />} />
@@ -168,6 +170,14 @@ function AppInner() {
                 : <AccountPage user={user} onLogout={handleLogout} />
               }
             </RequireAuth>
+          }
+        />
+        <Route
+          path="/governance"
+          element={
+            <Suspense fallback={null}>
+              <GovernancePublicPage />
+            </Suspense>
           }
         />
         <Route

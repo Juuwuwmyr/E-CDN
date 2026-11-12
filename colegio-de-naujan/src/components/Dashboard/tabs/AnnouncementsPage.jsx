@@ -195,75 +195,72 @@ export default function AnnouncementsPage({ user }) {
 
         <form onSubmit={handlePost} style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
 
-          {/* ── Announcement Type ── */}
-          <div>
-            <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '.5rem' }}>Type</p>
-            <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap' }}>
-              {Object.entries(TYPE_CONFIG).map(([k, v]) => (
-                <button key={k} type="button" onClick={() => setType(k)}
-                  style={{
-                    padding: '.4rem .9rem', borderRadius: 999, fontSize: '.78rem', fontWeight: 700,
-                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s',
-                    background: type === k ? v.color : v.bg, color: type === k ? '#fff' : v.color,
-                    border: `1.5px solid ${type === k ? v.color : v.border}`,
-                  }}>
-                  {v.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* ── Compose fields row: Type + Course + Year in one line ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
 
-          {/* ── Audience: Courses ── */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.5rem' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0 }}>
-                Notify — Course
-              </p>
-              {!allCourses && (
-                <button type="button" onClick={() => setTargetCourses([])}
-                  style={{ fontSize: '.65rem', fontWeight: 700, color: '#002280', background: '#eef1fb', border: 'none', borderRadius: 6, padding: '.15rem .5rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Clear
-                </button>
-              )}
+            {/* Type */}
+            <div>
+              <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '.4rem' }}>Type</p>
+              <select
+                value={type}
+                onChange={e => setType(e.target.value)}
+                style={{
+                  width: '100%', padding: '.7rem .9rem', borderRadius: 9,
+                  border: `1.5px solid ${TYPE_CONFIG[type]?.border || '#e4e8f2'}`,
+                  fontSize: '.86rem', fontWeight: 700, fontFamily: 'inherit',
+                  color: TYPE_CONFIG[type]?.color || '#374151',
+                  background: TYPE_CONFIG[type]?.bg || '#f7f8fc',
+                  outline: 'none', cursor: 'pointer',
+                }}
+              >
+                {Object.entries(TYPE_CONFIG).map(([k, v]) => (
+                  <option key={k} value={k}>{v.label}</option>
+                ))}
+              </select>
             </div>
-            <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap' }}>
-              {/* All Courses button */}
-              <button type="button" onClick={() => setTargetCourses([])} style={pillStyle(allCourses)}>
-                All Courses
-              </button>
-              {COURSES.map(c => (
-                <button key={c} type="button" onClick={() => setTargetCourses(prev => toggle(prev, c))}
-                  style={pillStyle(targetCourses.includes(c))}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* ── Audience: Year Level ── */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.5rem' }}>
-              <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', margin: 0 }}>
-                Notify — Year Level
-              </p>
-              {!allYears && (
-                <button type="button" onClick={() => setTargetYearLevels([])}
-                  style={{ fontSize: '.65rem', fontWeight: 700, color: '#002280', background: '#eef1fb', border: 'none', borderRadius: 6, padding: '.15rem .5rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Clear
-                </button>
-              )}
+            {/* Course */}
+            <div>
+              <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '.4rem' }}>Course</p>
+              <select
+                value={targetCourses.length === 1 ? targetCourses[0] : ''}
+                onChange={e => {
+                  const val = e.target.value;
+                  setTargetCourses(val === '' ? [] : [val]);
+                }}
+                style={{
+                  width: '100%', padding: '.7rem .9rem', borderRadius: 9,
+                  border: '1.5px solid #e4e8f2', fontSize: '.86rem', fontWeight: 600,
+                  fontFamily: 'inherit', color: '#374151', background: '#fafafa',
+                  outline: 'none', cursor: 'pointer',
+                }}
+              >
+                <option value="">All Courses</option>
+                {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
-            <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => setTargetYearLevels([])} style={pillStyle(allYears)}>
-                All Year Levels
-              </button>
-              {YEAR_LEVELS.map(y => (
-                <button key={y} type="button" onClick={() => setTargetYearLevels(prev => toggle(prev, y))}
-                  style={pillStyle(targetYearLevels.includes(y))}>
-                  {YEAR_LABELS[y]}
-                </button>
-              ))}
+
+            {/* Year Level */}
+            <div>
+              <p style={{ fontSize: '.72rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '.4rem' }}>Year Level</p>
+              <select
+                value={targetYearLevels.length === 1 ? targetYearLevels[0] : ''}
+                onChange={e => {
+                  const val = e.target.value;
+                  setTargetYearLevels(val === '' ? [] : [val]);
+                }}
+                style={{
+                  width: '100%', padding: '.7rem .9rem', borderRadius: 9,
+                  border: '1.5px solid #e4e8f2', fontSize: '.86rem', fontWeight: 600,
+                  fontFamily: 'inherit', color: '#374151', background: '#fafafa',
+                  outline: 'none', cursor: 'pointer',
+                }}
+              >
+                <option value="">All Year Levels</option>
+                {YEAR_LEVELS.map(y => <option key={y} value={y}>{YEAR_LABELS[y]}</option>)}
+              </select>
             </div>
+
           </div>
 
           {/* ── Audience summary badge ── */}

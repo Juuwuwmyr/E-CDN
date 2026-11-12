@@ -5,11 +5,12 @@ import bagongPilipinasLogo from '../../assets/images/bagong-pilipinas-seeklogo.p
 
 /* ── Nav items — id matches section id in LandingPage ── */
 const navLinks = [
-  { label: 'Home',     id: 'home'     },
-  { label: 'Courses',  id: 'courses'  },
-  { label: 'Services', id: 'services' },
-  { label: 'About',    id: 'about'    },
-  { label: 'Contact',  id: 'contact'  },
+  { label: 'Home',       id: 'home'       },
+  { label: 'Courses',    id: 'courses'    },
+  { label: 'Services',   id: 'services'   },
+  { label: 'About',      id: 'about'      },
+  { label: 'Governance', id: 'governance' },
+  { label: 'Contact',    id: 'contact'    },
 ];
 
 const serviceDropdown = [

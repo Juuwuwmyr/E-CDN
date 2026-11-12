@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared Dashboard constants — single source of truth.
  * Import from here; never duplicate in individual pages.
  */
@@ -94,18 +94,8 @@ export const NAV_GROUPS = [
         label: 'Home',
         tab: 'overview',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-        ),
-      },
-      {
-        label: 'Activity',
-        tab: 'activity',
-        icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
           </svg>
         ),
       },
@@ -114,9 +104,9 @@ export const NAV_GROUPS = [
         route: '/dashboard/history',
         activeKey: 'history',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 3a9 9 0 10-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 117 7v-2a5 5 0 10-5-5v1.17l1.59-1.58L11 13l-4 4-4-4 1.41-1.41L6 13.17V12A9 9 0 0113 3z"/>
+            <path d="M12 8v5l3 3-1.5 1.5-3.5-3.5V8H12z"/>
           </svg>
         ),
       },
@@ -131,11 +121,8 @@ export const NAV_GROUPS = [
         tab: 'admin',
         role: 'Admin',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <path d="M17.5 14v6M14.5 17h6" />
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z"/>
           </svg>
         ),
       },
@@ -144,10 +131,9 @@ export const NAV_GROUPS = [
         tab: 'announcements',
         role: 'Admin',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/>
-            <path d="M12 17V3"/>
-            <path d="M5 10l7-7 7 7"/>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+            <path d="M7 9h10v2H7zm0 4h7v2H7z"/>
           </svg>
         ),
       },
@@ -156,10 +142,8 @@ export const NAV_GROUPS = [
         tab: 'students',
         role: 'Admin',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
           </svg>
         ),
       },
@@ -168,11 +152,20 @@ export const NAV_GROUPS = [
         tab: 'accounts',
         role: 'Admin',
         icon: (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-            <line x1="23" y1="11" x2="17" y2="11"/>
-            <line x1="20" y1="8" x2="20" y2="14"/>
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            <path d="M20 8h2v2h-2zM20 12h2v2h-2z"/>
+          </svg>
+        ),
+      },
+      {
+        label: 'Governance',
+        tab: 'governance',
+        role: 'Admin',
+        icon: (
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12V11c0 4.52-3.08 8.74-7 9.93-3.92-1.19-7-5.41-7-9.93V6.3l7-3.12z"/>
+            <path d="M11 13h2v2h-2zm0-6h2v5h-2z"/>
           </svg>
         ),
       },
@@ -187,18 +180,8 @@ export const NAV_ITEMS = [
     label: 'Home',
     tab: 'overview',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Activity',
-    tab: 'activity',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
       </svg>
     ),
   },
@@ -207,11 +190,8 @@ export const NAV_ITEMS = [
     tab: 'admin',
     role: 'Admin',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <path d="M17.5 14v6M14.5 17h6" />
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z"/>
       </svg>
     ),
   },
@@ -220,10 +200,8 @@ export const NAV_ITEMS = [
     tab: 'announcements',
     role: 'Admin',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 17H2a3 3 0 000 6h20a3 3 0 000-6z"/>
-        <path d="M12 17V3"/>
-        <path d="M5 10l7-7 7 7"/>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12zM7 9h10v2H7zm0 4h7v2H7z"/>
       </svg>
     ),
   },
@@ -232,10 +210,8 @@ export const NAV_ITEMS = [
     tab: 'students',
     role: 'Admin',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
       </svg>
     ),
   },
@@ -244,9 +220,18 @@ export const NAV_ITEMS = [
     route: '/dashboard/history',
     activeKey: 'history',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 3a9 9 0 10-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 117 7v-2a5 5 0 10-5-5v1.17l1.59-1.58L11 13l-4 4-4-4 1.41-1.41L6 13.17V12A9 9 0 0113 3zM12 8v5l3 3-1.5 1.5-3.5-3.5V8H12z"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'Governance',
+    tab: 'governance',
+    role: 'Admin',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99L7 9.5l1.41-1.41L12 11.17l3.59-3.58L17 9l-5 5z"/>
       </svg>
     ),
   },

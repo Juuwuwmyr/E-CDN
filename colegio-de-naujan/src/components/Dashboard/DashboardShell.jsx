@@ -249,7 +249,53 @@ const DashboardShell = ({ user, onLogout, activeTab, onTabChange, onRoute, onDro
         </div>
       </header>
 
-      {/* ══ MAIN PANEL (tab content rendered here) ══════════ */}
+      {/* ══ TOP NAV BAR ═════════════════════════════════════ */}
+      <nav className="db-topnav" aria-label="Main navigation">
+        <div className="db-topnav-inner">
+          {NAV_GROUPS.filter(g => !g.role || user?.role === g.role).flatMap(g => g.items)
+            .filter(item => !item.role || user?.role === item.role)
+            .map(item => {
+              const isActive =
+                (item.tab && activeTab === item.tab) ||
+                (item.activeKey && activeTab === item.activeKey);
+              return (
+                <button
+                  key={item.label}
+                  className={'db-topnav-item' + (isActive ? ' db-topnav-item--active' : '')}
+                  onClick={() => {
+                    if (item.tab)   onTabChange(item.tab);
+                    if (item.route) onRoute(item.route);
+                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span className="db-topnav-icon">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+
+          {/* Spacer pushes search to the right */}
+          <div className="db-topnav-spacer" />
+
+          {/* Search — docked right in the nav bar */}
+          <div className="db-topnav-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search…"
+              onKeyDown={e => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  window.dispatchEvent(new CustomEvent('db-search', { detail: e.target.value.trim() }));
+                }
+              }}
+            />
+          </div>
+        </div>
+      </nav>
+
+      {/* ══ MAIN PANEL ══════════════════════════════════════ */}
       <main className="db-main">
         {children}
       </main>
@@ -269,68 +315,11 @@ const DashboardShell = ({ user, onLogout, activeTab, onTabChange, onRoute, onDro
               if (item.route) onRoute(item.route);
             }}
             aria-label={item.label}
-            aria-current={
-              (item.tab && activeTab === item.tab) || (item.activeKey && activeTab === item.activeKey)
-                ? 'page' : undefined
-            }
           >
             {item.icon}
             <span>{item.label}</span>
           </button>
         ))}
-      </nav>
-
-      {/* ══ DESKTOP SIDEBAR (hidden on mobile) ══════════════ */}
-      <nav className="db-sidebar" aria-label="Main navigation">
-
-        {/* Brand header — desktop only */}
-        <div className="db-sidebar-brand">
-          <img src={cdnLogo} alt="CDN" className="db-sidebar-brand-logo" />
-          <div className="db-sidebar-brand-text">
-            <span className="db-sidebar-brand-name">CDN</span>
-            <span className="db-sidebar-brand-sub">E-Portal</span>
-          </div>
-        </div>
-
-        <div className="db-sidebar-inner">
-          {NAV_GROUPS.filter(g => !g.role || user?.role === g.role).map(group => (
-            <div key={group.group} className="db-sidebar-group">
-              <p className="db-sidebar-group-label">{group.group}</p>
-              {group.items
-                .filter(item => !item.role || user?.role === item.role)
-                .map(item => {
-                  const isActive =
-                    (item.tab && activeTab === item.tab) ||
-                    (item.activeKey && activeTab === item.activeKey);
-                  return (
-                    <button
-                      key={item.label}
-                      className={'db-sidebar-item' + (isActive ? ' db-sidebar-item--active' : '')}
-                      onClick={() => {
-                        if (item.tab)   onTabChange(item.tab);
-                        if (item.route) onRoute(item.route);
-                      }}
-                      aria-current={isActive ? 'page' : undefined}
-                    >
-                      <span className="db-sidebar-item-icon">{item.icon}</span>
-                      <span className="db-sidebar-item-label">{item.label}</span>
-                    </button>
-                  );
-                })}
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom user strip */}
-        <div className="db-sidebar-footer">
-          <div className="db-sidebar-avatar">
-            {user?.name?.charAt(0).toUpperCase() ?? 'U'}
-          </div>
-          <div className="db-sidebar-user">
-            <p className="db-sidebar-user-name">{user?.name?.split(' ')[0] ?? 'User'}</p>
-            <p className="db-sidebar-user-role">{user?.role ?? 'Member'}</p>
-          </div>
-        </div>
       </nav>
 
       {/* ══ FLOATING CHATBOT FAB ════════════════════════════ */}
