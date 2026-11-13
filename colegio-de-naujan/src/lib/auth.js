@@ -741,19 +741,36 @@ export function subscribeToSystemApplications(onChange) {
 
 /* ──────────────────────────────────────────────────────────
    validateSession  — verifies a session id + token pair against
-   the DB. Both must match and logout_at must be NULL. Returns
-   the DB row so callers can refresh the cached user identity
-   from the server instead of trusting localStorage alone.
+   the DB. Both must match. Returns the DB row so callers can
+   refresh the cached user identity from the server instead of
+   trusting localStorage alone.
+
+   Grace window: the beforeunload beacon marks logout_at whenever
+   the page unloads (URL edit, refresh, tab close). A logout_at
+   set within the last 30 seconds is therefore treated as a
+   navigation artifact, not a real logout — the caller renews the
+   session immediately after. An explicit logout still invalidates
+   the session: the local token is deleted and, after the grace
+   window, a stale token can no longer renew.
 ────────────────────────────────────────────────────────── */
+const SESSION_LOGOUT_GRACE_MS = 30 * 1000;
+
 export async function validateSession(sessionId, token) {
   if (!isNumericId(sessionId) || !token) return { valid: false };
   const { data, error } = await supabase
     .from('portal_sessions')
-    .select('id, user_id, role, user_type, full_name')
+    .select('id, user_id, role, user_type, full_name, logout_at')
     .eq('id', Number(sessionId))
     .eq('session_token', token)
-    .is('logout_at', null)
-    .single();
+    .maybeSingle();
+
   if (error || !data) return { valid: false };
+
+  // Only an OLD logout_at (> grace window) invalidates the session.
+  if (data.logout_at) {
+    const age = Date.now() - new Date(data.logout_at).getTime();
+    if (age > SESSION_LOGOUT_GRACE_MS) return { valid: false };
+  }
+
   return { valid: true, session: data };
 }

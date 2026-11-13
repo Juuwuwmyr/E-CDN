@@ -152,11 +152,35 @@ function AppInner() {
       renewSession(sessionId, token);
     });
 
-    // When the tab/browser closes WITHOUT logout → auto-mark as logged out
-    const handleUnload = () => markSessionLogoutBeacon(sessionId);
+    // When the tab/browser closes WITHOUT logout → auto-mark as logged out.
+    // Reads the CURRENT session id at unload time (it may have changed
+    // if the user logged out and back in without reloading).
+    const handleUnload = () => markSessionLogoutBeacon(localStorage.getItem('cdn_session'));
     window.addEventListener('beforeunload', handleUnload);
     return () => window.removeEventListener('beforeunload', handleUnload);
   }, []);
+
+  /* ── Session heartbeat ──
+     Keeps the session marked active while the app is open and clears
+     any logout_at the tab-close beacon may have set late (after a
+     reload or URL edit). Stops automatically on logout (user → null). */
+  useEffect(() => {
+    if (!user) return;
+    const id = localStorage.getItem('cdn_session');
+    const token = localStorage.getItem('cdn_token');
+    if (!id || !token) return;
+
+    const stillActive = () =>
+      localStorage.getItem('cdn_session') === id &&
+      localStorage.getItem('cdn_token') === token;
+
+    // Clears a late-landing beacon right after a reload/navigation
+    const late = setTimeout(() => { if (stillActive()) renewSession(id, token); }, 2000);
+    // Periodic heartbeat for long-lived tabs (also covers bfcache restore)
+    const beat = setInterval(() => { if (stillActive()) renewSession(id, token); }, 60000);
+
+    return () => { clearTimeout(late); clearInterval(beat); };
+  }, [user]);
 
   const handleLogin = () => {
     const userData = readSession();
