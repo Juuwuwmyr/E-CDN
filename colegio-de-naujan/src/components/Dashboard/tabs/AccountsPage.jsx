@@ -639,6 +639,24 @@ const AccountsPage = ({ user }) => {
     if (clearSelection) { setSelectedUser(null); setRightPaneMode('view'); }
   }, [showToast, fetchAll]);
 
+  /* ── Archive page handlers ──────────────────────────────── */
+  const handleArchiveRestore = useCallback(async (id) => {
+    try {
+      await toggleUserActive(id, true);
+      showToast('Account restored.');
+      fetchAll();
+    } catch (e) { showToast(e.message || 'Restore failed.', 'error'); }
+  }, [showToast, fetchAll]);
+
+  const handleArchiveDelete = useCallback(async (u) => {
+    if (!window.confirm(`Permanently delete account "${u.username}"? This cannot be undone.`)) return;
+    try {
+      await deletePortalUser(u.id);
+      showToast(`Account "${u.username}" permanently deleted.`);
+      fetchAll();
+    } catch (e) { showToast(e.message || 'Delete failed.', 'error'); }
+  }, [showToast, fetchAll]);
+
   /* handle add user */
   const handleAddUser = async (form) => {
     await createPortalUser(form);
@@ -662,6 +680,39 @@ const AccountsPage = ({ user }) => {
     <div className="db-home-content" style={{ paddingBottom: '2rem' }}>
       {toast && <Toast msg={toast.msg} type={toast.type} />}
 
+      {/* ── PAGE HEADER ── */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8, marginBottom:'1rem' }}>
+        <div>
+          <p style={{ margin:0, fontSize:'.97rem', fontWeight:800, color:'#0f1724' }}>Accounts</p>
+          <p style={{ margin:'2px 0 0', fontSize:'.72rem', color:'#94a3b8' }}>Manage portal users and student accounts</p>
+        </div>
+        <button
+          onClick={() => { setUserListFilter(userListFilter === 'archived' ? 'active' : 'archived'); setSelectedUser(null); }}
+          style={{
+            display:'inline-flex', alignItems:'center', gap:6,
+            padding:'6px 14px', borderRadius:8, border:'1.5px solid',
+            borderColor: userListFilter === 'archived' ? '#C8960C' : '#e2e8f0',
+            background:  userListFilter === 'archived' ? '#fdf8ec' : '#fff',
+            color:       userListFilter === 'archived' ? '#C8960C' : '#6b7280',
+            fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit',
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+          </svg>
+          {userListFilter === 'archived' ? '← Back' : 'Archive'}
+        </button>
+      </div>
+
+      {/* Stats / Split-pane OR Archive view */}
+      {userListFilter === 'archived' ? (
+        <AccountsArchivePage
+          portalUsers={portalUsers}
+          onRestore={handleArchiveRestore}
+          onDelete={handleArchiveDelete}
+        />
+      ) : (
+        <>
       {/* Stats */}
       <div className="db-stats-row" style={{ marginBottom: '1.5rem' }}>
         {STAT_CARDS.map((s) => (
@@ -810,6 +861,8 @@ const AccountsPage = ({ user }) => {
           user={user}
         />
       </div>
+        </>
+      )}
 
       {/* Add User Modal */}
       {showModal && (
@@ -823,3 +876,110 @@ const AccountsPage = ({ user }) => {
 };
 
 export default AccountsPage;
+
+/* ─────────────────────────────────────────────────────────────
+   AccountsArchivePage — full-page archive view
+───────────────────────────────────────────────────────────── */
+function AccountsArchivePage({ portalUsers, onRestore, onDelete }) {
+  const archived = portalUsers.filter(u => u.is_active === false);
+
+  return (
+    <div className="db-panel" style={{ padding: '1.5rem' }}>
+      {/* Section header */}
+      <div style={{ marginBottom: '1rem', paddingBottom: '.75rem', borderBottom: '1px solid #f3f4f6' }}>
+        <p style={{ margin: 0, fontSize: '.95rem', fontWeight: 800, color: '#0f1724' }}>Archived Accounts</p>
+        <p style={{ margin: '2px 0 0', fontSize: '.72rem', color: '#94a3b8' }}>
+          {archived.length} archived account{archived.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Count badge */}
+      <span className="sl-count" style={{ marginBottom: '.75rem', display: 'block' }}>
+        <strong>{archived.length}</strong> archived accounts
+      </span>
+
+      {/* Empty state */}
+      {archived.length === 0 ? (
+        <div className="db-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 44, height: 44, color: '#d1d5db' }}>
+            <polyline points="21 8 21 21 3 21 3 8"/>
+            <rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+          <p>No archived accounts</p>
+          <span>Accounts you archive will appear here.</span>
+        </div>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.84rem' }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                {['#', 'Name', 'Username', 'Role', 'Date Archived', 'Actions'].map(h => (
+                  <th key={h} style={{
+                    padding: '10px 12px', textAlign: 'left', fontSize: '.72rem',
+                    fontWeight: 700, color: '#6b7280', textTransform: 'uppercase',
+                    letterSpacing: '.04em', whiteSpace: 'nowrap',
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {archived.map((u, i) => {
+                const color = accountAvatarColor(u.username);
+                const rm = ROLE_META[u.role] || ROLE_META.student;
+                return (
+                  <tr key={u.id} style={{ borderBottom: '1px solid #f3f4f6', background: '#fff' }}>
+                    <td style={{ padding: '12px', color: '#9ca3af', fontWeight: 600 }}>{i + 1}</td>
+                    <td style={{ padding: '12px', minWidth: 160 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: '50%', background: color, color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '.82rem', fontWeight: 700, flexShrink: 0,
+                        }}>
+                          {(u.full_name || u.username || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <span style={{ fontWeight: 700, color: '#0f1724' }}>{u.full_name || '—'}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '12px', color: '#64748b' }}>{u.username}</td>
+                    <td style={{ padding: '12px' }}>
+                      <span className="sl-dept-badge" style={{ color: rm.color, background: rm.bg, fontSize: '.72rem', padding: '2px 8px', borderRadius: 20, fontWeight: 700 }}>
+                        {rm.label}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px', color: '#9ca3af', fontSize: '.78rem', whiteSpace: 'nowrap' }}>
+                      {u.updated_at ? new Date(u.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                          className="sl-btn sl-btn--ghost"
+                          style={{ padding: '5px 12px', fontSize: '.76rem' }}
+                          onClick={() => onRestore(u.id)}
+                        >
+                          ↩ Restore
+                        </button>
+                        <button
+                          className="sl-act-btn"
+                          title="Permanently delete"
+                          onClick={() => onDelete(u)}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14H6L5 6"/>
+                            <path d="M9 6V4h6v2"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -389,8 +389,34 @@ const SystemAppsManager = () => {
               </p>
             </div>
           </div>
+          {/* Archive toggle button */}
+          <button
+            onClick={() => { setStatusFilter(statusFilter === 'archived' ? '' : 'archived'); }}
+            style={{
+              display:'inline-flex', alignItems:'center', gap:6,
+              padding:'6px 14px', borderRadius:8, border:'1.5px solid',
+              borderColor: statusFilter === 'archived' ? '#C8960C' : '#e2e8f0',
+              background:  statusFilter === 'archived' ? '#fdf8ec' : '#fff',
+              color:       statusFilter === 'archived' ? '#C8960C' : '#6b7280',
+              fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit', flexShrink:0,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+            </svg>
+            {statusFilter === 'archived' ? '← Back' : 'Archive'}
+          </button>
         </div>
 
+        {/* Toolbar / Table OR Archive view */}
+        {statusFilter === 'archived' ? (
+          <SystemAppsArchiveView
+            apps={apps}
+            onRestore={handleRestore}
+            onDelete={handleDelete}
+          />
+        ) : (
+          <>
         {/* Toolbar */}
         <div style={{
           display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center',
@@ -764,6 +790,8 @@ const SystemAppsManager = () => {
             </tbody>
           </table>
         </div>
+          </>
+        )}
       </div>
 
       {/* ── Modal ──────────────────────────────────────────────── */}
@@ -1035,3 +1063,123 @@ const FieldNote = ({ children }) => (
 );
 
 export default SystemAppsManager;
+
+/* ─────────────────────────────────────────────────────────────
+   SystemAppsArchiveView — full-page archive view inside db-panel
+───────────────────────────────────────────────────────────── */
+function SystemAppsArchiveView({ apps, onRestore, onDelete }) {
+  const archived = apps.filter(a => a.badge === 'Archived');
+
+  return (
+    <div style={{ padding: '1.25rem 0' }}>
+      {/* Section header */}
+      <div style={{ marginBottom: '1rem', paddingBottom: '.75rem', borderBottom: '1px solid #f3f4f6' }}>
+        <p style={{ margin: 0, fontSize: '.92rem', fontWeight: 800, color: '#0f1724' }}>Archived Applications</p>
+        <p style={{ margin: '2px 0 0', fontSize: '.72rem', color: '#94a3b8' }}>
+          {archived.length} archived application{archived.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Count */}
+      <span style={{ fontSize: '.78rem', color: '#94a3b8', fontWeight: 600, marginBottom: '.75rem', display: 'block' }}>
+        <strong style={{ color: '#374151' }}>{archived.length}</strong> archived applications
+      </span>
+
+      {/* Empty state */}
+      {archived.length === 0 ? (
+        <div className="db-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 44, height: 44, color: '#d1d5db' }}>
+            <polyline points="21 8 21 21 3 21 3 8"/>
+            <rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+          <p>No archived applications</p>
+          <span>Applications you archive will appear here.</span>
+        </div>
+      ) : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.84rem' }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                {['#', 'Application', 'Category', 'URL', 'Date Archived', 'Actions'].map(h => (
+                  <th key={h} style={{
+                    padding: '10px 12px', textAlign: 'left', fontSize: '.72rem',
+                    fontWeight: 700, color: '#6b7280', textTransform: 'uppercase',
+                    letterSpacing: '.04em', whiteSpace: 'nowrap',
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {archived.map((app, i) => (
+                <tr key={app.id} style={{ borderBottom: '1px solid #f3f4f6', background: '#fff' }}>
+                  <td style={{ padding: '12px', color: '#9ca3af', fontWeight: 600 }}>{i + 1}</td>
+                  <td style={{ padding: '12px', minWidth: 180 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: 6, background: app.bg, color: app.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}>
+                          <rect x="2" y="3" width="20" height="14" rx="2"/>
+                          <path d="M8 21h8M12 17v4"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#111827' }}>{app.label}</div>
+                        {app.sub && <div style={{ fontSize: '.72rem', color: '#9ca3af' }}>{app.sub}</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <span style={{
+                      background: app.bg, color: app.color,
+                      fontSize: '.68rem', fontWeight: 700, padding: '3px 8px', borderRadius: 4,
+                      textTransform: 'uppercase', letterSpacing: '.04em',
+                    }}>
+                      {catLabel(app.category)}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', maxWidth: 200 }}>
+                    <span style={{
+                      fontSize: '.76rem', color: '#6b7280', fontFamily: 'monospace',
+                      display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180,
+                    }} title={app.url}>
+                      {truncateUrl(app.url)}
+                    </span>
+                  </td>
+                  <td style={{ padding: '12px', color: '#9ca3af', fontSize: '.78rem', whiteSpace: 'nowrap' }}>
+                    {app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button
+                        onClick={() => onRestore(app)}
+                        className="sl-btn sl-btn--ghost"
+                        style={{ padding: '5px 12px', fontSize: '.76rem' }}
+                      >
+                        ↩ Restore
+                      </button>
+                      <button
+                        onClick={() => onDelete(app)}
+                        className="sl-act-btn"
+                        title="Permanently delete"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14H6L5 6"/>
+                          <path d="M9 6V4h6v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+

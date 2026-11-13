@@ -157,6 +157,28 @@ export default function AnnouncementsPage({ user }) {
     toastTimer.current = setTimeout(() => setToast(null), 4000);
   }, []);
 
+  /* ── Archive page handlers ─────────────────────────────────── */
+  const handleArchiveRestore = useCallback(async (id) => {
+    try {
+      await reactivateAnnouncement(id);
+      setAnnouncements(prev => prev.map(x => x.id === id ? { ...x, is_active: true } : x));
+      showToast('Announcement restored.');
+    } catch (e) {
+      showToast(e.message || 'Restore failed.', 'error');
+    }
+  }, [showToast]);
+
+  const handleArchiveDelete = useCallback(async (ann) => {
+    if (!window.confirm('Permanently delete this announcement? This cannot be undone.')) return;
+    try {
+      await deleteAnnouncement(ann.id);
+      setAnnouncements(prev => prev.filter(x => x.id !== ann.id));
+      showToast('Announcement permanently deleted.');
+    } catch (e) {
+      showToast(e.message || 'Delete failed.', 'error');
+    }
+  }, [showToast]);
+
   /* ── Derived values ────────────────────────────────────────── */
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -345,6 +367,39 @@ export default function AnnouncementsPage({ user }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
+      {/* ── PAGE HEADER ── */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
+        <div>
+          <p style={{ margin:0, fontSize:'.97rem', fontWeight:800, color:'#0f1724' }}>Announcements</p>
+          <p style={{ margin:'2px 0 0', fontSize:'.72rem', color:'#94a3b8' }}>Manage and broadcast announcements to students</p>
+        </div>
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'archived' ? 'all' : 'archived')}
+          style={{
+            display:'inline-flex', alignItems:'center', gap:6,
+            padding:'6px 14px', borderRadius:8, border:'1.5px solid',
+            borderColor: statusFilter === 'archived' ? '#C8960C' : '#e2e8f0',
+            background:  statusFilter === 'archived' ? '#fdf8ec' : '#fff',
+            color:       statusFilter === 'archived' ? '#C8960C' : '#6b7280',
+            fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit',
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+          </svg>
+          {statusFilter === 'archived' ? '← Back' : 'Archive'}
+        </button>
+      </div>
+
+      {/* ── STATS BAR / SPLIT-PANE OR ARCHIVE VIEW ─────────── */}
+      {statusFilter === 'archived' ? (
+        <AnnouncementsArchivePage
+          announcements={announcements}
+          onRestore={handleArchiveRestore}
+          onDelete={handleArchiveDelete}
+        />
+      ) : (
+        <>
       {/* ── STATS BAR ──────────────────────────────────────── */}
       <div className="db-stats-row">
         <StatCard
@@ -665,6 +720,8 @@ export default function AnnouncementsPage({ user }) {
           </div>
         )}
       </div>
+        </>
+      )}
 
       {/* ── TOAST ───────────────────────────────────────────── */}
       {toast && (
@@ -1099,5 +1156,90 @@ function ComposePane({
         </button>
       </div>
     </form>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   AnnouncementsArchivePage — full-page archive view
+───────────────────────────────────────────────────────────── */
+function AnnouncementsArchivePage({ announcements, onRestore, onDelete }) {
+  const archived = announcements
+    .filter(a => !a.is_active)
+    .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
+
+  return (
+    <div className="db-panel" style={{ padding: '1.5rem' }}>
+      {/* Section header */}
+      <div style={{ marginBottom: '1rem', paddingBottom: '.75rem', borderBottom: '1px solid #f3f4f6' }}>
+        <p style={{ margin: 0, fontSize: '.95rem', fontWeight: 800, color: '#0f1724' }}>Archived Announcements</p>
+        <p style={{ margin: '2px 0 0', fontSize: '.72rem', color: '#94a3b8' }}>
+          {archived.length} archived announcement{archived.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Count badge */}
+      <span className="sl-count" style={{ marginBottom: '0.75rem', display: 'block' }}>
+        <strong>{archived.length}</strong> archived announcements
+      </span>
+
+      {/* Empty state */}
+      {archived.length === 0 ? (
+        <div className="db-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 44, height: 44, color: '#d1d5db' }}>
+            <polyline points="21 8 21 21 3 21 3 8"/>
+            <rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+          <p>No archived announcements</p>
+          <span>Announcements you archive will appear here.</span>
+        </div>
+      ) : (
+        <div className="sl-list">
+          {archived.map((ann, i) => {
+            const cfg = TYPE_CONFIG[ann.type] || TYPE_CONFIG.info;
+            return (
+              <div key={ann.id} className="sl-list-row" style={{ alignItems: 'center' }}>
+                <span className="sl-list-num">{i + 1}</span>
+                {/* Type badge */}
+                <span style={{
+                  fontSize: '.62rem', fontWeight: 700, padding: '.15rem .5rem', borderRadius: 999,
+                  background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`,
+                  flexShrink: 0,
+                }}>
+                  {cfg.label}
+                </span>
+                <div className="sl-list-info" style={{ flex: 2 }}>
+                  <p className="sl-list-name">{ann.title}</p>
+                  <p className="sl-list-sn">
+                    {audienceLabel(ann)} · Archived {timeAgo(ann.updated_at || ann.created_at)}
+                  </p>
+                </div>
+                {/* Row actions */}
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button
+                    className="sl-btn sl-btn--ghost"
+                    style={{ padding: '5px 12px', fontSize: '.76rem' }}
+                    onClick={() => onRestore(ann.id)}
+                  >
+                    ↩ Restore
+                  </button>
+                  <button
+                    className="sl-act-btn"
+                    title="Permanently delete"
+                    onClick={() => onDelete(ann)}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14H6L5 6"/>
+                      <path d="M9 6V4h6v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
