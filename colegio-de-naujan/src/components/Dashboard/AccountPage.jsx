@@ -30,6 +30,7 @@ const AccountPage = ({ user, onLogout }) => {
   const handleLogout = () => {
     localStorage.removeItem('cdn_user');
     localStorage.removeItem('cdn_session');
+    localStorage.removeItem('cdn_token');
     onLogout();
     navigate('/');
   };

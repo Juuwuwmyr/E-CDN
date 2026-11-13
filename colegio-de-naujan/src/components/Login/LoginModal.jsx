@@ -18,6 +18,18 @@ const EyeOff = () => (
   </svg>
 );
 
+const getPasswordStrength = (pw) => {
+  if (!pw) return { level: 0, label: '', color: '' };
+  const len = pw.length;
+  const hasNum = /[0-9]/.test(pw);
+  const hasSpec = /[^A-Za-z0-9]/.test(pw);
+  const hasUpper = /[A-Z]/.test(pw);
+  if (len < 8) return { level: 1, label: 'Weak', color: '#ef4444' };
+  if (len >= 10 && hasNum && hasSpec && hasUpper) return { level: 4, label: 'Strong', color: '#22c55e' };
+  if (len >= 8 && (hasNum || hasSpec)) return { level: 3, label: 'Good', color: '#3b82f6' };
+  return { level: 2, label: 'Fair', color: '#f59e0b' };
+};
+
 const LoginModal = ({ onLogin, onClose }) => {
   const [tab, setTab] = useState('login'); // 'login' | 'register'
 
@@ -61,11 +73,19 @@ const LoginModal = ({ onLogin, onClose }) => {
     try {
       const { ok, user, error } = await validateLogin(username, password);
       if (ok && user) {
-        const sessionId = await recordLoginSession(user);
+        const { id: sessionId, token } = await recordLoginSession(user);
         // Record in local analytics for department charts
         recordLogin(user.course || user.role || 'Admin', user.username, user.username);
-        localStorage.setItem('cdn_user',    JSON.stringify(user));
-        localStorage.setItem('cdn_session', String(sessionId ?? ''));
+        localStorage.setItem('cdn_user', JSON.stringify(user));
+        if (sessionId && token) {
+          localStorage.setItem('cdn_session', String(sessionId));
+          localStorage.setItem('cdn_token', token);
+        } else {
+          // Session row couldn't be created (or migration not applied):
+          // never persist a session that can't be validated later.
+          localStorage.removeItem('cdn_session');
+          localStorage.removeItem('cdn_token');
+        }
         onLogin();
       } else {
         setLoginErr(error || 'Invalid credentials.');
@@ -82,16 +102,22 @@ const LoginModal = ({ onLogin, onClose }) => {
     e.preventDefault();
     setRegErr('');
     if (regPass !== regConfirm) { setRegErr('Passwords do not match.'); return; }
-    if (regPass.length < 6)     { setRegErr('Password must be at least 6 characters.'); return; }
+    if (regPass.length < 8)     { setRegErr('Password must be at least 8 characters.'); return; }
     setRegLoad(true);
     try {
       const { ok, user, error } = await registerStudent(regSN, regPass);
       if (ok && user) {
         setRegSuccess(true);
-        const sessionId = await recordLoginSession(user);
+        const { id: sessionId, token } = await recordLoginSession(user);
         recordLogin(user.course || 'Student', user.username, user.username);
-        localStorage.setItem('cdn_user',    JSON.stringify(user));
-        localStorage.setItem('cdn_session', String(sessionId ?? ''));
+        localStorage.setItem('cdn_user', JSON.stringify(user));
+        if (sessionId && token) {
+          localStorage.setItem('cdn_session', String(sessionId));
+          localStorage.setItem('cdn_token', token);
+        } else {
+          localStorage.removeItem('cdn_session');
+          localStorage.removeItem('cdn_token');
+        }
         setTimeout(() => onLogin(), 1200);
       } else {
         setRegErr(error || 'Registration failed.');
@@ -266,7 +292,7 @@ const LoginModal = ({ onLogin, onClose }) => {
                       id="reg-pass"
                       type={showReg ? 'text' : 'password'}
                       className="lm-input"
-                      placeholder="At least 6 characters"
+                      placeholder="At least 8 characters"
                       value={regPass}
                       onChange={(e) => setRegPass(e.target.value)}
                       required
@@ -276,6 +302,29 @@ const LoginModal = ({ onLogin, onClose }) => {
                     </button>
                   </div>
                 </div>
+
+                {regPass && (() => {
+                  const strength = getPasswordStrength(regPass);
+                  return (
+                    <div style={{marginTop: '-8px', marginBottom: '4px'}}>
+                      <div style={{display: 'flex', gap: '4px', marginBottom: '4px'}}>
+                        {[1, 2, 3, 4].map(i => (
+                          <div
+                            key={i}
+                            style={{flex: 1,
+                              height: '4px',
+                              borderRadius: '2px',
+                              backgroundColor: i <= strength.level ? strength.color : '#e5e7eb',
+                              transition: 'background-color 0.2s',}}
+                          />
+                        ))}
+                      </div>
+                      <span style={{fontSize: '11px', color: strength.color, fontWeight: 500}}>
+                        {strength.label}
+                      </span>
+                    </div>
+                  );
+                })()}
 
                 <div className="lm-field">
                   <label htmlFor="reg-confirm" className="lm-label">Confirm Password</label>

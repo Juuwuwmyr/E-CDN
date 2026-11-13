@@ -9,7 +9,7 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import HistoryPage      from './components/Dashboard/HistoryPage';
 import AccountPage      from './components/Dashboard/AccountPage';
 import ChatbotWidget    from './components/Chatbot/ChatbotWidget';
-import { markSessionLogoutBeacon, renewSession, recordLogoutSession } from './lib/auth';
+import { markSessionLogoutBeacon, renewSession, recordLogoutSession, validateSession } from './lib/auth';
 import { logActivity } from './lib/activityLogger';
 import useIdleTimeout from './hooks/useIdleTimeout';
 
@@ -45,6 +45,13 @@ const readSession = () => {
     const raw = localStorage.getItem('cdn_user');
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
+};
+
+/* Removes every persisted session artifact. */
+const clearPersistedSession = () => {
+  localStorage.removeItem('cdn_user');
+  localStorage.removeItem('cdn_session');
+  localStorage.removeItem('cdn_token');
 };
 
 function RequireAuth({ user, children }) {
@@ -103,10 +110,41 @@ function AppInner() {
 
   useEffect(() => {
     const sessionId = localStorage.getItem('cdn_session');
-    if (!sessionId) return;
+    const token     = localStorage.getItem('cdn_token');
 
-    // Browser was reopened with an existing session — mark it active again
-    renewSession(sessionId);
+    // A session is only trusted when BOTH the DB row id and its
+    // random token are present and match. Anything else (forged
+    // cdn_user, stale pre-hardening sessions) is rejected.
+    if (!sessionId || !token) {
+      clearPersistedSession();
+      setUser(null);
+      return;
+    }
+
+    // Validate session is still active in DB (id + token + no logout)
+    validateSession(sessionId, token).then(({ valid, session }) => {
+      if (!valid) {
+        // Session was invalidated server-side — force re-login
+        clearPersistedSession();
+        setUser(null);
+        return;
+      }
+      // Refresh the cached user identity from the DB row so a
+      // hand-edited localStorage can't elevate roles or names.
+      const localUser = readSession();
+      const refreshed = {
+        ...(localUser || {}),
+        username: session?.user_id ?? localUser?.username,
+        role:     session?.role    ?? localUser?.role,
+        userType: session?.user_type ?? localUser?.userType,
+        name:     session?.full_name ?? localUser?.name,
+      };
+      localStorage.setItem('cdn_user', JSON.stringify(refreshed));
+      setUser(refreshed);
+
+      // Browser was reopened with a valid session — mark it active again
+      renewSession(sessionId, token);
+    });
 
     // When the tab/browser closes WITHOUT logout → auto-mark as logged out
     const handleUnload = () => markSessionLogoutBeacon(sessionId);
@@ -122,7 +160,7 @@ function AppInner() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('cdn_user');
+    clearPersistedSession();
     setUser(null);
     // RequireAuth will redirect to / automatically when user is null
   };

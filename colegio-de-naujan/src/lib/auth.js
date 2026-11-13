@@ -1,5 +1,92 @@
 import { supabase } from './supabase';
 import bcrypt from 'bcryptjs';
+import {
+  sanitizeLoginInput,
+  sanitizeStudentNumber,
+  validatePasswordInput,
+  validatePasswordPolicy,
+  generateSessionToken,
+  isNumericId,
+} from './security';
+
+/* ══════════════════════════════════════════════════════════
+   RATE LIMITING
+   Authoritative state lives in the DB (login_attempts table +
+   SECURITY DEFINER RPCs) so it survives page reloads, private
+   windows, and storage clearing. The sessionStorage functions
+   below are only a fast local mirror / offline fallback for
+   when the RPCs haven't been deployed yet.
+══════════════════════════════════════════════════════════ */
+const RL_WINDOW_MS = 5 * 60 * 1000;   // 5 minutes
+const RL_MAX_ATTEMPTS = 5;
+const RL_LOCK_MS = 15 * 60 * 1000;    // 15 minutes
+
+function formatLockMessage(waitSeconds) {
+  const mins = Math.max(1, Math.ceil((waitSeconds || 60) / 60));
+  return `Too many failed attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`;
+}
+
+/* DB-backed lock check (authoritative). Returns { locked, error }. */
+async function checkServerLock(username) {
+  try {
+    const { data, error } = await supabase.rpc('login_check_lock', {
+      p_username: username.toLowerCase(),
+    });
+    if (!error && data?.locked) {
+      return { locked: true, error: formatLockMessage(data.wait_seconds) };
+    }
+  } catch (_) { /* RPC missing — fall through to local check */ }
+  return { locked: false };
+}
+
+/* DB-backed failure recording (authoritative). */
+async function recordFailedAttempt(username) {
+  try {
+    await supabase.rpc('login_record_failure', {
+      p_username: username.toLowerCase(),
+    });
+  } catch (_) { /* RPC missing — local fallback below still applies */ }
+  recordFailedAttemptLocal(username);
+}
+
+/* ── Local fallback (sessionStorage) ──────────────────────── */
+function checkRateLimitLocal(username) {
+  const key = `cdn_rl_${username.toLowerCase()}`;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return { ok: true };
+    const state = JSON.parse(raw);
+    const now = Date.now();
+    if (state.lockUntil && now < state.lockUntil) {
+      return { ok: false, error: formatLockMessage(state.lockUntil - now) };
+    }
+    if (state.lockUntil && now >= state.lockUntil) {
+      sessionStorage.removeItem(key);
+    }
+  } catch (_) {}
+  return { ok: true };
+}
+
+function recordFailedAttemptLocal(username) {
+  const key = `cdn_rl_${username.toLowerCase()}`;
+  try {
+    const raw = sessionStorage.getItem(key);
+    const now = Date.now();
+    let state = raw ? JSON.parse(raw) : { count: 0, firstAttempt: now, lockUntil: null };
+    if (now - state.firstAttempt > RL_WINDOW_MS) {
+      state = { count: 0, firstAttempt: now, lockUntil: null };
+    }
+    state.count += 1;
+    if (state.count >= RL_MAX_ATTEMPTS) {
+      state.lockUntil = now + RL_LOCK_MS;
+    }
+    sessionStorage.setItem(key, JSON.stringify(state));
+  } catch (_) {}
+}
+
+function clearLocalRateLimit(username) {
+  try { sessionStorage.removeItem('cdn_rl_' + username.toLowerCase()); } catch (_) {}
+}
 
 /* ──────────────────────────────────────────────────────────
    validateLogin
@@ -10,24 +97,59 @@ import bcrypt from 'bcryptjs';
    Returns: { ok, user, error }
 ────────────────────────────────────────────────────────── */
 export async function validateLogin(username, password) {
-  const u = username.trim();
-  const p = password.trim();
+  // Allowlist validation — malformed input fails closed before any query.
+  const u = sanitizeLoginInput(username);
+  if (!u) {
+    return { ok: false, user: null, error: 'Invalid username format.' };
+  }
+  // Passwords pass through untouched; only presence + max length are checked.
+  const pwCheck = validatePasswordInput(password);
+  if (!pwCheck.ok) {
+    return { ok: false, user: null, error: pwCheck.error };
+  }
+  const p = pwCheck.value;
 
-  if (!u || !p) {
-    return { ok: false, user: null, error: 'Username and password are required.' };
+  // ── Rate limit: DB-backed (authoritative) ────────────────
+  const serverLock = await checkServerLock(u);
+  if (serverLock.locked) {
+    return { ok: false, user: null, error: serverLock.error };
+  }
+  // Local pre-check (fast path / fallback when RPC not deployed)
+  const rl = checkRateLimitLocal(u);
+  if (!rl.ok) {
+    return { ok: false, user: null, error: rl.error };
   }
 
   // ── 1. Check portal_users (admin / staff) ──────────────
   const { data: staffData, error: staffError } = await supabase
     .from('portal_users')
-    .select('*')
+    .select('username, password, full_name, role, is_active')
     .eq('username', u)
-    .eq('is_active', true)
     .single();
 
   if (staffData && !staffError) {
-    // Simple plaintext check (replace with bcrypt in production)
-    if (staffData.password === p) {
+    if (staffData.is_active === false) {
+      return { ok: false, user: null, error: 'This account has been deactivated. Contact the administrator.' };
+    }
+
+    const isBcrypt = staffData.password?.startsWith('$2');
+    const passwordOk = isBcrypt
+      ? bcrypt.compareSync(p, staffData.password)
+      : staffData.password === p; // legacy plaintext row
+
+    if (passwordOk) {
+      if (!isBcrypt) {
+        // Auto-upgrade legacy plaintext to bcrypt (best effort).
+        try {
+          const hashed = bcrypt.hashSync(p, 10);
+          const { error } = await supabase
+            .from('portal_users')
+            .update({ password: hashed })
+            .eq('username', u);
+          if (error) console.warn('[auth] legacy hash upgrade failed:', error.message);
+        } catch (_) {}
+      }
+      clearLocalRateLimit(u);
       return {
         ok: true,
         user: {
@@ -39,12 +161,14 @@ export async function validateLogin(username, password) {
         error: null,
       };
     }
+    await recordFailedAttempt(u);
+    return { ok: false, user: null, error: 'Invalid username or password.' };
   }
 
   // ── 2. Check students — student_number + custom password OR LASTNAME ──
   const { data: studentData, error: studentError } = await supabase
     .from('students')
-    .select('*')
+    .select('student_number, full_name, course, year_level, section, enrollment_status')
     .eq('student_number', u)
     .single();
 
@@ -58,21 +182,30 @@ export async function validateLogin(username, password) {
 
     // full_name is stored as "LAST, FIRST" or "LAST FIRST" — derive last name for fallback
     const fullName = studentData.full_name || '';
-    // Try splitting on comma first ("DELA CRUZ, JUAN"), else take first word
     const derivedLastName = fullName.includes(',')
       ? fullName.split(',')[0].trim()
       : fullName.split(' ')[0].trim();
 
-    const passwordMatch = acct
-      ? (() => {
-          // bcrypt hash check (new accounts)
-          if (acct.password?.startsWith('$2')) {
-            return bcrypt.compareSync(p, acct.password);
-          }
-          // Legacy plaintext fallback (old accounts — encourage re-register)
-          return acct.password === p;
-        })()
-      : derivedLastName.toUpperCase() === p.toUpperCase();
+    let passwordMatch = false;
+    if (acct) {
+      const isBcrypt = acct.password?.startsWith('$2');
+      passwordMatch = isBcrypt
+        ? bcrypt.compareSync(p, acct.password)
+        : acct.password === p; // legacy plaintext row
+      if (passwordMatch && !isBcrypt) {
+        // Auto-upgrade legacy plaintext to bcrypt (best effort).
+        try {
+          const hashed = bcrypt.hashSync(p, 10);
+          const { error } = await supabase
+            .from('student_accounts')
+            .update({ password: hashed })
+            .eq('student_number', u);
+          if (error) console.warn('[auth] legacy student hash upgrade failed:', error.message);
+        } catch (_) {}
+      }
+    } else {
+      passwordMatch = derivedLastName.toUpperCase() === p.toUpperCase();
+    }
 
     if (passwordMatch) {
       if (studentData.enrollment_status === 'dropped' || studentData.enrollment_status === 'loa') {
@@ -82,6 +215,7 @@ export async function validateLogin(username, password) {
           error: `Your account is currently ${studentData.enrollment_status}. Contact the registrar.`,
         };
       }
+      clearLocalRateLimit(u);
       return {
         ok: true,
         user: {
@@ -98,9 +232,11 @@ export async function validateLogin(username, password) {
         error: null,
       };
     }
-    return { ok: false, user: null, error: 'Incorrect password. Try your last name or registered password.' };
+    await recordFailedAttempt(u);
+    return { ok: false, user: null, error: 'Invalid username or password.' };
   }
 
+  await recordFailedAttempt(u);
   return { ok: false, user: null, error: 'Invalid username or password.' };
 }
 
@@ -110,6 +246,7 @@ export async function validateLogin(username, password) {
    exist yet, retries without it so login always works.
 ────────────────────────────────────────────────────────── */
 export async function recordLoginSession(user) {
+  const token = generateSessionToken();
   const courseValue = user.course || user.role || null;
 
   // First attempt: include course column
@@ -121,12 +258,13 @@ export async function recordLoginSession(user) {
       full_name:  user.name,
       role:       user.role,
       course:     courseValue,
+      session_token: token,
       login_at:   new Date().toISOString(),
     })
     .select('id')
     .single();
 
-  if (!error) return data?.id ?? null;
+  if (!error) return { id: data?.id ?? null, token };
 
   // If error mentions 'course' column not existing, retry without it
   console.warn('recordLoginSession first attempt error:', error.message);
@@ -138,16 +276,58 @@ export async function recordLoginSession(user) {
         user_id:    user.username,
         full_name:  user.name,
         role:       user.role,
+        session_token: token,
         login_at:   new Date().toISOString(),
       })
       .select('id')
       .single();
-    if (error2) console.error('recordLoginSession retry error:', error2);
-    return data2?.id ?? null;
+    if (!error2) return { id: data2?.id ?? null, token };
+
+    // Session-token column missing too (migration not applied) —
+    // log in without a persisted session rather than storing a
+    // session that can never validate.
+    if (error2.message?.includes('session_token') || error2.code === '42703') {
+      const { data: data3, error: error3 } = await supabase
+        .from('portal_sessions')
+        .insert({
+          user_type:  user.userType,
+          user_id:    user.username,
+          full_name:  user.name,
+          role:       user.role,
+          login_at:   new Date().toISOString(),
+        })
+        .select('id')
+        .single();
+      if (error3) console.error('recordLoginSession retry error:', error3);
+      return { id: data3?.id ?? null, token: null };
+    }
+
+    console.error('recordLoginSession retry error:', error2);
+    return { id: null, token: null };
+  }
+
+  if (error.message?.includes('session_token') || error.code === '42703') {
+    // Token column missing (migration not applied) — fall back to a
+    // token-less session so login still works, but validation on
+    // reload will require a fresh login (fail closed).
+    const { data: data3, error: error3 } = await supabase
+      .from('portal_sessions')
+      .insert({
+        user_type:  user.userType,
+        user_id:    user.username,
+        full_name:  user.name,
+        role:       user.role,
+        course:     courseValue,
+        login_at:   new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+    if (error3) console.error('recordLoginSession fallback error:', error3);
+    return { id: data3?.id ?? null, token: null };
   }
 
   console.error('Session record error:', error);
-  return null;
+  return { id: null, token: null };
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -276,12 +456,13 @@ export function markSessionLogoutBeacon(sessionId) {
    in localStorage (browser was closed without logout).
    Clears the logout_at so the admin sees them as Online again.
 ────────────────────────────────────────────────────────── */
-export async function renewSession(sessionId) {
-  if (!sessionId) return;
+export async function renewSession(sessionId, token) {
+  if (!isNumericId(sessionId) || !token) return;
   const { error } = await supabase
     .from('portal_sessions')
     .update({ logout_at: null })
-    .eq('id', sessionId);
+    .eq('id', Number(sessionId))
+    .eq('session_token', token);
   if (error) console.error('renewSession error:', error);
 }
 
@@ -448,16 +629,17 @@ export async function validateStudentNumber(studentNumber) {
    Returns: { ok, user, error }
 ────────────────────────────────────────────────────────── */
 export async function registerStudent(studentNumber, password) {
-  const sn = studentNumber.trim();
-  const pw = password.trim();
+  const sn = sanitizeStudentNumber(studentNumber);
+  if (!sn) return { ok: false, error: 'Invalid student number format.' };
 
-  if (!sn || !pw) return { ok: false, error: 'All fields are required.' };
-  if (pw.length < 6) return { ok: false, error: 'Password must be at least 6 characters.' };
+  const pwCheck = validatePasswordPolicy(password);
+  if (!pwCheck.ok) return { ok: false, error: pwCheck.error };
+  const pw = password;
 
   // 1. Check student exists in enrollment list
   const { data: student, error: lookupErr } = await supabase
     .from('students')
-    .select('*')
+    .select('student_number, full_name, course, year_level, section, enrollment_status')
     .eq('student_number', sn)
     .single();
 
@@ -546,4 +728,23 @@ export function subscribeToSystemApplications(onChange) {
     .subscribe();
 
   return channel;
+}
+
+/* ──────────────────────────────────────────────────────────
+   validateSession  — verifies a session id + token pair against
+   the DB. Both must match and logout_at must be NULL. Returns
+   the DB row so callers can refresh the cached user identity
+   from the server instead of trusting localStorage alone.
+────────────────────────────────────────────────────────── */
+export async function validateSession(sessionId, token) {
+  if (!isNumericId(sessionId) || !token) return { valid: false };
+  const { data, error } = await supabase
+    .from('portal_sessions')
+    .select('id, user_id, role, user_type, full_name')
+    .eq('id', Number(sessionId))
+    .eq('session_token', token)
+    .is('logout_at', null)
+    .single();
+  if (error || !data) return { valid: false };
+  return { valid: true, session: data };
 }

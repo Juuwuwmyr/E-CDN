@@ -1,4 +1,6 @@
 ﻿import { supabase } from './supabase';
+import bcrypt from 'bcryptjs';
+import { sanitizeLoginInput, validatePasswordPolicy } from './security';
 
 /* ── Fetch all portal users (admin/staff) ── */
 export async function getPortalUsers() {
@@ -20,22 +22,54 @@ export async function getStudentAccounts() {
   return data || [];
 }
 
-/* ── Create portal user ── */
+/* ── Create portal user (password is bcrypt-hashed before insert) ── */
 export async function createPortalUser({ username, full_name, role, password }) {
+  const safeUsername = sanitizeLoginInput(username);
+  if (!safeUsername) {
+    throw new Error('Username may only contain letters, numbers, dots, dashes and underscores (max 32 characters).');
+  }
+  if (typeof full_name !== 'string' || !full_name.trim()) {
+    throw new Error('Full name is required.');
+  }
+  const pwCheck = validatePasswordPolicy(password);
+  if (!pwCheck.ok) throw new Error(pwCheck.error);
+
+  const hashed = bcrypt.hashSync(password, 10);
+
   const { data, error } = await supabase
     .from('portal_users')
-    .insert({ username, full_name, role, password, is_active: true })
+    .insert({ username: safeUsername, full_name: full_name.trim(), role, password: hashed, is_active: true })
     .select('id,username,full_name,role,is_active,created_at')
     .single();
   if (error) throw error;
   return data;
 }
 
-/* ── Update portal user ── */
+/* ── Update portal user (hashes password when one is provided) ── */
 export async function updatePortalUser(id, updates) {
+  const safeUpdates = { ...updates };
+  if (updates.password !== undefined) {
+    const pwCheck = validatePasswordPolicy(updates.password);
+    if (!pwCheck.ok) throw new Error(pwCheck.error);
+    safeUpdates.password = bcrypt.hashSync(updates.password, 10);
+  }
+  if (updates.username !== undefined) {
+    const safeUsername = sanitizeLoginInput(updates.username);
+    if (!safeUsername) {
+      throw new Error('Username may only contain letters, numbers, dots, dashes and underscores (max 32 characters).');
+    }
+    safeUpdates.username = safeUsername;
+  }
+  if (updates.full_name !== undefined) {
+    if (typeof updates.full_name !== 'string' || !updates.full_name.trim()) {
+      throw new Error('Full name is required.');
+    }
+    safeUpdates.full_name = updates.full_name.trim();
+  }
+
   const { data, error } = await supabase
     .from('portal_users')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...safeUpdates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select('id,username,full_name,role,is_active,created_at')
     .single();
@@ -54,11 +88,15 @@ export async function deletePortalUser(id) {
   if (error) throw error;
 }
 
-/* ── Reset student account password ── */
+/* ── Reset student account password (bcrypt-hashed before upsert) ── */
 export async function resetStudentPassword(student_number, newPassword) {
+  const pwCheck = validatePasswordPolicy(newPassword);
+  if (!pwCheck.ok) throw new Error(pwCheck.error);
+
+  const hashed = bcrypt.hashSync(newPassword, 10);
   const { error } = await supabase
     .from('student_accounts')
-    .upsert({ student_number, password: newPassword }, { onConflict: 'student_number' });
+    .upsert({ student_number, password: hashed }, { onConflict: 'student_number' });
   if (error) throw error;
 }
 

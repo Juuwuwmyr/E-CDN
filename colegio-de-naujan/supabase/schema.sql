@@ -129,11 +129,14 @@ CREATE POLICY "allow_anon_read_visits"
   USING (true);
 
 -- ── 8. DEFAULT ADMIN/STAFF USERS ────────────────────────────
--- ⚠️  Change passwords before deploying to production!
+-- Passwords are bcrypt hashes (cost 10). Plaintext for the two
+-- seeds is 'bsis2026' (admin) and 'cdn2026' (bsis) — these are
+-- public in the repo, so CHANGE THEM immediately after the first
+-- login and delete/replace these rows in production.
 INSERT INTO public.portal_users (username, password, full_name, role)
 VALUES
-  ('admin', 'bsis2026',  'Administrator', 'admin'),
-  ('bsis',  'cdn2026',   'BSIS Student',  'staff')
+  ('admin', '$2b$10$C7vA/ijr8jzGcI1JuBuXeeYIzG/Om6cuvOeu/2486QsSEjPspOs6q', 'Administrator', 'admin'),
+  ('bsis',  '$2b$10$fFcgsWJ81wSegBZt5Z6DdetNLCxq.UNsCXLtLtG5xHAlwQctJv5ii', 'BSIS Student',  'staff')
 ON CONFLICT (username) DO NOTHING;
 
 -- ── 9. STUDENT ACCOUNTS (custom passwords set during registration) ──

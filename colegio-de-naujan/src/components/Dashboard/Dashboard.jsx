@@ -60,6 +60,7 @@ const Dashboard = ({ user, onLogout }) => {
     recordLogout(user.studentNumber || user.username, user.username);
     localStorage.removeItem('cdn_user');
     localStorage.removeItem('cdn_session');
+    localStorage.removeItem('cdn_token');
     onLogout();
   };
 

@@ -262,7 +262,7 @@ export default function StudentDashboard({ user, onLogout }) {
   const handleLogout = async () => {
     const sessionId = localStorage.getItem('cdn_session');
     await recordLogoutSession(sessionId);
-    localStorage.removeItem('cdn_user'); localStorage.removeItem('cdn_session');
+    localStorage.removeItem('cdn_user'); localStorage.removeItem('cdn_session'); localStorage.removeItem('cdn_token');
     onLogout();
   };
 
