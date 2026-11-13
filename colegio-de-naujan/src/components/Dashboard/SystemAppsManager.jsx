@@ -168,6 +168,16 @@ const SystemAppsManager = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return apps.filter(a => {
+      const isArchived = a.badge === 'Archived';
+      if (statusFilter === 'archived') {
+        return isArchived && (
+          !q || a.label?.toLowerCase().includes(q)
+            || a.id?.toLowerCase().includes(q)
+            || a.url?.toLowerCase().includes(q)
+        ) && (!catFilter || a.category === catFilter);
+      }
+      // For non-archived views, exclude archived apps
+      if (isArchived) return false;
       const matchSearch = !q || a.label?.toLowerCase().includes(q)
         || a.id?.toLowerCase().includes(q)
         || a.url?.toLowerCase().includes(q);
@@ -298,6 +308,37 @@ const SystemAppsManager = () => {
     }
   };
 
+  /* archive — deactivate + mark badge as Archived */
+  const handleArchive = async (app) => {
+    if (!window.confirm(`Archive "${app.label}"? It will be hidden from the portal.`)) return;
+    try {
+      const { error } = await supabase
+        .from('system_applications')
+        .update({ is_active: false, badge: 'Archived', updated_at: new Date().toISOString() })
+        .eq('id', app.id);
+      if (error) throw error;
+      showToast(`"${app.label}" archived.`);
+      fetchApps();
+    } catch (err) {
+      showToast('Failed to archive application.', 'error');
+    }
+  };
+
+  /* restore — re-activate and clear Archived badge */
+  const handleRestore = async (app) => {
+    try {
+      const { error } = await supabase
+        .from('system_applications')
+        .update({ is_active: true, badge: null, updated_at: new Date().toISOString() })
+        .eq('id', app.id);
+      if (error) throw error;
+      showToast(`"${app.label}" restored.`);
+      fetchApps();
+    } catch (err) {
+      showToast('Failed to restore application.', 'error');
+    }
+  };
+
   /* toggle active */
   const toggleActive = async (app) => {
     setTogglingId(app.id);
@@ -399,6 +440,7 @@ const SystemAppsManager = () => {
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
+            <option value="archived">Archived</option>
           </select>
 
           {/* Spacer */}
@@ -596,71 +638,124 @@ const SystemAppsManager = () => {
                     {/* Actions */}
                     <td style={{ padding: '12px 12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {/* Open link */}
-                        <a
-                          href={app.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="Open in new tab"
-                          style={{
-                            width: 28, height: 28, display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', borderRadius: 6,
-                            background: '#f3f4f6', color: '#374151',
-                            textDecoration: 'none', flexShrink: 0,
-                          }}
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                            style={{ width: 14, height: 14 }}>
-                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                            <polyline points="15 3 21 3 21 9"/>
-                            <line x1="10" y1="14" x2="21" y2="3"/>
-                          </svg>
-                        </a>
+                        {app.badge === 'Archived' ? (
+                          <>
+                            {/* Restore */}
+                            <button
+                              onClick={() => handleRestore(app)}
+                              title="Restore"
+                              style={{ padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 4,
+                                borderRadius: 6, background: '#eef1fb', color: '#002280',
+                                border: 'none', cursor: 'pointer', fontSize: '.78rem', fontWeight: 700 }}
+                            >
+                              ↩ Restore
+                            </button>
+                            {/* Permanent Delete */}
+                            <button
+                              onClick={() => handleDelete(app)}
+                              title="Permanently delete"
+                              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', borderRadius: 6,
+                                background: '#fef2f2', color: '#991b1b',
+                                border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                style={{ width: 13, height: 13 }}>
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                              </svg>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {/* Open link */}
+                            <a
+                              href={app.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Open in new tab"
+                              style={{
+                                width: 28, height: 28, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', borderRadius: 6,
+                                background: '#f3f4f6', color: '#374151',
+                                textDecoration: 'none', flexShrink: 0,
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                style={{ width: 14, height: 14 }}>
+                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                              </svg>
+                            </a>
 
-                        {/* Edit */}
-                        <button
-                          onClick={() => openModal(app)}
-                          title="Edit"
-                          style={{
-                            width: 28, height: 28, display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', borderRadius: 6,
-                            background: '#eef1fb', color: '#002280',
-                            border: 'none', cursor: 'pointer', flexShrink: 0,
-                          }}
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                            style={{ width: 13, height: 13 }}>
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
+                            {/* Edit */}
+                            <button
+                              onClick={() => openModal(app)}
+                              title="Edit"
+                              style={{
+                                width: 28, height: 28, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', borderRadius: 6,
+                                background: '#eef1fb', color: '#002280',
+                                border: 'none', cursor: 'pointer', flexShrink: 0,
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                style={{ width: 13, height: 13 }}>
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                              </svg>
+                            </button>
 
-                        {/* Toggle */}
-                        <ToggleSwitch
-                          checked={app.is_active}
-                          onChange={() => toggleActive(app)}
-                          disabled={togglingId === app.id}
-                        />
+                            {/* Toggle */}
+                            <ToggleSwitch
+                              checked={app.is_active}
+                              onChange={() => toggleActive(app)}
+                              disabled={togglingId === app.id}
+                            />
 
-                        {/* Delete */}
-                        <button
-                          onClick={() => handleDelete(app)}
-                          title="Delete"
-                          style={{
-                            width: 28, height: 28, display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', borderRadius: 6,
-                            background: '#fef2f2', color: '#991b1b',
-                            border: 'none', cursor: 'pointer', flexShrink: 0,
-                          }}
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                            style={{ width: 13, height: 13 }}>
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                            <path d="M10 11v6M14 11v6"/>
-                            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
-                          </svg>
-                        </button>
+                            {/* Archive */}
+                            <button
+                              onClick={() => handleArchive(app)}
+                              title="Archive (hide from portal)"
+                              style={{
+                                width: 28, height: 28, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', borderRadius: 6,
+                                background: '#f3f4f6', color: '#6b7280',
+                                border: 'none', cursor: 'pointer', flexShrink: 0,
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                style={{ width: 13, height: 13 }}>
+                                <polyline points="21 8 21 21 3 21 3 8"/>
+                                <rect x="1" y="3" width="22" height="5"/>
+                                <line x1="10" y1="12" x2="14" y2="12"/>
+                              </svg>
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => handleDelete(app)}
+                              title="Delete permanently"
+                              style={{
+                                width: 28, height: 28, display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', borderRadius: 6,
+                                background: '#fef2f2', color: '#991b1b',
+                                border: 'none', cursor: 'pointer', flexShrink: 0,
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                style={{ width: 13, height: 13 }}>
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                                <path d="M10 11v6M14 11v6"/>
+                                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                              </svg>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

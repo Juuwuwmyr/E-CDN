@@ -164,8 +164,9 @@ export default function AnnouncementsPage({ user }) {
       .filter(a => {
         if (q && !a.title.toLowerCase().includes(q) && !a.body.toLowerCase().includes(q)) return false;
         if (typeFilter !== 'all' && a.type !== typeFilter) return false;
-        if (statusFilter === 'active' && !a.is_active)  return false;
-        if (statusFilter === 'hidden' && a.is_active)   return false;
+        if (statusFilter === 'active'   && !a.is_active)  return false;
+        if (statusFilter === 'hidden'   &&  a.is_active)  return false;
+        if (statusFilter === 'archived' &&  a.is_active)  return false;
         return true;
       })
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -302,7 +303,17 @@ export default function AnnouncementsPage({ user }) {
     }
   }, [showToast]);
 
-  const handleDelete = useCallback(async (ann) => {
+  const handleArchive = useCallback(async (ann) => {
+    try {
+      await deactivateAnnouncement(ann.id);
+      setAnnouncements(prev => prev.map(x => x.id === ann.id ? { ...x, is_active: false } : x));
+      showToast('Announcement archived.');
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }, [showToast]);
+
+  const handlePermanentDelete = useCallback(async (ann) => {
     if (!window.confirm('Permanently delete this announcement? This cannot be undone.')) return;
     try {
       await deleteAnnouncement(ann.id);
@@ -312,7 +323,7 @@ export default function AnnouncementsPage({ user }) {
         setComposeOpen(false);
         setMobileShowDetail(false);
       }
-      showToast('Announcement deleted.');
+      showToast('Announcement permanently deleted.');
     } catch (err) {
       showToast('Error: ' + err.message, 'error');
     }
@@ -469,6 +480,7 @@ export default function AnnouncementsPage({ user }) {
                   <option value="all">All Status</option>
                   <option value="active">Active</option>
                   <option value="hidden">Hidden</option>
+                  <option value="archived">Archived</option>
                 </select>
               </div>
             </div>
@@ -629,7 +641,9 @@ export default function AnnouncementsPage({ user }) {
                 ann={selected}
                 onEdit={handleEdit}
                 onToggle={handleToggle}
-                onDelete={handleDelete}
+                onDelete={handleArchive}
+                onArchive={handleArchive}
+                onPermanentDelete={handlePermanentDelete}
               />
             )}
 
@@ -684,7 +698,7 @@ function StatCard({ value, label, color, bg, icon }) {
 /* ─────────────────────────────────────────────────────────────
    DetailPane
 ───────────────────────────────────────────────────────────── */
-function DetailPane({ ann, onEdit, onToggle, onDelete }) {
+function DetailPane({ ann, onEdit, onToggle, onDelete, onArchive, onPermanentDelete }) {
   const cfg = TYPE_CONFIG[ann.type] || TYPE_CONFIG.info;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -783,21 +797,46 @@ function DetailPane({ ann, onEdit, onToggle, onDelete }) {
             </>
           )}
         </button>
+        {!ann.is_active && (
+          <button
+            className="sl-act-btn sl-act-btn--edit"
+            onClick={() => onToggle(ann)}
+            title="Restore announcement"
+            style={{ width: 'auto', padding: '.45rem .95rem', borderRadius: 9, fontSize: '.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '.4rem' }}
+          >
+            ↩ Restore
+          </button>
+        )}
         <div style={{ flex: 1 }} />
         <button
-          className="sl-act-btn sl-act-btn--del"
-          onClick={() => onDelete(ann)}
-          title="Permanently delete"
+          className="sl-act-btn sl-act-btn--toggle"
+          onClick={() => onArchive(ann)}
+          title="Archive announcement"
           style={{ width: 'auto', padding: '.45rem .95rem', borderRadius: 9, fontSize: '.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '.4rem' }}
         >
           <svg style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6l-1 14H6L5 6" />
-            <path d="M10 11v6M14 11v6" />
-            <path d="M9 6V4h6v2" />
+            <polyline points="21 8 21 21 3 21 3 8" />
+            <rect x="1" y="3" width="22" height="5" />
+            <line x1="10" y1="12" x2="14" y2="12" />
           </svg>
-          Delete
+          Archive
         </button>
+        {!ann.is_active && (
+          <button
+            className="sl-act-btn sl-act-btn--del"
+            onClick={() => onPermanentDelete(ann)}
+            title="Permanently delete"
+            style={{ width: 'auto', padding: '.45rem .95rem', borderRadius: 9, fontSize: '.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '.4rem' }}
+          >
+            <svg style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v6M14 11v6" />
+              <path d="M9 6V4h6v2" />
+            </svg>
+            Permanently Delete
+          </button>
+        )}
       </div>
     </div>
   );

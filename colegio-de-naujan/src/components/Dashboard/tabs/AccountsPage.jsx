@@ -273,8 +273,20 @@ const RightPane = ({ selectedUser, subTab, rightPaneMode, setRightPaneMode, onMu
     }
   };
 
-  /* ── delete ── */
-  const handleDelete = async () => {
+  /* ── archive (soft-delete) ── */
+  const handleArchive = async () => {
+    if (!window.confirm(`Archive account "${selectedUser.username}"? It will be hidden from the portal.`)) return;
+    try {
+      await updatePortalUser(selectedUser.id, { is_active: false });
+      await logActivity('user_archived', `Archived account: ${selectedUser.username}`, adminUser?.username, 'success', 'Accounts');
+      onMutate(`Account "${selectedUser.username}" archived.`, 'success', true);
+    } catch (ex) {
+      onMutate(ex.message || 'Archive failed.', 'error', false);
+    }
+  };
+
+  /* ── permanent delete ── */
+  const handlePermanentDelete = async () => {
     if (!window.confirm(`Permanently delete account "${selectedUser.username}"?\nThis action cannot be undone.`)) return;
     try {
       await deletePortalUser(selectedUser.id);
@@ -282,6 +294,17 @@ const RightPane = ({ selectedUser, subTab, rightPaneMode, setRightPaneMode, onMu
       onMutate(`Account "${selectedUser.username}" deleted.`, 'success', true);
     } catch (ex) {
       onMutate(ex.message || 'Delete failed.', 'error', false);
+    }
+  };
+
+  /* ── restore ── */
+  const handleRestore = async () => {
+    try {
+      await toggleUserActive(selectedUser.id, true);
+      await logActivity('user_restored', `Restored account: ${selectedUser.username}`, adminUser?.username, 'success', 'Accounts');
+      onMutate(`Account "${selectedUser.username}" restored.`, 'success', true);
+    } catch (ex) {
+      onMutate(ex.message || 'Restore failed.', 'error', false);
     }
   };
 
@@ -391,16 +414,33 @@ const RightPane = ({ selectedUser, subTab, rightPaneMode, setRightPaneMode, onMu
             </svg>
             Reset Password
           </button>
-          {isPortal && (
-            <button className="sl-act-btn sl-act-btn--del" onClick={handleDelete}
+          {isPortal && active && (
+            <button className="sl-act-btn sl-act-btn--del" onClick={handleArchive}
               style={{ width: 'auto', padding: '0 12px', gap: 5, fontSize: '.78rem', fontWeight: 600, marginLeft: 'auto' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+                <polyline points="21 8 21 21 3 21 3 8"/>
+                <rect x="1" y="3" width="22" height="5"/>
+                <line x1="10" y1="12" x2="14" y2="12"/>
               </svg>
-              Delete
+              Archive
             </button>
+          )}
+          {isPortal && !active && (
+            <>
+              <button className="sl-act-btn sl-act-btn--edit" onClick={handleRestore}
+                style={{ width: 'auto', padding: '0 12px', gap: 5, fontSize: '.78rem', fontWeight: 600 }}>
+                ↩ Restore
+              </button>
+              <button className="sl-act-btn sl-act-btn--del" onClick={handlePermanentDelete}
+                style={{ width: 'auto', padding: '0 12px', gap: 5, fontSize: '.78rem', fontWeight: 600, marginLeft: 'auto' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+                </svg>
+                Permanently Delete
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -528,6 +568,7 @@ const AccountsPage = ({ user }) => {
   const [showModal,    setShowModal]    = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [rightPaneMode, setRightPaneMode] = useState('view'); // 'view' | 'edit' | 'reset-password'
+  const [userListFilter, setUserListFilter] = useState('active'); // 'active' | 'archived'
   const toastTimer = useRef(null);
 
   const showToast = useCallback((msg, type = 'success') => {
@@ -562,7 +603,7 @@ const AccountsPage = ({ user }) => {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   /* clear search when tab changes */
-  useEffect(() => { setSearch(''); setSelectedUser(null); setRightPaneMode('view'); }, [subTab]);
+  useEffect(() => { setSearch(''); setSelectedUser(null); setRightPaneMode('view'); setUserListFilter('active'); }, [subTab]);
 
   /* stats */
   const counts = useMemo(() => ({
@@ -576,12 +617,20 @@ const AccountsPage = ({ user }) => {
   const currentList = subTab === 'portal' ? portalUsers : studentAccts;
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return currentList;
-    return currentList.filter((u) =>
+    let list = currentList;
+    if (subTab === 'portal') {
+      if (userListFilter === 'active') {
+        list = list.filter(u => u.is_active !== false);
+      } else if (userListFilter === 'archived') {
+        list = list.filter(u => u.is_active === false);
+      }
+    }
+    if (!q) return list;
+    return list.filter((u) =>
       [u.username, u.full_name, u.role, u.student_number]
         .some((v) => (v || '').toLowerCase().includes(q))
     );
-  }, [currentList, search]);
+  }, [currentList, search, subTab, userListFilter]);
 
   /* handle mutation callback from RightPane */
   const handleMutate = useCallback((msg, type, clearSelection = false) => {
@@ -661,6 +710,26 @@ const AccountsPage = ({ user }) => {
               ))}
             </div>
           </div>
+
+          {/* Active / Archived filter (portal only) */}
+          {subTab === 'portal' && (
+            <div style={{ padding: '0 10px 4px', flexShrink: 0, display: 'flex', gap: 4 }}>
+              {[{ key: 'active', label: 'Active' }, { key: 'archived', label: 'Archived' }].map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => { setUserListFilter(t.key); setSelectedUser(null); }}
+                  style={{ flex: 1, padding: '4px 0', fontSize: '.72rem', fontWeight: 700,
+                    border: '1px solid',
+                    borderColor: userListFilter === t.key ? '#002280' : '#e2e8f0',
+                    background: userListFilter === t.key ? '#eef1fb' : '#fafafa',
+                    color: userListFilter === t.key ? '#002280' : '#64748b',
+                    borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Search */}
           <div style={{ padding: '6px 10px 6px', flexShrink: 0 }}>
