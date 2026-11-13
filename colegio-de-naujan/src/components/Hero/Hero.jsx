@@ -21,6 +21,7 @@ const Hero = () => {
         minHeight: 'calc(100vh - 72px)',
         overflow: 'hidden',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -59,8 +60,9 @@ const Hero = () => {
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         textAlign: 'center',
-        padding: '5rem 1.5rem 8rem',
+        padding: '3.5rem 1.5rem 3rem',
         maxWidth: 760, margin: '0 auto', width: '100%',
+        flex: 1,
       }}>
 
         {/* Eyebrow badge */}
@@ -160,9 +162,9 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Large faint watermark bottom-right */}
-      <div style={{
-        position: 'absolute', bottom: 56, right: 0, zIndex: 2,
+      {/* Large faint watermark bottom-right — hidden on mobile (stats bar sits below) */}
+      <div className="hero-watermark" style={{
+        position: 'absolute', bottom: 88, right: 0, zIndex: 2,
         padding: '0 1.5rem',
         pointerEvents: 'none',
       }}>
@@ -211,17 +213,14 @@ const Hero = () => {
         )}
       </button>
 
-      {/* Stats bar */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        zIndex: 3,
+      {/* Stats bar — in normal flow so it never covers the CTA content on small screens */}
+      <div className="hero-stats" style={{
+        position: 'relative', zIndex: 3, width: '100%',
         background: 'rgba(0,0,0,0.45)',
         backdropFilter: 'blur(10px)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         display: 'flex',
         justifyContent: 'center',
-        padding: '0.9rem 2rem',
-        gap: '3rem',
         flexWrap: 'wrap',
       }}>
         {[
@@ -241,6 +240,13 @@ const Hero = () => {
         @keyframes heroPulse {
           0%,100% { opacity:1; transform:scale(1); }
           50%      { opacity:.4; transform:scale(.7); }
+        }
+        /* Mobile: compact stat spacing; desktop: roomier row */
+        .hero-stats { gap: 1rem 1.25rem; padding: 0.85rem 1rem; }
+        .hero-watermark { display: none; }
+        @media (min-width: 640px) {
+          .hero-stats { gap: 3rem; padding: 0.9rem 2rem; }
+          .hero-watermark { display: block; }
         }
       `}</style>
     </section>

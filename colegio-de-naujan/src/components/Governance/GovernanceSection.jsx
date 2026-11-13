@@ -491,7 +491,7 @@ const StatsBar = () => {
     { label:'Active Consultations', value:stats?.consultations??'—', color:'#C8960C', bg:'#fdf8ec', icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> },
   ];
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem', marginBottom:'3rem' }}>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(230px, 1fr))', gap:'1rem', marginBottom:'3rem' }}>
       {items.map(item=>(
         <div key={item.label} style={{ background:'#fff', border:'1.5px solid #e8edf5', borderRadius:14, padding:'1.1rem 1.25rem', display:'flex', alignItems:'center', gap:'1rem' }}>
           <div style={{ width:42,height:42,borderRadius:11,background:item.bg,color:item.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>{item.icon}</div>
@@ -541,7 +541,7 @@ const GovernanceSection = () => {
   const [openModal, setOpenModal] = useState(null); // 'transparency' | 'accountability' | 'participation' | null
 
   return (
-    <section id="governance" style={{ background:'#f8f9fc', padding:'5.5rem 0 4rem', borderTop:'1px solid #f1f5f9' }}>
+    <section id="governance" className="gov-section" style={{ background:'#f8f9fc', padding:'5.5rem 0 4rem', borderTop:'1px solid #f1f5f9' }}>
       <div className="cdn-container">
 
         {/* Header */}
@@ -667,6 +667,11 @@ const GovernanceSection = () => {
         @keyframes gov-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes gov-modal-in { from{opacity:0} to{opacity:1} }
         @keyframes gov-modal-up { from{opacity:0;transform:translateY(24px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+        /* Mobile: tighter section padding (overrides inline style) */
+        .gov-section { padding: 3.5rem 0 3rem !important; }
+        @media (min-width: 768px) {
+          .gov-section { padding: 5.5rem 0 4rem !important; }
+        }
       `}</style>
     </section>
   );
