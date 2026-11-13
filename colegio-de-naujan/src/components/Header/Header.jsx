@@ -28,7 +28,7 @@ function scrollTo(id) {
   window.scrollTo({ top, behavior: 'smooth' });
 }
 
-const Header = ({ onLoginClick }) => {
+const Header = ({ onLoginClick, user }) => {
   const [scrolled,           setScrolled]           = useState(false);
   const [activeId,           setActiveId]           = useState('home');
   const [menuOpen,           setMenuOpen]           = useState(false);
@@ -247,22 +247,40 @@ const Header = ({ onLoginClick }) => {
           })}
         </nav>
 
-        {/* Right — Login + Bagong Pilipinas */}
+        {/* Right — Login (or Dashboard when logged in) + Bagong Pilipinas */}
         <div className="hidden lg:flex items-center gap-4 justify-end">
-          <button
-            onClick={() => onLoginClick()}
-            className="flex items-center gap-1.5 px-4 py-2 font-bold text-[0.82rem] rounded-lg border-0 cursor-pointer transition-all duration-150"
-            style={{ background: '#002280', color: '#fff' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#001560'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#002280'; e.currentTarget.style.transform = 'none'; }}
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-              <polyline points="10 17 15 12 10 7"/>
-              <line x1="15" y1="12" x2="3" y2="12"/>
-            </svg>
-            Login
-          </button>
+          {user ? (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-1.5 px-4 py-2 font-bold text-[0.82rem] rounded-lg border-0 cursor-pointer transition-all duration-150"
+              style={{ background: '#002280', color: '#fff' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#001560'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#002280'; e.currentTarget.style.transform = 'none'; }}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="9" rx="1"/>
+                <rect x="14" y="3" width="7" height="5" rx="1"/>
+                <rect x="14" y="12" width="7" height="9" rx="1"/>
+                <rect x="3" y="16" width="7" height="5" rx="1"/>
+              </svg>
+              Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => onLoginClick()}
+              className="flex items-center gap-1.5 px-4 py-2 font-bold text-[0.82rem] rounded-lg border-0 cursor-pointer transition-all duration-150"
+              style={{ background: '#002280', color: '#fff' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#001560'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#002280'; e.currentTarget.style.transform = 'none'; }}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              Login
+            </button>
+          )}
           <img src={bagongPilipinasLogo} alt="Bagong Pilipinas" style={{ width: 46, height: 46, objectFit: 'contain' }} />
         </div>
 
@@ -341,11 +359,11 @@ const Header = ({ onLoginClick }) => {
             );
           })}
           <button
-            onClick={() => { setMenuOpen(false); onLoginClick(); }}
+            onClick={() => { setMenuOpen(false); user ? navigate('/dashboard') : onLoginClick(); }}
             className="mt-3 w-full py-2.5 font-bold text-sm rounded-lg border-0 cursor-pointer"
             style={{ background: '#002280', color: '#fff' }}
           >
-            Login
+            {user ? 'Dashboard' : 'Login'}
           </button>
         </div>
       )}

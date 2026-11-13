@@ -9,9 +9,7 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import HistoryPage      from './components/Dashboard/HistoryPage';
 import AccountPage      from './components/Dashboard/AccountPage';
 import ChatbotWidget    from './components/Chatbot/ChatbotWidget';
-import { markSessionLogoutBeacon, renewSession, recordLogoutSession, validateSession } from './lib/auth';
-import { logActivity } from './lib/activityLogger';
-import useIdleTimeout from './hooks/useIdleTimeout';
+import { markSessionLogoutBeacon, renewSession, validateSession } from './lib/auth';
 
 /* ── Helpers ── */
 const isStudent = (user) =>
@@ -80,11 +78,11 @@ function ScrollToTop() {
   return null;
 }
 
-function PublicLayout({ onLoginClick }) {
+function PublicLayout({ onLoginClick, user }) {
   useScrollAnimation();
   return (
     <div className="w-full min-h-screen flex flex-col">
-      <Header onLoginClick={onLoginClick} />
+      <Header onLoginClick={onLoginClick} user={user} />
       <main style={{ paddingTop: '72px', flex: 1 }}>
         <Suspense fallback={null}>
           <Routes>
@@ -100,6 +98,14 @@ function PublicLayout({ onLoginClick }) {
       <Footer />
     </div>
   );
+}
+
+/* ── Landing page: logged-in users go straight back to the portal ──
+   Covers the back-button case (history → "/") so a logged-in user is
+   never dumped on the public landing page as if they were logged out. */
+function LandingRoute({ user, onLoginClick }) {
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <PublicLayout onLoginClick={onLoginClick} user={user} />;
 }
 
 /* ── Inner app — needs router context ── */
@@ -178,6 +184,10 @@ function AppInner() {
       <ScrollToTop />
       <Routes>
         <Route
+          path="/"
+          element={<LandingRoute user={user} onLoginClick={() => setShowModal(true)} />}
+        />
+        <Route
           path="/dashboard"
           element={
             <RequireAuth user={user}>
@@ -220,7 +230,7 @@ function AppInner() {
         />
         <Route
           path="/*"
-          element={<PublicLayout onLoginClick={() => setShowModal(true)} />}
+          element={<PublicLayout onLoginClick={() => setShowModal(true)} user={user} />}
         />
       </Routes>
     </>
