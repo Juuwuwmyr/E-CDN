@@ -120,6 +120,17 @@ export async function validateLogin(username, password) {
     return { ok: false, user: null, error: rl.error };
   }
 
+  // Records exactly ONE failed attempt per login attempt, even when
+  // the credential check falls through multiple account lookups.
+  let failureRecorded = false;
+  const failLogin = async (message) => {
+    if (!failureRecorded) {
+      failureRecorded = true;
+      await recordFailedAttempt(u);
+    }
+    return { ok: false, user: null, error: message };
+  };
+
   // ── 1. Check portal_users (admin / staff) ──────────────
   const { data: staffData, error: staffError } = await supabase
     .from('portal_users')
@@ -161,8 +172,8 @@ export async function validateLogin(username, password) {
         error: null,
       };
     }
-    await recordFailedAttempt(u);
-    return { ok: false, user: null, error: 'Invalid username or password.' };
+    // Fall through to the students check — the id could also be a
+    // student number (preserves original login behavior).
   }
 
   // ── 2. Check students — student_number + custom password OR LASTNAME ──
@@ -232,12 +243,10 @@ export async function validateLogin(username, password) {
         error: null,
       };
     }
-    await recordFailedAttempt(u);
-    return { ok: false, user: null, error: 'Invalid username or password.' };
+    return failLogin('Invalid username or password.');
   }
 
-  await recordFailedAttempt(u);
-  return { ok: false, user: null, error: 'Invalid username or password.' };
+  return failLogin('Invalid username or password.');
 }
 
 /* ──────────────────────────────────────────────────────────
@@ -408,11 +417,11 @@ export function subscribeToSystemVisits(onChange) {
    recordLogoutSession  — marks logout time
 ────────────────────────────────────────────────────────── */
 export async function recordLogoutSession(sessionId) {
-  if (!sessionId) return;
+  if (!isNumericId(sessionId)) return;
   const { error } = await supabase
     .from('portal_sessions')
     .update({ logout_at: new Date().toISOString() })
-    .eq('id', sessionId);
+    .eq('id', Number(sessionId));
   if (error) console.error('Logout record error:', error);
 }
 
@@ -424,7 +433,7 @@ export async function recordLogoutSession(sessionId) {
    Falls back to a regular fetch if sendBeacon isn't available.
 ────────────────────────────────────────────────────────── */
 export function markSessionLogoutBeacon(sessionId) {
-  if (!sessionId) return;
+  if (!isNumericId(sessionId)) return;
   const url  = import.meta.env.VITE_SUPABASE_URL + '/rest/v1/portal_sessions?id=eq.' + sessionId;
   const body = JSON.stringify({ logout_at: new Date().toISOString() });
   const headers = {
