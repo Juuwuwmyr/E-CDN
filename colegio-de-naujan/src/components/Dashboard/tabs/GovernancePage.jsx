@@ -8,6 +8,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   getAllDocuments, createDocument, updateDocument, publishDocument, archiveDocument, getDocumentStats,
+  deleteDocument, deleteConcern, deleteConsultation,
+  permanentlyDeleteDocument, permanentlyDeleteConcern, permanentlyDeleteConsultation,
+  restoreDocument, restoreConcern, restoreConsultation,
+  getArchivedDocuments, getArchivedConcerns, getArchivedConsultations,
   getAllConcerns, updateConcernStatus, getConcernStats,
   getAllConsultations, createConsultation, updateConsultation, getParticipationStats,
   addQuestion, getConsultationWithQuestions, getConsultationStats,
@@ -55,8 +59,8 @@ const STATUS_BG = {
 const TYPE_COLORS = { survey:'#002280', consultation:'#7c3aed', proposal:'#C8960C' };
 const TYPE_BG     = { survey:'#eef1fb', consultation:'#f5f0ff', proposal:'#fdf8ec' };
 
-const DOC_PIPELINE = ['draft','submitted','approved','published','archived'];
-const STATUS_TABS  = ['all','draft','published','archived'];
+const DOC_PIPELINE = ['draft','submitted','approved','published'];
+const STATUS_TABS  = ['all','draft','published'];
 
 const Badge = ({ label, color, bg }) => (
   <span style={{
@@ -169,7 +173,8 @@ const TransparencyTab = ({ user }) => {
     setLoading(true);
     try {
       const [d, s] = await Promise.all([getAllDocuments(), getDocumentStats()]);
-      setDocs(d); setStats(s);
+      // Exclude archived from main list
+      setDocs(d.filter(doc => doc.status !== 'archived')); setStats(s);
     } catch (e) { showToast(e.message, 'error'); }
     finally { setLoading(false); }
   };
@@ -267,6 +272,15 @@ const TransparencyTab = ({ user }) => {
     try { await archiveDocument(doc.id);
       await logActivity('document_archived', `Archived: ${doc.title}`, user?.username, 'success', 'Governance');
       showToast(`"${doc.title}" archived.`); load();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  const handleDelete = async (doc) => {
+    if (!window.confirm(`Move "${doc.title}" to archive? You can restore it later.`)) return;
+    try {
+      await deleteDocument(doc.id);
+      await logActivity('document_archived', `Archived: ${doc.title}`, user?.username, 'success', 'Governance');
+      showToast(`"${doc.title}" moved to archive.`); load();
     } catch (e) { showToast(e.message, 'error'); }
   };
 
@@ -471,6 +485,9 @@ const TransparencyTab = ({ user }) => {
                   <button className="sl-act-btn sl-act-btn--edit" title="Edit" onClick={()=>openEdit(doc)}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
+                  <button className="sl-act-btn" title="Delete permanently" onClick={()=>handleDelete(doc)} style={{ color:'#C8102E' }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
                 </div>
               </div>
             );
@@ -635,7 +652,7 @@ const AccountabilityTab = ({ user }) => {
     setLoading(true);
     try {
       const [c, s] = await Promise.all([getAllConcerns({}), getConcernStats()]);
-      setConcerns(c); setStats(s);
+      setConcerns(c.filter(x => x.status !== 'archived')); setStats(s);
     } catch (e) { showToast(e.message, 'error'); }
     finally { setLoading(false); }
   };
@@ -688,6 +705,16 @@ const AccountabilityTab = ({ user }) => {
       setSelected(null); load();
     } catch (e) { showToast(e.message, 'error'); }
     finally { setSaving(false); }
+  };
+
+  const handleDeleteConcern = async (concern) => {
+    if (!window.confirm(`Move concern "${concern.reference_no}" to archive? You can restore it later.`)) return;
+    try {
+      await deleteConcern(concern.id);
+      await logActivity('concern_archived', `Archived concern ${concern.reference_no}`, user?.username, 'success', 'Governance');
+      showToast(`Concern ${concern.reference_no} moved to archive.`);
+      setSelected(null); load();
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   const clearFilters = () => { setStatusFilter('all'); setPriorityFilter('all'); setCatFilter('all'); setDateFrom(''); setDateTo(''); setSearch(''); };
@@ -904,6 +931,15 @@ const AccountabilityTab = ({ user }) => {
             <div style={{ flexShrink:0, display:'flex', gap:'.75rem', justifyContent:'flex-end', padding:'1rem 1.4rem', borderTop:'1px solid #f1f5f9', background:'#fff' }}>
               <button className="sl-btn sl-btn--ghost" onClick={()=>setSelected(null)} disabled={saving}>Cancel</button>
               <button className="sl-btn sl-btn--primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</button>
+              <button
+                type="button"
+                onClick={()=>handleDeleteConcern(selected)}
+                disabled={saving}
+                style={{ marginLeft:'auto', padding:'8px 14px', borderRadius:8, border:'none', background:'#fee2e2', color:'#C8102E', fontSize:'.82rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{marginRight:4,verticalAlign:'middle'}}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -942,7 +978,7 @@ const ParticipationTab = ({ user }) => {
     setLoading(true);
     try {
       const [c, s] = await Promise.all([getAllConsultations(), getParticipationStats()]);
-      setConsultations(c); setStats(s);
+      setConsultations(c.filter(x => x.status !== 'archived')); setStats(s);
       // response counts per consultation
       const cnts = await Promise.all(c.map(x => getConsultationStats(x.id).then(r => [x.id, r.responseCount]).catch(() => [x.id, 0])));
       setCounts(Object.fromEntries(cnts));
@@ -969,9 +1005,25 @@ const ParticipationTab = ({ user }) => {
   const handleStatusChange = async (id, status, title) => {
     try {
       await updateConsultation(id, { status });
-      await logActivity('consultation_status_changed', `Set "${title}" to ${status}`, user?.username, 'success', 'Governance');
-      showToast(`Status updated to ${status}.`);
-      load();
+      await logActivity('consultation_updated', `Status → ${status}: ${title}`, user?.username, 'success', 'Governance');
+      showToast(`Consultation ${status}.`); load();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  const handleDeleteConsultation = async (c) => {
+    if (!window.confirm(`Move "${c.title}" to archive? You can restore it later.`)) return;
+    try {
+      await deleteConsultation(c.id);
+      await logActivity('consultation_archived', `Archived: ${c.title}`, user?.username, 'success', 'Governance');
+      showToast(`"${c.title}" moved to archive.`); load();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  const handleArchiveConsultation = async (c) => {
+    try {
+      await updateConsultation(c.id, { status: 'archived' });
+      await logActivity('consultation_archived', `Archived: ${c.title}`, user?.username, 'success', 'Governance');
+      showToast(`"${c.title}" archived.`); load();
     } catch (e) { showToast(e.message, 'error'); }
   };
 
@@ -1112,6 +1164,14 @@ const ParticipationTab = ({ user }) => {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                   </button>
                 )}
+                {(c.status === 'closed' || c.status === 'draft') && (
+                  <button className="sl-act-btn" title="Archive" onClick={()=>handleArchiveConsultation(c)}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                  </button>
+                )}
+                <button className="sl-act-btn" title="Delete permanently" onClick={()=>handleDeleteConsultation(c)}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
                 <button className="sl-act-btn" title="View Responses" onClick={()=>openResponses(c)}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#002280" strokeWidth="2.5"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
                 </button>
@@ -1297,6 +1357,137 @@ const ParticipationTab = ({ user }) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
+   ARCHIVE TAB — shows all soft-deleted items with restore / permanent delete
+═══════════════════════════════════════════════════════════ */
+const ArchiveTab = ({ user }) => {
+  const [docs,     setDocs]     = useState([]);
+  const [concerns, setConcerns] = useState([]);
+  const [consults, setConsults] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [toast,    setToast]    = useState(null);
+  const [section,  setSection]  = useState('all');
+
+  const showToast = (msg, type='success') => { setToast({msg,type}); setTimeout(()=>setToast(null),4000); };
+  const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [d, c, con] = await Promise.all([getArchivedDocuments(), getArchivedConcerns(), getArchivedConsultations()]);
+      setDocs(d); setConcerns(c); setConsults(con);
+    } catch (e) { showToast(e.message,'error'); }
+    finally { setLoading(false); }
+  };
+  useEffect(()=>{ load(); },[]);
+
+  const total = docs.length + concerns.length + consults.length;
+  const SECTIONS = [
+    { key:'all',           label:'All' },
+    { key:'documents',     label:`Documents (${docs.length})` },
+    { key:'concerns',      label:`Concerns (${concerns.length})` },
+    { key:'consultations', label:`Consultations (${consults.length})` },
+  ];
+
+  const RowActions = ({ onRestore, onDelete }) => (
+    <div style={{display:'flex',gap:6,flexShrink:0}}>
+      <button className="sl-btn sl-btn--ghost" style={{padding:'5px 12px',fontSize:'.76rem'}} onClick={onRestore}>↩ Restore</button>
+      <button className="sl-act-btn" title="Permanently delete" onClick={onDelete}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>
+  );
+
+  return (
+    <div>
+      {toast && <div className={`sl-toast sl-toast--${toast.type}`}>{toast.msg}</div>}
+
+      <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+        {SECTIONS.map(s=>(
+          <button key={s.key} onClick={()=>setSection(s.key)} style={{
+            padding:'6px 14px',borderRadius:20,border:'1.5px solid',
+            borderColor:section===s.key?'#C8960C':'#e2e8f0',
+            background:section===s.key?'#fdf8ec':'#fff',
+            color:section===s.key?'#C8960C':'#6b7280',
+            fontSize:'.78rem',fontWeight:700,cursor:'pointer',fontFamily:'inherit',
+          }}>{s.label}</button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="db-empty-state"><p>Loading archive…</p></div>
+      ) : total === 0 ? (
+        <div className="db-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{width:44,height:44,color:'#d1d5db'}}>
+            <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/>
+          </svg>
+          <p>Archive is empty</p>
+          <span>Items you delete will appear here for recovery.</span>
+        </div>
+      ) : (
+        <div className="sl-list">
+
+          {/* Documents */}
+          {(section==='all'||section==='documents') && docs.length > 0 && <>
+            <div style={{padding:'8px 14px',background:'#f8fafc',fontSize:'.68rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'.08em',color:'#94a3b8',borderBottom:'1px solid #e2e8f0'}}>Documents ({docs.length})</div>
+            {docs.map((doc,i)=>(
+              <div key={doc.id} className="sl-list-row" style={{alignItems:'center'}}>
+                <span className="sl-list-num">{i+1}</span>
+                <div className="sl-list-info" style={{flex:2}}>
+                  <p className="sl-list-name">{doc.title}</p>
+                  <p className="sl-list-sn">{doc.category?.replace(/_/g,' ')} · Archived {fmtDate(doc.updated_at)}</p>
+                </div>
+                <RowActions
+                  onRestore={async()=>{ await restoreDocument(doc.id); showToast(`"${doc.title}" restored to draft.`); load(); }}
+                  onDelete={async()=>{ if(!window.confirm(`Permanently delete "${doc.title}"? This cannot be undone.`)) return; await permanentlyDeleteDocument(doc.id); showToast(`"${doc.title}" permanently deleted.`); load(); }}
+                />
+              </div>
+            ))}
+          </>}
+
+          {/* Concerns */}
+          {(section==='all'||section==='concerns') && concerns.length > 0 && <>
+            <div style={{padding:'8px 14px',background:'#f8fafc',fontSize:'.68rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'.08em',color:'#94a3b8',borderBottom:'1px solid #e2e8f0'}}>Concerns ({concerns.length})</div>
+            {concerns.map((c,i)=>(
+              <div key={c.id} className="sl-list-row" style={{alignItems:'center'}}>
+                <span className="sl-list-num">{i+1}</span>
+                <div className="sl-list-info" style={{flex:2}}>
+                  <p className="sl-list-name">{c.subject}</p>
+                  <p className="sl-list-sn">{c.reference_no} · Archived {fmtDate(c.updated_at)}</p>
+                </div>
+                <RowActions
+                  onRestore={async()=>{ await restoreConcern(c.id); showToast(`Concern ${c.reference_no} restored.`); load(); }}
+                  onDelete={async()=>{ if(!window.confirm(`Permanently delete concern ${c.reference_no}?`)) return; await permanentlyDeleteConcern(c.id); showToast('Concern permanently deleted.'); load(); }}
+                />
+              </div>
+            ))}
+          </>}
+
+          {/* Consultations */}
+          {(section==='all'||section==='consultations') && consults.length > 0 && <>
+            <div style={{padding:'8px 14px',background:'#f8fafc',fontSize:'.68rem',fontWeight:800,textTransform:'uppercase',letterSpacing:'.08em',color:'#94a3b8',borderBottom:'1px solid #e2e8f0'}}>Consultations ({consults.length})</div>
+            {consults.map((c,i)=>(
+              <div key={c.id} className="sl-list-row" style={{alignItems:'center'}}>
+                <span className="sl-list-num">{i+1}</span>
+                <div className="sl-list-info" style={{flex:2}}>
+                  <p className="sl-list-name">{c.title}</p>
+                  <p className="sl-list-sn">{c.type} · Archived {fmtDate(c.updated_at)}</p>
+                </div>
+                <RowActions
+                  onRestore={async()=>{ await restoreConsultation(c.id); showToast(`"${c.title}" restored to draft.`); load(); }}
+                  onDelete={async()=>{ if(!window.confirm(`Permanently delete "${c.title}"?`)) return; await permanentlyDeleteConsultation(c.id); showToast(`"${c.title}" permanently deleted.`); load(); }}
+                />
+              </div>
+            ))}
+          </>}
+
+        </div>
+      )}
+    </div>
+  );
+};
+
+/*
+═══════════════════════════════════════════════════════════
    MAIN GovernancePage
 ═══════════════════════════════════════════════════════════ */
 const GovernancePage = ({ user }) => {
@@ -1333,48 +1524,78 @@ const GovernancePage = ({ user }) => {
   ];
 
   /* Active sub-tab label for the page header */
-  const SUB_LABELS = { transparency:'Documents', accountability:'Concerns', participation:'Consultations' };
+  const SUB_LABELS = { transparency:'Documents', accountability:'Concerns', participation:'Consultations', archive:'Archive' };
 
   return (
     <div className="db-home-content" style={{ paddingBottom:'4rem' }}>
 
-      {/* Page header — shows which section is active */}
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'1.25rem' }}>
-        <div style={{
-          width:34, height:34, borderRadius:9, background:'#eef1fb', color:'#002280',
-          display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-          </svg>
-        </div>
-        <div>
-          <p style={{ margin:0, fontSize:'.97rem', fontWeight:800, color:'#0f1724' }}>
-            Governance — {SUB_LABELS[subTab]}
-          </p>
-          <p style={{ margin:0, fontSize:'.72rem', color:'#94a3b8' }}>
-            Use the Governance dropdown in the nav bar to switch sections
-          </p>
-        </div>
-      </div>
-
-      {/* Stat cards */}
-      <div className="db-stats-row" style={{ marginBottom:'1.5rem' }}>
-        {STAT_CARDS.map(s => (
-          <div key={s.label} className="db-stat-card" style={{ '--sc':s.color, '--sc-bg':s.bg }}>
-            <div className="db-stat-icon" style={{ background:s.bg, color:s.color }}>{s.icon}</div>
-            <div className="db-stat-body">
-              <p className="db-stat-value">{s.value}</p>
-              <p className="db-stat-label">{s.label}</p>
-            </div>
+      {/* Page header */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, marginBottom:'1.25rem' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{
+            width:34, height:34, borderRadius:9,
+            background: subTab === 'archive' ? '#fdf8ec' : '#eef1fb',
+            color: subTab === 'archive' ? '#C8960C' : '#002280',
+            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+          }}>
+            {subTab === 'archive' ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+              </svg>
+            )}
           </div>
-        ))}
+          <div>
+            <p style={{ margin:0, fontSize:'.97rem', fontWeight:800, color:'#0f1724' }}>
+              Governance — {SUB_LABELS[subTab]}
+            </p>
+            <p style={{ margin:0, fontSize:'.72rem', color:'#94a3b8' }}>
+              {subTab === 'archive' ? 'Archived items — restore or permanently delete' : 'Use the Governance dropdown in the nav bar to switch sections'}
+            </p>
+          </div>
+        </div>
+        {/* Archive shortcut button */}
+        <button
+          onClick={() => setSubTab(subTab === 'archive' ? 'transparency' : 'archive')}
+          style={{
+            display:'inline-flex', alignItems:'center', gap:6,
+            padding:'6px 14px', borderRadius:8, border:'1.5px solid',
+            borderColor: subTab === 'archive' ? '#C8960C' : '#e2e8f0',
+            background: subTab === 'archive' ? '#fdf8ec' : '#fff',
+            color: subTab === 'archive' ? '#C8960C' : '#6b7280',
+            fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:'inherit',
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l .94 1H5.12z"/>
+          </svg>
+          {subTab === 'archive' ? 'Back' : 'Archive'}
+        </button>
       </div>
 
-      {/* Content — only the selected section */}
+      {/* Stat cards — only when not in archive view */}
+      {subTab !== 'archive' && (
+        <div className="db-stats-row" style={{ marginBottom:'1.5rem' }}>
+          {STAT_CARDS.map(s => (
+            <div key={s.label} className="db-stat-card" style={{ '--sc':s.color, '--sc-bg':s.bg }}>
+              <div className="db-stat-icon" style={{ background:s.bg, color:s.color }}>{s.icon}</div>
+              <div className="db-stat-body">
+                <p className="db-stat-value">{s.value}</p>
+                <p className="db-stat-label">{s.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Content */}
       {subTab === 'transparency'   && <TransparencyTab   user={user}/>}
       {subTab === 'accountability' && <AccountabilityTab user={user}/>}
       {subTab === 'participation'  && <ParticipationTab  user={user}/>}
+      {subTab === 'archive'        && <ArchiveTab        user={user}/>}
     </div>
   );
 };

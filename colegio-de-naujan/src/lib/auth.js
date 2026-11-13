@@ -290,17 +290,22 @@ export async function renewSession(sessionId) {
 ────────────────────────────────────────────────────────── */
 export async function recordSystemVisit(systemId, systemLabel, userId = null) {
   try {
-    const { error } = await supabase
-      .from('system_visits')
-      .insert({
-        system_id:    systemId,
-        system_label: systemLabel,
-        user_id:      null, // stored separately — avoids UUID type conflict
-        visited_at:   new Date().toISOString(),
-      });
+    // Use aggregated stats (upsert daily totals) — prevents table bloat
+    const { error } = await supabase.rpc('record_system_visit_aggregated', {
+      p_system_id:    systemId,
+      p_system_label: systemLabel,
+    });
 
     if (error) {
-      console.error('[recordSystemVisit] INSERT error:', error);
+      // Fallback: try raw insert if RPC not available
+      await supabase
+        .from('system_visits')
+        .insert({
+          system_id:    systemId,
+          system_label: systemLabel,
+          user_id:      null,
+          visited_at:   new Date().toISOString(),
+        });
     }
   } catch (e) {
     console.error('[recordSystemVisit] Exception:', e);
@@ -311,9 +316,22 @@ export async function recordSystemVisit(systemId, systemLabel, userId = null) {
    getSystemVisitStats  — per-system visit counts from DB
 ────────────────────────────────────────────────────────── */
 export async function getSystemVisitStats() {
+  // Try aggregated stats table first (efficient, no bloat)
+  const { data: aggData, error: aggError } = await supabase
+    .from('system_visit_stats')
+    .select('system_id, visit_count');
+
+  if (!aggError && aggData && aggData.length > 0) {
+    return aggData.reduce((acc, row) => {
+      acc[row.system_id] = (acc[row.system_id] || 0) + (row.visit_count || 1);
+      return acc;
+    }, {});
+  }
+
+  // Fallback: raw system_visits table
   const { data, error } = await supabase
     .from('system_visits')
-    .select('system_id, system_label');
+    .select('system_id');
 
   if (error || !data) return {};
 
@@ -327,6 +345,25 @@ export async function getSystemVisitStats() {
    getRecentSystemVisits  — last N system visit rows
 ────────────────────────────────────────────────────────── */
 export async function getRecentSystemVisits(limit = 20) {
+  // Try aggregated stats table — ordered by most recently updated date
+  const { data: aggData, error: aggError } = await supabase
+    .from('system_visit_stats')
+    .select('system_id, system_label, visit_date, visit_count')
+    .order('visit_date', { ascending: false })
+    .limit(limit);
+
+  if (!aggError && aggData && aggData.length > 0) {
+    // Shape it to match the expected format for the Live Feed
+    return aggData.map((row, i) => ({
+      id:           `agg_${row.system_id}_${row.visit_date}`,
+      system_id:    row.system_id,
+      system_label: row.system_label || row.system_id,
+      user_id:      `${row.visit_count} visit${row.visit_count !== 1 ? 's' : ''} today`,
+      visited_at:   row.visit_date + 'T12:00:00.000Z',
+    }));
+  }
+
+  // Fallback: raw system_visits
   const { data, error } = await supabase
     .from('system_visits')
     .select('id, system_id, system_label, user_id, visited_at')
@@ -359,10 +396,14 @@ export async function getPortalMetrics() {
     .select('*', { count: 'exact', head: true })
     .gte('login_at', todayISO);
 
-  // Total system clicks
-  const { count: totalClicks } = await supabase
-    .from('system_visits')
-    .select('*', { count: 'exact', head: true });
+  // Total system clicks — use aggregated table (sum of all visit_counts)
+  const { data: aggClicks } = await supabase
+    .from('system_visit_stats')
+    .select('visit_count');
+
+  const totalClicks = aggClicks && aggClicks.length > 0
+    ? aggClicks.reduce((sum, r) => sum + (r.visit_count || 0), 0)
+    : 0;
 
   // Per-department session counts
   const { data: courseSessions } = await supabase

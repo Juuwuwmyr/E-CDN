@@ -416,7 +416,7 @@ const SystemAppsManager = () => {
             onDelete={handleDelete}
           />
         ) : (
-          <>
+          <div style={{ padding: '0 16px 16px' }}>
         {/* Toolbar */}
         <div style={{
           display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center',
@@ -512,7 +512,7 @@ const SystemAppsManager = () => {
         </div>
 
         {/* Table */}
-        <div style={{ overflowX: 'auto', marginTop: 4 }}>
+        <div style={{ overflowX: 'auto', marginTop: 4, padding: '0 4px' }}>
           <table style={{
             width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem',
           }}>
@@ -790,7 +790,7 @@ const SystemAppsManager = () => {
             </tbody>
           </table>
         </div>
-          </>
+          </div>
         )}
       </div>
 

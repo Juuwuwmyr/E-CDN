@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  LineChart, Line, BarChart, Bar,
+  BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell,
+  ResponsiveContainer, Cell, PieChart, Pie, Legend,
 } from 'recharts';
 import '../../styles/login-analytics.css';
 import {
@@ -10,387 +10,277 @@ import {
   subscribeToActiveSessions,
 } from '../../lib/auth';
 
-// Department config — maps course codes used in portal_sessions to display info
 const DEPARTMENTS = [
-  { key: 'BSIS',        label: 'BSIS',        color: '#002280' },
-  { key: 'BPA',         label: 'BPA',         color: '#C8102E' },
-  { key: 'BTVTED-WFT',  label: 'BTVTED-WFT',  color: '#C8960C' },
-  { key: 'BTVTED-CHS',  label: 'BTVTED-CHS',  color: '#7c3aed' },
+  { key: 'BSIS',       label: 'BSIS',       color: '#002280', bg: '#eef1fb' },
+  { key: 'BPA',        label: 'BPA',        color: '#C8102E', bg: '#fdf0f2' },
+  { key: 'BTVTED-WFT', label: 'WFT',        color: '#C8960C', bg: '#fdf8ec' },
+  { key: 'BTVTED-CHS', label: 'CHS',        color: '#7c3aed', bg: '#f5f0ff' },
 ];
 
-// Map any course/role string to a department key for grouping
 const resolveDept = (course) => {
   if (!course) return null;
   const u = course.toUpperCase();
-  if (u.includes('BSIS'))         return 'BSIS';
-  if (u.includes('WFT'))          return 'BTVTED-WFT';
-  if (u.includes('CHS'))          return 'BTVTED-CHS';
-  if (u.includes('BPA'))          return 'BPA';
-  return null; // admin/staff — not shown in dept chart
+  if (u.includes('BSIS')) return 'BSIS';
+  if (u.includes('WFT'))  return 'BTVTED-WFT';
+  if (u.includes('CHS'))  return 'BTVTED-CHS';
+  if (u.includes('BPA'))  return 'BPA';
+  return null;
 };
 
-const fmtLoginTime = (isoStr) => {
-  if (!isoStr) return '—';
-  const d = new Date(isoStr);
-  const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
-  if (diffMin < 1)   return 'just now';
-  if (diffMin < 60)  return diffMin + 'm ago';
-  if (diffMin < 1440) return Math.floor(diffMin / 60) + 'h ago';
-  return Math.floor(diffMin / 1440) + 'd ago';
+/* ── Custom Tooltip ── */
+const ChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: '#0f1724', borderRadius: 8, padding: '8px 14px',
+      boxShadow: '0 4px 16px rgba(0,0,0,.18)',
+    }}>
+      {label && <p style={{ margin: '0 0 4px', fontSize: '.72rem', color: 'rgba(255,255,255,.55)', fontWeight: 600 }}>{label}</p>}
+      {payload.map((p, i) => (
+        <p key={i} style={{ margin: 0, fontSize: '.85rem', fontWeight: 700, color: p.color || '#fff' }}>
+          {p.value} {p.name === 'logins' ? 'active' : 'sessions'}
+        </p>
+      ))}
+    </div>
+  );
 };
 
 const LoginAnalytics = () => {
-  const [sessions,   setSessions]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [dbError,    setDbError]    = useState(null);   // show if DB read fails
-  const [chartType,  setChartType]  = useState('bar');
+  const [sessions,  setSessions]  = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [dbError,   setDbError]   = useState(null);
+  const [chartType, setChartType] = useState('bar');
 
-  /* ── Fetch from Supabase ── */
   const fetchSessions = async () => {
     try {
       const data = await getActiveSessions();
       setSessions(data);
       setDbError(null);
     } catch (e) {
-      setDbError('Could not load sessions. Check Supabase permissions.');
+      setDbError('Could not load sessions.');
       console.error('fetchSessions error:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ── Mount: initial fetch + Realtime subscription + polling fallback ── */
   useEffect(() => {
     fetchSessions();
-
-    // Realtime subscription — instant push when someone logs in/out
-    const channel = subscribeToActiveSessions(() => {
-      fetchSessions();
-    });
-
-    // Polling fallback every 5 seconds in case Realtime isn't configured
-    const pollInterval = setInterval(() => {
-      fetchSessions();
-    }, 5000);
-
-    return () => {
-      channel.unsubscribe();
-      clearInterval(pollInterval);
-    };
+    const channel  = subscribeToActiveSessions(fetchSessions);
+    const interval = setInterval(fetchSessions, 30000);
+    return () => { channel.unsubscribe(); clearInterval(interval); };
   }, []);
 
-
   /* ── Derived data ── */
+  const activeUsers = sessions
+    .filter(s => resolveDept(s.course) !== null)
+    .map(s => ({ ...s, dept: resolveDept(s.course) }));
 
-  // Only student sessions (with a resolvable department)
-  const studentSessions = sessions.filter(s => resolveDept(s.course) !== null);
-
-  // Currently logged-in students with resolved dept
-  const activeUsers = studentSessions.map(s => ({
-    ...s,
-    dept: resolveDept(s.course),
+  const chartData = DEPARTMENTS.map(dept => ({
+    name:     dept.label,
+    fullName: dept.key,
+    logins:   activeUsers.filter(u => u.dept === dept.key).length,
+    color:    dept.color,
+    bg:       dept.bg,
   }));
 
-  const totalActiveUsers = activeUsers.length;
-
-  // Bar/Pie chart data — count per department (currently active only)
-  const chartData = DEPARTMENTS.map(dept => {
-    const count = activeUsers.filter(u => u.dept === dept.key).length;
-    const shortName = dept.key.replace('BTVTED-', '');
-    return { name: shortName, fullName: dept.key, logins: count, color: dept.color };
-  });
-
-  // Time-series: active logins in 5-min buckets over the last 60 min
   const timeSeriesData = (() => {
     const now = Date.now();
     return Array.from({ length: 12 }, (_, i) => {
-      const slotCenter = now - (11 - i) * 5 * 60 * 1000;
-      const slotStart  = slotCenter - 2.5 * 60 * 1000;
-      const slotEnd    = slotCenter + 2.5 * 60 * 1000;
-      // Count sessions whose login_at falls inside this 5-min window
-      const count = sessions.filter(s => {
+      const center = now - (11 - i) * 5 * 60 * 1000;
+      const start  = center - 2.5 * 60 * 1000;
+      const end    = center + 2.5 * 60 * 1000;
+      const count  = sessions.filter(s => {
         const t = new Date(s.login_at).getTime();
-        return t >= slotStart && t <= slotEnd;
+        return t >= start && t <= end;
       }).length;
       return {
-        time: new Date(slotCenter).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        time:  new Date(center).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         count,
       };
     });
   })();
 
-  /* ── Custom tooltip ── */
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="analytics-tooltip">
-          <p className="analytics-tooltip-label">{payload[0].payload.fullName || payload[0].payload.name}</p>
-          <p className="analytics-tooltip-value">{payload[0].value} active</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  const totalActive = activeUsers.length;
+  const maxDept     = chartData.sort((a, b) => b.logins - a.logins)[0];
+  const hasData     = totalActive > 0;
+
+  const CHART_TYPES = [
+    { key: 'bar', label: 'Bar',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3H3v18h2V3zm4 6H7v12h2V9zm4-4h-2v16h2V5zm4 8h-2v8h2v-8z"/></svg> },
+    { key: 'line', label: 'Line',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.5l6-6 4 4L22 6.92"/><path d="M3.5 18.5l6-6 4 4" fillOpacity="0"/></svg> },
+    { key: 'pie', label: 'Pie',
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg> },
+  ];
 
   return (
-    <div className="login-analytics-root">
-      {/* DB error banner — shown if Supabase SELECT policy is missing */}
-      {dbError && (
-        <div style={{
-          background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 10,
-          padding: '10px 16px', marginBottom: 16, fontSize: '0.85rem', color: '#991b1b',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          {dbError}
+    <div style={{
+      background: '#fff', borderRadius: 14, border: '1px solid #e5e7eb',
+      overflow: 'hidden', marginTop: 20,
+    }}>
+
+      {/* ── Header ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '1rem 1.5rem', borderBottom: '1px solid #f3f4f6', flexWrap: 'wrap', gap: 10,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 9, background: '#eef1fb', color: '#002280',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+            </svg>
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '.95rem', fontWeight: 800, color: '#0f1724' }}>Live Login Analytics</p>
+            <p style={{ margin: 0, fontSize: '.72rem', color: '#94a3b8' }}>
+              {loading ? 'Loading…' : hasData ? `${totalActive} active session${totalActive !== 1 ? 's' : ''}` : 'No active sessions right now'}
+            </p>
+          </div>
         </div>
-      )}
-      <div className="analytics-header">
-        <div>
-          <h2 className="analytics-title">Live Login Analytics</h2>
-        </div>
-        <div className="analytics-controls">
-          <button
-            className={`analytics-btn ${chartType === 'bar' ? 'active' : ''}`}
-            onClick={() => setChartType('bar')}
-            title="Bar Chart"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="2" x2="12" y2="22" />
-              <path d="M17 5H9a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2z" />
-            </svg>
-          </button>
-          <button
-            className={`analytics-btn ${chartType === 'line' ? 'active' : ''}`}
-            onClick={() => setChartType('line')}
-            title="Line Chart"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-              <polyline points="17 6 23 6 23 12" />
-            </svg>
-          </button>
-          <button
-            className={`analytics-btn ${chartType === 'pie' ? 'active' : ''}`}
-            onClick={() => setChartType('pie')}
-            title="Pie Chart"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2v10l7.07 7.07" />
-            </svg>
-          </button>
+
+        {/* Chart type toggle */}
+        <div style={{ display: 'flex', gap: 4, background: '#f4f6fb', borderRadius: 10, padding: 4 }}>
+          {CHART_TYPES.map(t => (
+            <button key={t.key} onClick={() => setChartType(t.key)} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '6px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
+              fontSize: '.75rem', fontWeight: 700, fontFamily: 'inherit',
+              background: chartType === t.key ? '#fff' : 'transparent',
+              color:      chartType === t.key ? '#002280' : '#94a3b8',
+              boxShadow:  chartType === t.key ? '0 1px 3px rgba(0,0,0,.08)' : 'none',
+              transition: 'all .15s',
+            }}>
+              {t.icon}{t.label}
+            </button>
+          ))}
         </div>
       </div>
 
+      {dbError && (
+        <div style={{ margin: '0 1.5rem 0', padding: '8px 12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, fontSize: '.82rem', color: '#991b1b', marginTop: 12 }}>
+          {dbError}
+        </div>
+      )}
 
-      {/* Charts */}
-      <div className="analytics-charts">
-        <div className="analytics-chart-container">
-          <div className="analytics-chart-header">
-            <h3 className="analytics-chart-title">Active Logins by Department</h3>
-            <span className="analytics-chart-meta"></span>          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            {chartType === 'bar' ? (
-              <BarChart data={chartData} barCategoryGap="35%">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" />
-                <YAxis
-                  allowDecimals={false}
-                  domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
-                  tickCount={6}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="logins" radius={[8, 8, 0, 0]} maxBarSize={56}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+      {/* ── KPI mini-cards ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, borderBottom: '1px solid #f3f4f6' }}>
+        {DEPARTMENTS.map(dept => {
+          const count = activeUsers.filter(u => u.dept === dept.key).length;
+          return (
+            <div key={dept.key} style={{
+              padding: '1rem 1.25rem', borderRight: '1px solid #f3f4f6',
+              display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: dept.color, flexShrink: 0 }} />
+              <div>
+                <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: dept.color, lineHeight: 1 }}>{loading ? '—' : count}</p>
+                <p style={{ margin: '2px 0 0', fontSize: '.68rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '.04em' }}>{dept.label}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Charts ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 0, padding: '1.25rem 1.5rem' }}>
+
+        {/* Left — Dept chart */}
+        <div style={{ paddingRight: '1.5rem', borderRight: '1px solid #f3f4f6' }}>
+          <p style={{ margin: '0 0 .75rem', fontSize: '.82rem', fontWeight: 700, color: '#374151' }}>
+            Active Logins by Department
+          </p>
+          {!hasData ? (
+            <div style={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#d1d5db' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style={{ marginBottom: 8, opacity: .3 }}>
+                <path d="M5 3H3v18h2V3zm4 6H7v12h2V9zm4-4h-2v16h2V5zm4 8h-2v8h2v-8z"/>
+              </svg>
+              <p style={{ margin: 0, fontSize: '.8rem', fontWeight: 600 }}>No active logins</p>
+            </div>
+          ) : chartType === 'pie' ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={chartData.filter(d => d.logins > 0)}
+                  cx="50%" cy="50%"
+                  outerRadius={80} innerRadius={40}
+                  dataKey="logins" paddingAngle={3}
+                  label={({ name, logins }) => `${name} ${logins}`}
+                  labelLine={false}
+                >
+                  {chartData.filter(d => d.logins > 0).map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData} barCategoryGap="40%" margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} domain={[0, d => Math.max(d + 1, 5)]} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(0,34,128,.04)' }} />
+                <Bar dataKey="logins" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                  {chartData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
                   ))}
                 </Bar>
               </BarChart>
-            ) : chartType === 'line' ? (
-              <LineChart data={timeSeriesData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="time" />
-                <YAxis
-                  allowDecimals={false}
-                  domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
-                  tickCount={6}
-                />
-                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                <Line type="monotone" dataKey="count" stroke="#002280" strokeWidth={2} dot={{ fill: '#002280', r: 4 }} />
-              </LineChart>
-            ) : (
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, logins }) => logins > 0 ? `${name}: ${logins}` : ''}
-                  outerRadius={100}
-                  dataKey="logins"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value} users`, 'Active']} />
-              </PieChart>
-            )}
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        {/* Time Series Chart */}
-        <div className="analytics-chart-container">
-          <div className="analytics-chart-header">
-            <h3 className="analytics-chart-title">Active Users Timeline</h3>
-            <span className="analytics-chart-meta">Last 60 minutes</span>
+        {/* Right — Timeline */}
+        <div style={{ paddingLeft: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.75rem' }}>
+            <p style={{ margin: 0, fontSize: '.82rem', fontWeight: 700, color: '#374151' }}>Session Timeline</p>
+            <span style={{ fontSize: '.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.06em' }}>Last 60 min</span>
           </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={timeSeriesData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="time" />
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={timeSeriesData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis
+                dataKey="time"
+                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                axisLine={false} tickLine={false}
+                interval={3}
+              />
               <YAxis
                 allowDecimals={false}
-                domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
-                tickCount={6}
+                domain={[0, d => Math.max(d + 1, 5)]}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false} tickLine={false}
               />
-              <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+              <Tooltip content={<ChartTooltip />} />
+              <defs>
+                <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#002280" stopOpacity={0.15}/>
+                  <stop offset="95%" stopColor="#002280" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
               <Line
                 type="monotone"
                 dataKey="count"
-                stroke="#10813f"
-                strokeWidth={3}
-                dot={{ fill: '#10813f', r: 5 }}
-                activeDot={{ r: 7 }}
+                stroke="#002280"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, fill: '#002280', strokeWidth: 0 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Currently Active Users — the main real-time list */}
-      <div className="analytics-active-users">
-        <div className="analytics-chart-header">
-          <h3 className="analytics-chart-title">Currently Active Users</h3>
-          <span className="analytics-chart-meta">
-            {loading ? 'Loading…' : `${activeUsers.length} online`}
-            <span style={{
-              display: 'inline-block',
-              width: 8, height: 8,
-              borderRadius: '50%',
-              background: activeUsers.length > 0 ? '#10813f' : '#d1d5db',
-              marginLeft: 6,
-              verticalAlign: 'middle',
-              animation: activeUsers.length > 0 ? 'pulse 2s infinite' : 'none',
-            }} />
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="analytics-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12,6 12,12 16,14" />
-            </svg>
-            <p>Loading active sessions…</p>
-          </div>
-        ) : activeUsers.length > 0 ? (
-          <div className="analytics-table">
-            <div className="analytics-table-header">
-              <div className="analytics-table-cell">Department</div>
-              <div className="analytics-table-cell">Name</div>
-              <div className="analytics-table-cell">Username</div>
-              <div className="analytics-table-cell">Logged in</div>
-            </div>
-            {activeUsers.map((u) => {
-              const dept = DEPARTMENTS.find(d => d.key === u.dept);
-              return (
-                <div key={u.id} className="analytics-table-row">
-                  <div className="analytics-table-cell">
-                    <span
-                      className="analytics-dept-badge"
-                      style={{ background: dept?.color || '#ccc', color: '#fff' }}
-                    >
-                      {u.dept}
-                    </span>
-                  </div>
-                  <div className="analytics-table-cell">{u.full_name || '—'}</div>
-                  <div className="analytics-table-cell">{u.user_id}</div>
-                  <div className="analytics-table-cell analytics-table-time">
-                    {fmtLoginTime(u.login_at)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="analytics-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12h8M12 8v8" />
-            </svg>
-            <p>No active users at the moment</p>
-          </div>
-        )}
-      </div>
-
-      {/* Recent Logins from active sessions */}
-      <div className="analytics-recent-logins">
-        <div className="analytics-chart-header">
-          <h3 className="analytics-chart-title">Recent Logins</h3>
-          <span className="analytics-chart-meta">{sessions.length} active session{sessions.length !== 1 ? 's' : ''}</span>
-        </div>
-
-        {sessions.length > 0 ? (
-          <div className="analytics-table">
-            <div className="analytics-table-header">
-              <div className="analytics-table-cell">Department</div>
-              <div className="analytics-table-cell">Username</div>
-              <div className="analytics-table-cell">Time</div>
-            </div>
-            {sessions.slice(0, 10).map((s, idx) => {
-              const dept = DEPARTMENTS.find(d => d.key === resolveDept(s.course));
-              return (
-                <div key={idx} className="analytics-table-row">
-                  <div className="analytics-table-cell">
-                    <span
-                      className="analytics-dept-badge"
-                      style={{ background: dept?.color || '#6b7280', color: '#fff' }}
-                    >
-                      {resolveDept(s.course) || s.role || 'Staff'}
-                    </span>
-                  </div>
-                  <div className="analytics-table-cell">{s.user_id}</div>
-                  <div className="analytics-table-cell analytics-table-time">
-                    {new Date(s.login_at).toLocaleTimeString('en-US', {
-                      hour: '2-digit', minute: '2-digit', second: '2-digit',
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="analytics-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M12 2a10 10 0 100 20 10 10 0 000-20z" />
-              <path d="M12 6v6m0 4v.01" />
-            </svg>
-            <p>No active sessions recorded yet</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
 
 export default LoginAnalytics;
 
-// Keep recordLogin / recordLogout named exports for backward-compat
-// (Dashboard.jsx and Login.jsx still import these — they can stay as no-ops
-//  since the real recording now happens via auth.js → Supabase)
 export const recordLogin  = () => {};
 export const recordLogout = () => {};

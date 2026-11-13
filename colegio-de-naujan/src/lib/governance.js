@@ -299,3 +299,118 @@ export async function uploadGovernanceFile(file, folderPath = 'documents', onPro
   if (onProgress) onProgress(100);
   return urlData.publicUrl;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SOFT DELETE (archive) + PERMANENT DELETE helpers
+   "Delete" in UI → moves to archive (status='archived')
+   "Archived" items hidden from normal queries
+   "Permanent Delete" → truly removes from DB
+═══════════════════════════════════════════════════════════ */
+
+/* ── Documents ── */
+export async function deleteDocument(id) {
+  // Soft delete — move to archive
+  const { error } = await supabase
+    .from('governance_documents')
+    .update({ status: 'archived' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function permanentlyDeleteDocument(id) {
+  const { error } = await supabase
+    .from('governance_documents')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function restoreDocument(id) {
+  const { error } = await supabase
+    .from('governance_documents')
+    .update({ status: 'draft' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function getArchivedDocuments() {
+  const { data, error } = await supabase
+    .from('governance_documents')
+    .select('*')
+    .eq('status', 'archived')
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+/* ── Concerns ── */
+export async function deleteConcern(id) {
+  // Soft delete — mark as archived
+  const { error } = await supabase
+    .from('concern_submissions')
+    .update({ status: 'archived' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function permanentlyDeleteConcern(id) {
+  const { error } = await supabase
+    .from('concern_submissions')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function restoreConcern(id) {
+  const { error } = await supabase
+    .from('concern_submissions')
+    .update({ status: 'closed' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function getArchivedConcerns() {
+  const { data, error } = await supabase
+    .from('concern_submissions')
+    .select('*')
+    .eq('status', 'archived')
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+/* ── Consultations ── */
+export async function deleteConsultation(id) {
+  // Soft delete — move to archived status
+  const { error } = await supabase
+    .from('consultations')
+    .update({ status: 'archived' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function permanentlyDeleteConsultation(id) {
+  const { error } = await supabase
+    .from('consultations')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function restoreConsultation(id) {
+  const { error } = await supabase
+    .from('consultations')
+    .update({ status: 'draft' })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+export async function getArchivedConsultations() {
+  const { data, error } = await supabase
+    .from('consultations')
+    .select('*')
+    .eq('status', 'archived')
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
