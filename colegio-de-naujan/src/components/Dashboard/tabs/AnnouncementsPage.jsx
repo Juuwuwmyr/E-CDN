@@ -213,8 +213,8 @@ export default function AnnouncementsPage({ user }) {
   ).length;
 
   /* ── Right-pane mode ────────────────────────────────────────── */
-  // 'compose' | 'detail' | 'empty'
-  const paneMode = composeOpen ? 'compose' : selected ? 'detail' : 'empty';
+  // 'detail' | 'empty'  — compose is now a modal, not a pane
+  const paneMode = selected ? 'detail' : 'empty';
 
   /* ── Handlers ───────────────────────────────────────────────── */
   const handleSelect = useCallback((id) => {
@@ -702,25 +702,40 @@ export default function AnnouncementsPage({ user }) {
               />
             )}
 
-            {/* ── COMPOSE / EDIT FORM ─────────────────────── */}
-            {paneMode === 'compose' && (
-              <ComposePane
-                editingId={editingId}
-                title={title}         setTitle={setTitle}
-                body={body}           setBody={setBody}
-                type={type}           setType={setType}
-                targetCourses={targetCourses}       setTargetCourses={setTargetCourses}
-                targetYearLevels={targetYearLevels} setTargetYearLevels={setTargetYearLevels}
-                previewAudience={previewAudience}
-                saving={saving}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-              />
-            )}
+            {/* ── COMPOSE / EDIT FORM → now a modal, not rendered here ─── */}
           </div>
         )}
       </div>
         </>
+      )}
+
+      {/* ── COMPOSE / EDIT MODAL ────────────────────────────── */}
+      {composeOpen && (
+        <div className="sl-modal-backdrop" onClick={e => e.target === e.currentTarget && handleCancel()}>
+          <div className="sl-modal" style={{ maxWidth: 620, maxHeight: '92vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div className="sl-modal-header">
+              <div>
+                <h3 style={{ margin: 0 }}>{editingId ? 'Edit Announcement' : 'New Announcement'}</h3>
+                <p style={{ margin: '3px 0 0', fontSize: '.75rem', color: '#94a3b8' }}>
+                  {editingId ? 'Update the announcement below' : 'Draft and broadcast to students'}
+                </p>
+              </div>
+              <button className="sl-modal-close" onClick={handleCancel}>✕</button>
+            </div>
+            <ComposePane
+              editingId={editingId}
+              title={title}         setTitle={setTitle}
+              body={body}           setBody={setBody}
+              type={type}           setType={setType}
+              targetCourses={targetCourses}       setTargetCourses={setTargetCourses}
+              targetYearLevels={targetYearLevels} setTargetYearLevels={setTargetYearLevels}
+              previewAudience={previewAudience}
+              saving={saving}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+            />
+          </div>
+        </div>
       )}
 
       {/* ── TOAST ───────────────────────────────────────────── */}
@@ -926,24 +941,9 @@ function ComposePane({
   });
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-      {/* Form header */}
-      <div style={{
-        padding: '.9rem 1.4rem .75rem', borderBottom: '1px solid #f3f4f6',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div>
-          <p style={{ fontSize: '.88rem', fontWeight: 800, color: '#0f1724', margin: 0 }}>
-            {isEdit ? 'Edit Announcement' : 'Compose New Announcement'}
-          </p>
-          <p style={{ fontSize: '.7rem', color: '#9ca3af', margin: '1px 0 0', fontWeight: 500 }}>
-            {isEdit ? 'Update the announcement below' : 'Draft and publish to students'}
-          </p>
-        </div>
-      </div>
-
+    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Scrollable form body */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.1rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ padding: '1.1rem 1.4rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
         {/* Title */}
         <div>
@@ -1111,10 +1111,7 @@ function ComposePane({
       </div>
 
       {/* Actions */}
-      <div style={{
-        padding: '.9rem 1.4rem', borderTop: '1px solid #f3f4f6',
-        display: 'flex', gap: '.6rem', alignItems: 'center',
-      }}>
+      <div className="sl-modal-actions">
         <button
           type="submit"
           className="sl-btn sl-btn--primary"

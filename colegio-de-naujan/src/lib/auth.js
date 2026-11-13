@@ -405,7 +405,7 @@ export function subscribeToSystemVisits(onChange) {
     .channel('system_visits_realtime')
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'system_visits' },
+      { event: '*', schema: 'public', table: 'system_visit_stats' },
       () => onChange()
     )
     .subscribe();
@@ -477,25 +477,48 @@ export async function renewSession(sessionId, token) {
 
 /* ──────────────────────────────────────────────────────────
    recordSystemVisit  — logs a system click to Supabase
+   Uses direct upsert to system_visit_stats (daily aggregation)
 ────────────────────────────────────────────────────────── */
 export async function recordSystemVisit(systemId, systemLabel, userId = null) {
   try {
-    // Use aggregated stats (upsert daily totals) — prevents table bloat
-    const { error } = await supabase.rpc('record_system_visit_aggregated', {
-      p_system_id:    systemId,
-      p_system_label: systemLabel,
-    });
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
-    if (error) {
-      // Fallback: try raw insert if RPC not available
-      await supabase
-        .from('system_visits')
-        .insert({
+    // Try upsert into aggregated stats table
+    const { error: upsertError } = await supabase
+      .from('system_visit_stats')
+      .upsert(
+        {
           system_id:    systemId,
           system_label: systemLabel,
-          user_id:      null,
-          visited_at:   new Date().toISOString(),
-        });
+          visit_date:   today,
+          visit_count:  1,
+        },
+        {
+          onConflict:    'system_id,visit_date',
+          ignoreDuplicates: false,
+        }
+      );
+
+    if (upsertError) {
+      // If upsert fails (e.g. table doesn't exist yet), try incrementing manually
+      const { data: existing } = await supabase
+        .from('system_visit_stats')
+        .select('visit_count')
+        .eq('system_id', systemId)
+        .eq('visit_date', today)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from('system_visit_stats')
+          .update({ visit_count: existing.visit_count + 1, system_label: systemLabel })
+          .eq('system_id', systemId)
+          .eq('visit_date', today);
+      } else {
+        await supabase
+          .from('system_visit_stats')
+          .insert({ system_id: systemId, system_label: systemLabel, visit_date: today, visit_count: 1 });
+      }
     }
   } catch (e) {
     console.error('[recordSystemVisit] Exception:', e);
